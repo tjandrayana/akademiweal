@@ -8,20 +8,24 @@ import (
 	"strings"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/fluxystack/akademiweal/backend/internal/auth"
 	"github.com/fluxystack/akademiweal/backend/internal/db"
 	"github.com/fluxystack/akademiweal/backend/internal/handler"
 	"github.com/fluxystack/akademiweal/backend/internal/repository"
 	"github.com/fluxystack/akademiweal/backend/internal/service"
 	"github.com/fluxystack/akademiweal/backend/internal/tracking"
+	"github.com/joho/godotenv"
 )
 
-// listenAddr prefers HTTP_ADDR if set (legacy). Otherwise HTTP_HOST + HTTP_PORT.
-// Empty HTTP_HOST means listen on all interfaces (":port").
+// listenAddr prefers HTTP_ADDR if set (legacy). Then PORT (Vercel/Railway/Render convention).
+// Otherwise HTTP_HOST + HTTP_PORT. Empty HTTP_HOST means listen on all interfaces (":port").
 func listenAddr() string {
 	if a := strings.TrimSpace(os.Getenv("HTTP_ADDR")); a != "" {
 		return a
+	}
+	// PaaS platforms (Vercel, Railway, Render, Fly) inject PORT and expect 0.0.0.0:$PORT.
+	if p := strings.TrimSpace(os.Getenv("PORT")); p != "" {
+		return ":" + p
 	}
 	host := strings.TrimSpace(os.Getenv("HTTP_HOST"))
 	port := strings.TrimSpace(os.Getenv("HTTP_PORT"))
@@ -41,7 +45,7 @@ func main() {
 
 	database, err := db.OpenFromEnv()
 	if err != nil {
-		log.Fatalf("failed to open database: %v", err)
+		log.Printf("[FATAL]failed to open database: %v", err)
 	}
 	defer func() {
 		if err := database.Close(); err != nil {
@@ -51,7 +55,7 @@ func main() {
 
 	signer, err := auth.NewSignerFromEnv()
 	if err != nil {
-		log.Fatalf("failed to init jwt: %v", err)
+		log.Printf("[FATAL]failed to init jwt: %v", err)
 	}
 
 	repo := repository.New(database)
@@ -71,6 +75,6 @@ func main() {
 
 	log.Printf("starting backend server on %s\n", addr)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("server failed: %v", err)
+		log.Printf("[FATAL]server failed: %v", err)
 	}
 }
