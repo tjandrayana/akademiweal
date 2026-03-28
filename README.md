@@ -55,7 +55,7 @@ Before generating any code:
 **Frontend** (`frontend/`)
 
 1. Copy `frontend/.env.example` to `frontend/.env` or `frontend/.env.local`.
-2. Set **`VITE_API_HOST`** and **`VITE_API_PORT`** so the dev proxy forwards `/api` to `http://HOST:PORT` (defaults `localhost` / `9001`).
+2. For the dev server proxy, set **`VITE_API_HOST`** + **`VITE_API_PORT`**, or set **`VITE_API_PROXY_TARGET`** to a full URL (e.g. `https://api.example.com`) when the API is on a domain without a `:9001` port.
 3. In development, the app calls `/api` (proxy); no need for `VITE_API_URL` unless you bypass the proxy.
 4. For production builds, set **`VITE_API_URL`** to a full API base URL (e.g. `https://api…`), or set host/port so the client uses `http://HOST:PORT`, or leave host/port unset to keep same-origin `/api` behind your reverse proxy.
 
