@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	chimw "github.com/go-chi/chi/v5/middleware"
 
 	"github.com/fluxystack/akademiweal/backend/internal/auth"
 	"github.com/fluxystack/akademiweal/backend/internal/service"
@@ -21,6 +22,8 @@ func New(svc *service.Service, signer *auth.Signer) *Handler {
 
 func (h *Handler) Routes() http.Handler {
 	r := chi.NewRouter()
+	r.Use(chimw.RequestID)
+	r.Use(chimw.Logger)
 
 	r.Get("/health", h.health)
 	r.Post("/login", h.login)

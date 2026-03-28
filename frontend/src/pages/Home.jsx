@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchLessonsByLevel } from '../api/lessons'
+import { fetchLessonsByLevels } from '../api/lessons'
 import { Button } from '../components/Button'
 import { ProgressBar } from '../components/ProgressBar'
 import { StatCard } from '../components/StatCard'
@@ -353,61 +353,64 @@ export function Home() {
     } catch { /* ignore */ }
     return {}
   })
-  const [lessons, setLessons] = useState(null)
   const [loadState, setLoadState] = useState('loading')
   const [loadError, setLoadError] = useState(null)
   const [toast, setToast] = useState(null)
   const [muted, setMuted] = useState(() => isMuted())
 
-  const loadLessons = useCallback(async (signal) => {
+  /**
+   * Loads all levels. Optional staleCheck avoids applying results after unmount or React Strict Mode
+   * remount (we do not abort fetch — that caused canceled requests and bad UX/metrics).
+   */
+  const loadAllLessons = useCallback(async (opts) => {
+    const staleCheck = opts?.staleCheck
     setLoadState('loading')
     setLoadError(null)
     try {
-      const data = await fetchLessonsByLevel(selectedLevel, { signal })
-      if (!Array.isArray(data)) {
-        throw new Error('Invalid response')
-      }
-      setLessons(data)
-      setLoadState('ready')
-    } catch (e) {
-      if (e?.name === 'AbortError') {
+      const raw = await fetchLessonsByLevels(LEVELS)
+      if (staleCheck?.()) {
         return
       }
-      setLessons(null)
+      const next = {}
+      for (const lv of LEVELS) {
+        const arr = raw?.[String(lv)] ?? raw?.[lv]
+        next[lv] = Array.isArray(arr) ? arr : []
+      }
+      setLessonsByLevel(next)
+      try {
+        localStorage.setItem(LEVELS_CACHE_KEY, JSON.stringify(next))
+      } catch {
+        /* ignore */
+      }
+      setLoadState('ready')
+    } catch (e) {
+      if (staleCheck?.()) {
+        return
+      }
       setLoadError(e instanceof Error ? e.message : 'Something went wrong')
       setLoadState('error')
     }
-  }, [selectedLevel])
-
-  useEffect(() => {
-    const ac = new AbortController()
-    loadLessons(ac.signal)
-    return () => ac.abort()
-  }, [loadLessons])
-
-  useEffect(() => {
-    let cancelled = false
-    async function loadAll() {
-      try {
-        const pairs = await Promise.all(
-          LEVELS.map(async (lv) => {
-            const data = await fetchLessonsByLevel(lv)
-            return [lv, Array.isArray(data) ? data : []]
-          }),
-        )
-        if (!cancelled) {
-          setLessonsByLevel(Object.fromEntries(pairs))
-          try { localStorage.setItem(LEVELS_CACHE_KEY, JSON.stringify(Object.fromEntries(pairs))) } catch { /* ignore */ }
-        }
-      } catch {
-        /* leave lessonsByLevel as-is (cached or default) */
-      }
-    }
-    loadAll()
-    return () => {
-      cancelled = true
-    }
   }, [])
+
+  useEffect(() => {
+    let stale = false
+    loadAllLessons({ staleCheck: () => stale })
+    return () => {
+      stale = true
+    }
+  }, [loadAllLessons])
+
+  const lessons = useMemo(() => {
+    if (loadState !== 'ready') {
+      return null
+    }
+    const list = lessonsByLevel[selectedLevel]
+    if (Array.isArray(list)) {
+      return list
+    }
+    // Avoid blank UI when shape is unexpected — show empty state instead of nothing.
+    return []
+  }, [lessonsByLevel, selectedLevel, loadState])
 
   useEffect(() => {
     if (!toast) {
@@ -639,7 +642,7 @@ export function Home() {
                 😕
               </span>
               <p className="m-0 text-base font-semibold text-text">{loadError}</p>
-              <Button type="button" variant="primary" className="w-full" onClick={() => loadLessons(undefined)}>
+              <Button type="button" variant="primary" className="w-full" onClick={() => loadAllLessons()}>
                 Coba lagi
               </Button>
             </div>
