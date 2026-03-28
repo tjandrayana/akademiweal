@@ -5,11 +5,24 @@
 export const TOKEN_KEY = 'token'
 
 function apiBaseURL() {
-  const raw = import.meta.env.VITE_API_URL
-  if (raw != null && String(raw).trim() !== '') {
-    return String(raw).replace(/\/$/, '')
+  const full = import.meta.env.VITE_API_URL
+  if (full != null && String(full).trim() !== '') {
+    return String(full).replace(/\/$/, '')
   }
-  return ''
+  // Dev: same-origin /api (Vite proxy → VITE_API_HOST:VITE_API_PORT in vite.config.js).
+  if (import.meta.env.DEV) {
+    return ''
+  }
+  const h = import.meta.env.VITE_API_HOST
+  const p = import.meta.env.VITE_API_PORT
+  const hasHost = h != null && String(h).trim() !== ''
+  const hasPort = p != null && String(p).trim() !== ''
+  if (!hasHost && !hasPort) {
+    return ''
+  }
+  const host = hasHost ? String(h).trim() : 'localhost'
+  const port = hasPort ? String(p).trim() : '9001'
+  return `http://${host}:${port}`
 }
 
 function buildURL(pathWithQuery) {
