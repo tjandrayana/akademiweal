@@ -40,18 +40,29 @@ func listenAddr() string {
 
 func main() {
 	// Load ./.env then overlay backend/.env so Supabase DATABASE_URL in backend/.env wins over any repo-root .env.
-	_ = godotenv.Load(".env")
-	_ = godotenv.Overload(filepath.Join("backend", ".env"))
+	if os.Getenv("VERCEL") == "" {
+		_ = godotenv.Load(".env")
+		_ = godotenv.Overload(filepath.Join("backend", ".env"))
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("PANIC:", r)
+		}
+	}()
 
 	database, err := db.OpenFromEnv()
 	if err != nil {
-		log.Printf("[FATAL]failed to open database: %v", err)
+		log.Printf("[WARN] failed to open database: %v", err)
 	}
-	defer func() {
-		if err := database.Close(); err != nil {
-			log.Printf("database close: %v", err)
-		}
-	}()
+
+	if database != nil {
+		defer func() {
+			if err := database.Close(); err != nil {
+				log.Printf("database close: %v", err)
+			}
+		}()
+	}
 
 	signer, err := auth.NewSignerFromEnv()
 	if err != nil {
