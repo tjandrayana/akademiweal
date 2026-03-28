@@ -48,14 +48,15 @@ Before generating any code:
 **Backend** (`backend/`)
 
 1. Copy `backend/.env.example` to `backend/.env`.
-2. Adjust `DB_*`, `JWT_SECRET`, and optional `HTTP_ADDR` (default `:9001`).
+2. Adjust `DB_*`, `JWT_SECRET`, and HTTP listen address: **`HTTP_HOST`** + **`HTTP_PORT`** (empty host = listen on all interfaces, port default `9001`). Optional legacy **`HTTP_ADDR`** (e.g. `:9001`) overrides host/port when set.
 3. The server loads the first file that exists: `.env` (when you run from `backend/`) or `backend/.env` (when you run from the repo root).
 
 **Frontend** (`frontend/`)
 
 1. Copy `frontend/.env.example` to `frontend/.env` or `frontend/.env.local`.
-2. Leave `VITE_API_URL` unset in development to use the Vite proxy (`/api` → backend).
-3. Set `VITE_API_URL` to a full API base URL when not using the proxy (e.g. deployed API).
+2. Set **`VITE_API_HOST`** and **`VITE_API_PORT`** so the dev proxy forwards `/api` to `http://HOST:PORT` (defaults `localhost` / `9001`).
+3. In development, the app calls `/api` (proxy); no need for `VITE_API_URL` unless you bypass the proxy.
+4. For production builds, set **`VITE_API_URL`** to a full API base URL (e.g. `https://api…`), or set host/port so the client uses `http://HOST:PORT`, or leave host/port unset to keep same-origin `/api` behind your reverse proxy.
 
 **Gitignore**
 
