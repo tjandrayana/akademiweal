@@ -11,13 +11,13 @@ type User struct {
 	Email string
 }
 
-// GetUserByEmail returns a user by normalized email, or sql.ErrNoRows.
+// GetUserByEmail returns a user by normalized email, or ErrNoRows from pgx when missing.
 func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*User, error) {
-	if r == nil || r.db == nil || r.db.SQL == nil {
+	if r == nil || r.db == nil || r.db.Pool == nil {
 		return nil, fmt.Errorf("repository: database not initialized")
 	}
 	var u User
-	err := r.db.SQL.QueryRowContext(ctx,
+	err := r.db.Pool.QueryRow(ctx,
 		`SELECT id, email FROM users WHERE email = $1`,
 		email,
 	).Scan(&u.ID, &u.Email)
@@ -29,11 +29,11 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*User, e
 
 // CreateUser inserts a user and returns id.
 func (r *Repository) CreateUser(ctx context.Context, email string) (int64, error) {
-	if r == nil || r.db == nil || r.db.SQL == nil {
+	if r == nil || r.db == nil || r.db.Pool == nil {
 		return 0, fmt.Errorf("repository: database not initialized")
 	}
 	var id int64
-	err := r.db.SQL.QueryRowContext(ctx,
+	err := r.db.Pool.QueryRow(ctx,
 		`INSERT INTO users (email) VALUES ($1) RETURNING id`,
 		email,
 	).Scan(&id)
