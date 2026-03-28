@@ -90,6 +90,19 @@ func (r *Repository) GetLessonsByLevel(ctx context.Context, level int) ([]Lesson
 	return out, nil
 }
 
+// GetLessonsForLevels returns lessons grouped by level (one query per level; small fixed N).
+func (r *Repository) GetLessonsForLevels(ctx context.Context, levels []int) (map[int][]Lesson, error) {
+	out := make(map[int][]Lesson)
+	for _, lv := range levels {
+		list, err := r.GetLessonsByLevel(ctx, lv)
+		if err != nil {
+			return nil, err
+		}
+		out[lv] = list
+	}
+	return out, nil
+}
+
 func parseOptionsJSON(raw []byte) ([]string, error) {
 	if len(raw) == 0 {
 		return []string{}, nil

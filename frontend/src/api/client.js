@@ -9,9 +9,19 @@ function apiBaseURL() {
   if (full != null && String(full).trim() !== '') {
     return String(full).replace(/\/$/, '')
   }
-  // Dev: same-origin /api (Vite proxy → VITE_API_HOST:VITE_API_PORT in vite.config.js).
+  // Dev: same-origin /api (Vite proxy — see vite.config.js).
   if (import.meta.env.DEV) {
     return ''
+  }
+  // Production: same full URL as dev proxy (Vercel must set this at build time; redeploy after changing).
+  const proxyTarget = import.meta.env.VITE_API_PROXY_TARGET
+  if (proxyTarget != null && String(proxyTarget).trim() !== '') {
+    try {
+      const u = new URL(proxyTarget)
+      return u.origin
+    } catch {
+      /* ignore */
+    }
   }
   const h = import.meta.env.VITE_API_HOST
   const p = import.meta.env.VITE_API_PORT
