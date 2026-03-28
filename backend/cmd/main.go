@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -15,6 +16,23 @@ import (
 	"github.com/fluxystack/akademiweal/backend/internal/service"
 	"github.com/fluxystack/akademiweal/backend/internal/tracking"
 )
+
+// listenAddr prefers HTTP_ADDR if set (legacy). Otherwise HTTP_HOST + HTTP_PORT.
+// Empty HTTP_HOST means listen on all interfaces (":port").
+func listenAddr() string {
+	if a := strings.TrimSpace(os.Getenv("HTTP_ADDR")); a != "" {
+		return a
+	}
+	host := strings.TrimSpace(os.Getenv("HTTP_HOST"))
+	port := strings.TrimSpace(os.Getenv("HTTP_PORT"))
+	if port == "" {
+		port = "9001"
+	}
+	if host == "" {
+		return ":" + port
+	}
+	return host + ":" + port
+}
 
 func main() {
 	// Load the first existing file: ./.env (when cwd is backend/) or backend/.env (when cwd is repo root).
@@ -44,10 +62,7 @@ func main() {
 	svc := service.New(repo, signer, evtTracker)
 	h := handler.New(svc, signer)
 
-	addr := os.Getenv("HTTP_ADDR")
-	if addr == "" {
-		addr = ":9001"
-	}
+	addr := listenAddr()
 
 	server := &http.Server{
 		Addr:         addr,
