@@ -35,12 +35,9 @@ func listenAddr() string {
 }
 
 func main() {
-	// Load the first existing file: ./.env (when cwd is backend/) or backend/.env (when cwd is repo root).
-	for _, p := range []string{".env", filepath.Join("backend", ".env")} {
-		if err := godotenv.Load(p); err == nil {
-			break
-		}
-	}
+	// Load ./.env then overlay backend/.env so Supabase DATABASE_URL in backend/.env wins over any repo-root .env.
+	_ = godotenv.Load(".env")
+	_ = godotenv.Overload(filepath.Join("backend", ".env"))
 
 	database, err := db.OpenFromEnv()
 	if err != nil {

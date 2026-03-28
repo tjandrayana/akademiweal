@@ -48,8 +48,9 @@ Before generating any code:
 **Backend** (`backend/`)
 
 1. Copy `backend/.env.example` to `backend/.env`.
-2. Adjust `DB_*`, `JWT_SECRET`, and HTTP listen address: **`HTTP_HOST`** + **`HTTP_PORT`** (empty host = listen on all interfaces, port default `9001`). Optional legacy **`HTTP_ADDR`** (e.g. `:9001`) overrides host/port when set.
-3. The server loads the first file that exists: `.env` (when you run from `backend/`) or `backend/.env` (when you run from the repo root).
+2. Configure Postgres with **`DB_HOST`**, **`DB_PORT`**, **`DB_USER`**, **`DB_PASSWORD`**, **`DB_NAME`**, **`DB_SSLMODE`** (remote Supabase typically needs **`require`**). If **`DB_HOST`** is omitted, **`DATABASE_URL`** is used when set (e.g. some CI setups).
+3. Set **`JWT_SECRET`** and HTTP listen address: **`HTTP_HOST`** + **`HTTP_PORT`** (empty host = listen on all interfaces, port default `9001`). Optional legacy **`HTTP_ADDR`** (e.g. `:9001`) overrides host/port when set.
+4. `main` loads `./.env` then overlays `backend/.env` so backend-specific values win.
 
 **Frontend** (`frontend/`)
 

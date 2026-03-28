@@ -30,11 +30,11 @@ ORDER BY id
 // GetLessonsByLevel returns all lessons for the given level.
 // options JSONB is unmarshaled into []string.
 func (r *Repository) GetLessonsByLevel(ctx context.Context, level int) ([]Lesson, error) {
-	if r == nil || r.db == nil || r.db.SQL == nil {
+	if r == nil || r.db == nil || r.db.Pool == nil {
 		return nil, fmt.Errorf("repository: database not initialized")
 	}
 
-	rows, err := r.db.SQL.QueryContext(ctx, lessonSelectByLevel, level)
+	rows, err := r.db.Pool.Query(ctx, lessonSelectByLevel, level)
 	if err != nil {
 		return nil, fmt.Errorf("repository: query lessons by level: %w", err)
 	}

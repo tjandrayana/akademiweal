@@ -1,16 +1,17 @@
 package db
 
-import "database/sql"
+import "github.com/jackc/pgx/v5/pgxpool"
 
-// DB wraps *sql.DB for dependency injection through repository/service layers.
+// DB wraps *pgxpool.Pool for dependency injection through repository/service layers.
 type DB struct {
-	SQL *sql.DB
+	Pool *pgxpool.Pool
 }
 
 // Close releases the database connection pool.
 func (d *DB) Close() error {
-	if d == nil || d.SQL == nil {
+	if d == nil || d.Pool == nil {
 		return nil
 	}
-	return d.SQL.Close()
+	d.Pool.Close()
+	return nil
 }
