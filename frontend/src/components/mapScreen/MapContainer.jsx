@@ -31,6 +31,7 @@ export function MapContainer({
   mascotEvolutionLevel,
   onOpenNode,
   mapReady,
+  guestMaxPathStep = null,
 }) {
   const slots = getZigzagSlotPositions()
   const sorted = [...nodes].sort((a, b) => a.level - b.level)
@@ -59,7 +60,9 @@ export function MapContainer({
 
       <div className="map-container-nodes">
         {sorted.map((node, idx) => {
-          const status = resolveMapNodeStatus(node, progress)
+          const status = resolveMapNodeStatus(node, progress, {
+            guestMaxPathStep: guestMaxPathStep ?? undefined,
+          })
           const pos = slots[idx] ?? slots[slots.length - 1]
           const isBoss = node.role === 'boss'
 

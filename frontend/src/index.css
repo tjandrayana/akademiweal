@@ -7,7 +7,7 @@
   --color-primary-dark: #16A34A;
   --color-primary-light: #DCFCE7;
 
-  /* ── InvestQuest quest layer (map, profile, celebrations) + shared accents ── */
+  /* ── AkademiWeal map / profile / celebration layer + shared accents ── */
   --color-iq-navy: #06112a;
   --color-iq-navy-mid: #0b1c44;
   --color-iq-gold-bright: #f5c518;
@@ -260,6 +260,36 @@
   50%       { transform: translateY(-8px) rotate(5deg); }
 }
 
+@keyframes guest-unlock-coin-tap {
+  0%   { transform: scale(1) rotate(0deg); }
+  30%  { transform: scale(1.15) rotate(-14deg); }
+  60%  { transform: scale(0.95) rotate(10deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes guest-unlock-float-slow {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0.75; }
+  33%      { transform: translateY(-12px) translateX(4px); opacity: 1; }
+  66%      { transform: translateY(-6px) translateX(-6px); opacity: 0.85; }
+}
+
+@keyframes guest-unlock-shine {
+  0%   { transform: translateX(-120%) skewX(-12deg); opacity: 0; }
+  40%  { opacity: 0.35; }
+  100% { transform: translateX(220%) skewX(-12deg); opacity: 0; }
+}
+
+@keyframes guest-unlock-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 /* ─────────────────────────────────────────────────────────────
    Utility classes
 ───────────────────────────────────────────────────────────── */
@@ -340,6 +370,33 @@
 
   .animate-mascot-float {
     animation: mascot-float 1.8s ease-in-out infinite;
+  }
+
+  .animate-guest-unlock-coin {
+    animation: guest-unlock-coin-tap 0.55s cubic-bezier(0.34, 1.35, 0.64, 1) both;
+  }
+
+  .animate-guest-unlock-float {
+    animation: guest-unlock-float-slow 5s ease-in-out infinite;
+  }
+
+  .animate-guest-unlock-shine {
+    animation: guest-unlock-shine 2.8s ease-in-out infinite;
+  }
+
+  .animate-guest-unlock-card {
+    animation: guest-unlock-card-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-guest-unlock-coin,
+    .animate-guest-unlock-float,
+    .animate-guest-unlock-shine {
+      animation: none !important;
+    }
+    .animate-guest-unlock-card {
+      animation: onb-step-in-reduced 0.2s ease both;
+    }
   }
 
   /* Scrollbar hide utility */

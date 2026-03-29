@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { StepDots } from '../components/StepDots'
 import { cn } from '../lib/cn'
+import { storageKey } from '../lib/progressScope'
 import { playSelect, playStepNext, playCelebration } from '../lib/sounds'
 
 const GOALS = [
@@ -40,10 +41,10 @@ export function Onboarding() {
     playStepNext()
     try {
       if (step === 1 && goalId != null) {
-        localStorage.setItem('akademiweal_onboarding_goal', goalId)
+        localStorage.setItem(storageKey('onboarding_goal'), goalId)
       }
       if (step === 2 && timeId != null) {
-        localStorage.setItem('akademiweal_onboarding_time', timeId)
+        localStorage.setItem(storageKey('onboarding_time'), timeId)
       }
     } catch {
       /* ignore */
@@ -54,7 +55,7 @@ export function Onboarding() {
   function finishOnboarding() {
     playCelebration()
     try {
-      localStorage.setItem('akademiweal_onboarding_done', 'true')
+      localStorage.setItem(storageKey('onboarding_done'), 'true')
     } catch {
       /* ignore */
     }
@@ -63,7 +64,7 @@ export function Onboarding() {
 
   function skip() {
     try {
-      localStorage.setItem('akademiweal_onboarding_done', 'true')
+      localStorage.setItem(storageKey('onboarding_done'), 'true')
     } catch {
       /* ignore */
     }

@@ -89,7 +89,12 @@ async function handleEnvelope(res, opts = {}) {
     if (!opts.skipUnauthorizedEvent) {
       notifyUnauthorized()
     }
-    throw new Error('Session expired. Sign in again.')
+    const err401 = body?.error
+    const msg401 =
+      typeof err401 === 'string' && err401.length > 0
+        ? err401
+        : 'Session expired. Sign in again.'
+    throw new Error(msg401)
   }
 
   if (!res.ok) {

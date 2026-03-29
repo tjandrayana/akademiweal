@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import {
   AppHeader,
   AppHeaderBrandTitle,
@@ -11,9 +11,11 @@ import MascotEvolution, { getMascotByLevel } from '../components/MascotEvolution
 import { MascotEvolutionTimeline } from '../components/profile/MascotEvolutionTimeline'
 import { MascotTierDetailPanel } from '../components/profile/MascotTierDetailPanel'
 import { ProfileMascotDecor } from '../components/profile/ProfileMascotDecor'
-import '../components/profile/profile-investquest.css'
+import '../components/profile/profile-akademiweal.css'
 import { useGamificationStats } from '../hooks/useGamificationStats'
-import { getWeeklyXp } from '../lib/gamification'
+import { CURRICULUM_LEVELS, LEVELS_CACHE_KEY } from '../lib/curriculum'
+import { computeLessonPathProgress } from '../lib/mapProgress'
+import { getDisplayMascotEvolutionLevel, getWeeklyXp } from '../lib/gamification'
 
 const WEEK_DAYS = ['S', 'M', 'S', 'R', 'K', 'J', 'M']
 
@@ -27,13 +29,16 @@ function tierProgressPct(level, mascot) {
   return Math.min(100, (pos / range) * 100)
 }
 
-function XPLineChart({ data }) {
+function XPLineChart({ data, variant = 'light' }) {
   const W = 270
   const H = 72
   const PAD = 6
   const maxVal = Math.max(...data, 1)
 
   const xDenom = Math.max(1, data.length - 1)
+  const isDark = variant === 'dark'
+  const mutedFill = isDark ? '#4a4068' : '#D1D5DB'
+  const dotStroke = isDark ? 'rgba(255,248,236,0.35)' : 'white'
 
   function pt(val, i) {
     const x = PAD + (i / xDenom) * (W - PAD * 2)
@@ -51,7 +56,7 @@ function XPLineChart({ data }) {
       height={H}
       viewBox={`0 0 ${W} ${H}`}
       aria-hidden="true"
-      className={hasAnyXp ? 'text-iq-teal' : 'text-gray-300'}
+      className={hasAnyXp ? 'text-iq-teal' : isDark ? 'text-[#5a5078]' : 'text-gray-300'}
     >
       <polyline
         points={lineD}
@@ -69,8 +74,8 @@ function XPLineChart({ data }) {
             cx={x}
             cy={y}
             r="3.5"
-            fill={v > 0 ? 'currentColor' : '#D1D5DB'}
-            stroke="white"
+            fill={v > 0 ? 'currentColor' : mutedFill}
+            stroke={dotStroke}
             strokeWidth="1"
           />
         )
@@ -80,23 +85,45 @@ function XPLineChart({ data }) {
 }
 
 export function Profile() {
+  const location = useLocation()
   const {
     xp,
     streak,
     level,
     levelName,
     completedLessons,
-    mascotEvolutionLevel,
     xpForNext,
     xpInLevel,
   } = useGamificationStats()
   const completedCount = completedLessons.size
   const weeklyXp = getWeeklyXp()
 
-  const mascot = useMemo(() => getMascotByLevel(mascotEvolutionLevel), [mascotEvolutionLevel])
+  const mapProgress = useMemo(() => {
+    let byLevel = {}
+    try {
+      const raw = localStorage.getItem(LEVELS_CACHE_KEY)
+      if (raw) {
+        byLevel = JSON.parse(raw)
+      }
+    } catch {
+      /* ignore */
+    }
+    return computeLessonPathProgress(byLevel, completedLessons, CURRICULUM_LEVELS)
+  }, [completedLessons, location.pathname, xp])
+
+  const displayMascotLevel = useMemo(
+    () =>
+      getDisplayMascotEvolutionLevel(
+        xp,
+        mapProgress.stepTotal > 0 ? mapProgress.stepCurrent : 1,
+      ),
+    [xp, mapProgress.stepCurrent, mapProgress.stepTotal],
+  )
+
+  const mascot = useMemo(() => getMascotByLevel(displayMascotLevel), [displayMascotLevel])
   const tierPct = useMemo(
-    () => tierProgressPct(mascotEvolutionLevel, mascot),
-    [mascotEvolutionLevel, mascot],
+    () => tierProgressPct(displayMascotLevel, mascot),
+    [displayMascotLevel, mascot],
   )
   const levelXpPct =
     xpForNext > 0 ? Math.min(100, Math.round((xpInLevel / xpForNext) * 1000) / 10) : 100
@@ -121,7 +148,7 @@ export function Profile() {
   }
 
   return (
-    <div className="profile-iq flex flex-col min-h-svh max-w-md mx-auto bg-iq-navy pb-24">
+    <div className="profile-iq akademiweal-page-shell flex flex-col min-h-svh max-w-md mx-auto pb-24">
       {shareToast && (
         <div
           className="fixed top-4 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-lg"
@@ -135,19 +162,20 @@ export function Profile() {
         open={tierDetailIndex != null}
         tierIndex={tierDetailIndex}
         onClose={() => setTierDetailIndex(null)}
-        mascotEvolutionLevel={mascotEvolutionLevel}
+        mascotEvolutionLevel={displayMascotLevel}
       />
 
       <AppHeader
         mode="profile"
         variant="dark"
+        className="akademiweal-header"
         left={
           <Link
             to="/home"
             className="flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10"
             aria-label="Kembali ke beranda"
           >
-            <HeaderHomeIcon />
+            <HeaderHomeIcon className="text-white/90" />
           </Link>
         }
         center={<AppHeaderBrandTitle dark />}
@@ -158,14 +186,14 @@ export function Profile() {
             className="flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10"
             aria-label="Bagikan profil"
           >
-            <HeaderShareIcon />
+            <HeaderShareIcon className="text-white/90" />
           </button>
         }
       />
 
-      <div className="bg-iq-navy px-4 pb-4 pt-1 text-center">
+      <div className="px-4 pb-4 pt-1 text-center">
         <p className="profile-iq-sub m-0">Profil &amp; evolusi maskot</p>
-        <span className="profile-iq-tag mt-2 inline-block">InvestQuest × Weal</span>
+        <span className="profile-iq-tag mt-2 inline-block">AkademiWeal</span>
       </div>
 
       <section className="profile-iq-stage-wrap" aria-labelledby="profile-mascot-heading">
@@ -176,7 +204,7 @@ export function Profile() {
               Maskot kamu
             </h2>
             <MascotEvolution
-              level={mascotEvolutionLevel}
+              level={displayMascotLevel}
               size={196}
               showLabel={false}
               showQuote={false}
@@ -220,7 +248,7 @@ export function Profile() {
       </section>
 
       <MascotEvolutionTimeline
-        mascotEvolutionLevel={mascotEvolutionLevel}
+        mascotEvolutionLevel={displayMascotLevel}
         onSelectTier={(i) => setTierDetailIndex(i)}
       />
 
@@ -239,16 +267,16 @@ export function Profile() {
         </div>
       </section>
 
-      <div className="profile-iq-light flex flex-col gap-3 px-4 pt-2 pb-4">
-        <div className="grid grid-cols-3 divide-x divide-gray-200 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="akademiweal-page-scroll flex flex-col gap-3 pt-2 pb-4">
+        <div className="akademiweal-glass-card grid grid-cols-3 divide-x divide-white/10 overflow-hidden">
           {[
             { label: 'Pelajaran', value: completedCount },
             { label: 'Total XP', value: xp.toLocaleString() },
             { label: 'Level', value: level },
           ].map(({ label, value }) => (
             <div key={label} className="flex flex-col items-center py-4 gap-0.5">
-              <span className="text-xl font-extrabold text-gray-900">{value}</span>
-              <span className="text-[11px] text-gray-500 font-semibold">{label}</span>
+              <span className="text-xl font-extrabold text-[#FFF8EC]">{value}</span>
+              <span className="text-[11px] text-[#8b9ec9] font-semibold">{label}</span>
             </div>
           ))}
         </div>
@@ -258,53 +286,53 @@ export function Profile() {
           disabled
           aria-disabled="true"
           title="Fitur sosial segera hadir"
-          className="w-full py-2.5 rounded-xl border-2 border-gray-200 text-gray-300 text-sm font-bold cursor-not-allowed opacity-50 bg-white"
+          className="w-full py-2.5 rounded-xl border-2 border-white/15 text-white/30 text-sm font-bold cursor-not-allowed bg-white/[0.04]"
         >
           Ikuti
         </button>
 
-        <div className="rounded-2xl bg-white border border-gray-200 p-4 flex items-center gap-3 shadow-sm">
+        <div className="akademiweal-glass-card p-4 flex items-center gap-3">
           <div
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-3xl leading-none"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-orange-500/20 text-3xl leading-none ring-1 ring-orange-400/30"
             aria-hidden="true"
           >
             🔥
           </div>
           <div>
-            <p className="m-0 text-lg font-extrabold text-gray-900">{streak} hari beruntun</p>
-            <p className="m-0 text-xs text-gray-500">Streak aktif</p>
+            <p className="m-0 text-lg font-extrabold text-[#FFF8EC]">{streak} hari beruntun</p>
+            <p className="m-0 text-xs text-[#8b9ec9]">Streak aktif</p>
           </div>
           <div className="ml-auto flex items-center gap-0.5" aria-label={`${streak} hari`}>
             {[...Array(7)].map((_, i) => (
               <div
                 key={i}
-                className={`h-6 w-1.5 rounded-full ${i < Math.min(streak, 7) ? 'bg-orange-400' : 'bg-gray-100'}`}
+                className={`h-6 w-1.5 rounded-full ${i < Math.min(streak, 7) ? 'bg-orange-400' : 'bg-white/10'}`}
               />
             ))}
           </div>
         </div>
 
-        <div className="rounded-2xl bg-white border border-gray-200 p-4 shadow-sm">
+        <div className="akademiweal-glass-card p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="m-0 text-sm font-bold text-gray-900">XP Mingguan</p>
-            <span className="flex items-center gap-1 text-[11px] text-gray-500">
+            <p className="m-0 text-sm font-bold text-[#FFF8EC]">XP Mingguan</p>
+            <span className="flex items-center gap-1 text-[11px] text-[#8b9ec9]">
               <span className="inline-block w-4 h-0.5 bg-iq-teal rounded" />
               XP kamu
             </span>
           </div>
           <div className="flex justify-center">
-            <XPLineChart data={weeklyXp} />
+            <XPLineChart data={weeklyXp} variant="dark" />
           </div>
           <div className="flex justify-between mt-2 px-1">
             {WEEK_DAYS.map((d, i) => (
-              <span key={i} className="text-[10px] text-gray-500 font-semibold w-8 text-center">
+              <span key={i} className="text-[10px] text-[#7b95c8] font-semibold w-8 text-center">
                 {d}
               </span>
             ))}
           </div>
         </div>
 
-        <p className="text-xs text-gray-500 text-center mb-2">
+        <p className="text-xs text-[#7b95c8] text-center mb-2">
           Akun penuh dan pengaturan akan menyusul.
         </p>
       </div>

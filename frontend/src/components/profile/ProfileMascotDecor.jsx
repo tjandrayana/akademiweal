@@ -1,4 +1,4 @@
-/** Floating stars & coins behind mascot — from investquest_design_assets.html */
+/** Floating stars & coins behind mascot — from design assets reference */
 export function ProfileMascotDecor() {
   return (
     <svg className="profile-iq-decor" viewBox="0 0 400 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true">

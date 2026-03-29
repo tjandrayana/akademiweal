@@ -85,7 +85,7 @@ function IconPerson({ active }) {
 // disabled: true = coming soon, not yet implemented
 const TABS = [
   { path: '/home',        Icon: IconHome,   label: 'Belajar'  },
-  { path: null,           Icon: IconBook,   label: 'Pelajaran', disabled: true },
+  { path: '/pelajaran',    Icon: IconBook,   label: 'Pelajaran' },
   { path: '/leaderboard', Icon: IconTrophy, label: 'Peringkat' },
   { path: null,           Icon: IconGift,   label: 'Hadiah',    disabled: true },
   { path: '/profile',     Icon: IconPerson, label: 'Profil'   },

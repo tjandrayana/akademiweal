@@ -74,7 +74,7 @@ const shellDark =
  * Sticky top bar: centered brand (home/profile) or flexible center (lesson).
  *
  * @param {'home' | 'lesson' | 'profile'} mode
- * @param {'light' | 'dark'} variant — dark = InvestQuest strip on Profile
+ * @param {'light' | 'dark'} variant — dark = map-style strip on Profile / Pelajaran
  */
 export function AppHeader({
   left,

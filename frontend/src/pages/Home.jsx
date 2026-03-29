@@ -1,21 +1,22 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { getAuthToken } from '../api/client'
+import { pullAndPushXp } from '../api/progress'
 import { fetchLessonsByLevel } from '../api/lessons'
 import { BottomNav } from '../components/BottomNav'
 import MapScreen from '../components/MapScreen'
-import MascotEvolution, { getMascotByLevel } from '../components/MascotEvolution'
+import MascotEvolution from '../components/MascotEvolution'
 import { useGamificationStats } from '../hooks/useGamificationStats'
-import { getLevelName } from '../lib/gamification'
-import { computeInvestQuestMapProgress, lessonForMapLevel } from '../lib/mapProgress'
+import { getDisplayMascotEvolutionLevel, getLevelName } from '../lib/gamification'
+import { storageKey } from '../lib/progressScope'
+import { CURRICULUM_LEVELS, LEVELS_CACHE_KEY } from '../lib/curriculum'
+import { computeLessonPathProgress, lessonForMapLevel } from '../lib/mapProgress'
 import {
   ensureBackgroundMusicStarted,
   syncBackgroundMusicWithMute,
 } from '../lib/backgroundMusic'
 import { isMuted, playLevelStart, toggleMute } from '../lib/sounds'
-
-/** 8 akademi levels × 10 lessons = 80 langkah (satu zona peta per level) */
-const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8]
-const LEVELS_CACHE_KEY = 'akademiweal_levels_cache'
+import { GUEST_MAX_FREE_PATH_STEP, GUEST_UNLOCK_PATH, isLoggedIn } from '../lib/guestGate'
 
 // ── HUD sub-components ────────────────────────────────────────
 
@@ -135,8 +136,7 @@ function HudHearts({ lives, maxLives = 3 }) {
 
 export function Home() {
   const navigate = useNavigate()
-  const { streak, xp, level, levelName, completedLessons, lives, mascotEvolutionLevel } =
-    useGamificationStats()
+  const { xp, levelName, completedLessons, lives } = useGamificationStats()
 
   const [lessonsByLevel, setLessonsByLevel] = useState(() => {
     try {
@@ -156,7 +156,7 @@ export function Home() {
     async function loadAll() {
       try {
         const pairs = await Promise.all(
-          LEVELS.map(async (lv) => {
+          CURRICULUM_LEVELS.map(async (lv) => {
             const data = await fetchLessonsByLevel(lv)
             return [lv, Array.isArray(data) ? data : []]
           }),
@@ -186,9 +186,23 @@ export function Home() {
     return () => clearTimeout(t)
   }, [toast])
 
+  useEffect(() => {
+    if (!getAuthToken()) return
+    pullAndPushXp().catch(() => {})
+  }, [])
+
   const mapProgress = useMemo(
-    () => computeInvestQuestMapProgress(lessonsByLevel, completedLessons, LEVELS),
+    () => computeLessonPathProgress(lessonsByLevel, completedLessons, CURRICULUM_LEVELS),
     [lessonsByLevel, completedLessons],
+  )
+
+  const displayMascotLevel = useMemo(
+    () =>
+      getDisplayMascotEvolutionLevel(
+        xp,
+        mapProgress.stepTotal > 0 ? mapProgress.stepCurrent : 1,
+      ),
+    [xp, mapProgress.stepCurrent, mapProgress.stepTotal],
   )
 
   const hudLevelLabel = useMemo(() => `⚡ ${getLevelName(xp)}`, [xp])
@@ -202,7 +216,7 @@ export function Home() {
 
   const goToLesson = useCallback(
     (lessonId) => {
-      const pathLevel = LEVELS.find((lv) =>
+      const pathLevel = CURRICULUM_LEVELS.find((lv) =>
         (lessonsByLevel[lv] || []).some((l) => l.id === lessonId),
       )
       if (!pathLevel) return
@@ -214,19 +228,25 @@ export function Home() {
 
   const handleMapPlayLevel = useCallback(
     (mapLevel) => {
-      const hit = lessonForMapLevel(mapLevel, lessonsByLevel, LEVELS)
+      if (!isLoggedIn() && mapLevel > GUEST_MAX_FREE_PATH_STEP) {
+        navigate(GUEST_UNLOCK_PATH, {
+          state: { reason: 'guest_limit', from: { pathname: '/home' } },
+        })
+        return
+      }
+      const hit = lessonForMapLevel(mapLevel, lessonsByLevel, CURRICULUM_LEVELS)
       if (!hit) {
         setToast('Pelajaran untuk tahap ini belum tersedia.')
         return
       }
       goToLesson(hit.lesson.id)
     },
-    [lessonsByLevel, goToLesson],
+    [navigate, lessonsByLevel, goToLesson],
   )
 
   const goalLabel = useMemo(() => {
     try {
-      const id = localStorage.getItem('akademiweal_onboarding_goal')
+      const id = localStorage.getItem(storageKey('onboarding_goal'))
       if (!id) return null
       const labels = { zero: 'Belajar dari nol', start: 'Siap mulai investasi', more: 'Tambah pengetahuan' }
       return labels[id] ?? null
@@ -236,7 +256,7 @@ export function Home() {
   }, [])
 
   const flatCount = useMemo(
-    () => LEVELS.reduce((n, lv) => n + (lessonsByLevel[lv]?.length || 0), 0),
+    () => CURRICULUM_LEVELS.reduce((n, lv) => n + (lessonsByLevel[lv]?.length || 0), 0),
     [lessonsByLevel],
   )
 
@@ -276,7 +296,7 @@ export function Home() {
       >
         {/* Left: mascot avatar + name + level */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <MascotAvatar mascotEvolutionLevel={mascotEvolutionLevel} />
+          <MascotAvatar mascotEvolutionLevel={displayMascotLevel} />
           <div style={{ minWidth: 0 }}>
             <div
               style={{
@@ -349,7 +369,8 @@ export function Home() {
               hudLevelLabel={hudLevelLabel}
               coinsDisplay={xp.toLocaleString()}
               lives={lives}
-              mascotEvolutionLevel={mascotEvolutionLevel}
+              mascotEvolutionLevel={displayMascotLevel}
+              guestMaxPathStep={isLoggedIn() ? null : GUEST_MAX_FREE_PATH_STEP}
               onPlayLevel={handleMapPlayLevel}
             />
           )}
