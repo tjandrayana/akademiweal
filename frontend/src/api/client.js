@@ -4,30 +4,53 @@
 
 export const TOKEN_KEY = 'token'
 
+function stripTrailingSlash(s) {
+  return s.replace(/\/$/, '')
+}
+
+let missingProdApiUrlWarned = false
+
 function apiBaseURL() {
-  const full = import.meta.env.VITE_API_URL
-  if (full != null && String(full).trim() !== '') {
-    return String(full).replace(/\/$/, '')
-  }
-  // Dev: same-origin /api (Vite proxy → VITE_API_HOST:VITE_API_PORT in vite.config.js).
+  /**
+   * Development: same-origin `/api` → Vite proxies to `VITE_API_URL` (see vite.config.js).
+   * Production: `VITE_API_URL` only (`https://…` or path-only `/api` if you terminate API on the same host).
+   */
   if (import.meta.env.DEV) {
     return ''
   }
-  const h = import.meta.env.VITE_API_HOST
-  const p = import.meta.env.VITE_API_PORT
-  const hasHost = h != null && String(h).trim() !== ''
-  const hasPort = p != null && String(p).trim() !== ''
-  if (!hasHost && !hasPort) {
-    return ''
+
+  const rawUrl = import.meta.env.VITE_API_URL
+  if (rawUrl != null && String(rawUrl).trim() !== '') {
+    return stripTrailingSlash(String(rawUrl).trim())
   }
-  const host = hasHost ? String(h).trim() : 'localhost'
-  const port = hasPort ? String(p).trim() : '9001'
-  return `http://${host}:${port}`
+
+  if (import.meta.env.PROD && typeof window !== 'undefined' && !missingProdApiUrlWarned) {
+    missingProdApiUrlWarned = true
+    console.warn(
+      '[AkademiWeal] VITE_API_URL is unset; using same-origin /api. Set VITE_API_URL for production (e.g. https://akademiweal.drghartanto.com).',
+    )
+  }
+  return ''
+}
+
+let mixedContentWarned = false
+
+/** Call after apiBaseURL() in the browser — HTTPS pages cannot fetch http:// APIs. */
+function warnIfMixedContent(base) {
+  if (mixedContentWarned || typeof window === 'undefined' || !base) return
+  if (!window.location.protocol.startsWith('https')) return
+  if (!base.startsWith('http://')) return
+  mixedContentWarned = true
+  console.error(
+    '[AkademiWeal API] Mixed content: HTTPS page but API base is http://… Browsers block that. ' +
+      'Set VITE_API_URL to https://your-api or use path-only /api behind a same-origin proxy.',
+  )
 }
 
 function buildURL(pathWithQuery) {
   const path = pathWithQuery.startsWith('/') ? pathWithQuery : `/${pathWithQuery}`
   const base = apiBaseURL()
+  warnIfMixedContent(base)
   if (base) {
     return `${base}${path}`
   }
