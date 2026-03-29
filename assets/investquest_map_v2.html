@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>InvestQuest — Map v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#1A0A2E;
+  font-family:'Nunito',sans-serif;
+  display:flex;flex-direction:column;align-items:center;
+  padding:40px 20px 80px;
+  min-height:100vh;
+}
+
+/* ── PAGE HEADER ── */
+.page-header{text-align:center;margin-bottom:36px}
+.eyebrow{font-size:11px;font-weight:900;letter-spacing:4px;text-transform:uppercase;color:#FFB830;margin-bottom:10px}
+.page-title{
+  font-family:'Fredoka One',cursive;font-size:50px;
+  background:linear-gradient(135deg,#FFE060,#FFB830,#FF8C00);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1;letter-spacing:2px;margin-bottom:8px;
+}
+.page-sub{font-size:14px;color:#8A6AB8;max-width:480px;margin:0 auto}
+
+/* ── PHONE FRAME ── */
+.phone{
+  width:390px;
+  border-radius:52px;
+  background:#0F0A1E;
+  border:4px solid #2A1A4A;
+  box-shadow:
+    0 0 0 1px rgba(255,184,48,0.2),
+    0 0 60px rgba(255,120,0,0.15),
+    0 50px 140px rgba(0,0,0,0.9);
+  overflow:hidden;
+  position:relative;
+}
+/* Phone glass shimmer */
+.phone::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:40%;
+  background:linear-gradient(180deg,rgba(255,255,255,0.04) 0%,transparent 100%);
+  pointer-events:none;z-index:200;border-radius:52px 52px 0 0;
+}
+
+/* Notch */
+.notch{
+  width:126px;height:36px;background:#0F0A1E;
+  border-radius:0 0 22px 22px;margin:0 auto;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  position:relative;z-index:110;
+}
+.notch-dot{width:10px;height:10px;border-radius:50%;background:#1A1030}
+.notch-bar{width:52px;height:5px;border-radius:3px;background:#1A1030}
+
+/* Status bar */
+.status{
+  display:flex;justify-content:space-between;
+  padding:2px 24px 6px;
+  font-size:12px;font-weight:800;color:#6A4A8A;
+  position:relative;z-index:110;
+}
+
+/* ── TOP HUD ── */
+.hud{
+  background:linear-gradient(180deg,rgba(15,10,30,0.97) 0%,rgba(15,10,30,0.93) 100%);
+  padding:10px 16px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:2px solid rgba(255,184,48,0.15);
+  position:relative;z-index:108;
+}
+.hud-left{display:flex;align-items:center;gap:10px}
+.hud-avatar{
+  width:42px;height:42px;border-radius:50%;
+  border:2px solid #FFB830;
+  background:linear-gradient(135deg,#FF8C30,#E07020);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+  box-shadow:0 0 12px rgba(255,184,48,0.4);
+}
+.hud-name{font-family:'Fredoka One',cursive;font-size:17px;color:#FFF8EC;line-height:1}
+.hud-level{
+  display:inline-flex;align-items:center;gap:4px;
+  margin-top:3px;
+  font-size:10px;font-weight:900;letter-spacing:1px;
+  background:linear-gradient(135deg,rgba(0,220,140,0.2),rgba(0,200,120,0.1));
+  border:1px solid rgba(0,220,140,0.3);
+  border-radius:100px;padding:2px 9px;color:#00DC8C;
+}
+.hud-right{display:flex;align-items:center;gap:8px}
+.hud-coins{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,184,48,0.12);
+  border:1.5px solid rgba(255,184,48,0.3);
+  border-radius:100px;padding:6px 14px;
+  font-family:'Fredoka One',cursive;font-size:16px;color:#FFB830;
+  box-shadow:0 0 8px rgba(255,184,48,0.15);
+}
+.coin-icon{
+  width:20px;height:20px;border-radius:50%;
+  background:linear-gradient(135deg,#FFB830,#FF8C00);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:900;color:#7A4000;
+  box-shadow:0 2px 4px rgba(0,0,0,0.3);
+}
+.hud-hearts{display:flex;gap:2px}
+.heart{font-size:16px}
+
+/* ── MAP SCROLL ── */
+.map-scroll{
+  height:660px;overflow-y:scroll;overflow-x:hidden;
+  scrollbar-width:none;position:relative;
+}
+.map-scroll::-webkit-scrollbar{display:none}
+.map-canvas{position:relative;width:366px}
+
+/* ── ZONE BLOCKS ── */
+.zone{position:relative;width:100%;overflow:hidden}
+
+/* ── LEVEL NODE BASE ── */
+.node{
+  position:absolute;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border-radius:50%;cursor:pointer;
+  transform:translate(-50%,-50%);
+  transition:transform .15s, box-shadow .15s;
+  border:4px solid;
+  font-family:'Fredoka One',cursive;
+  z-index:20;
+}
+.node:hover{transform:translate(-50%,-50%) scale(1.15)}
+.node.locked:hover{transform:translate(-50%,-50%)}
+.node.locked{cursor:default;opacity:0.5}
+
+.node-done{
+  width:60px;height:60px;
+  background:linear-gradient(160deg,#20D890,#00B870);
+  border-color:#00906A;
+  box-shadow:0 4px 0 #007A50, 0 6px 20px rgba(0,184,112,0.4);
+}
+.node-current{
+  width:66px;height:66px;
+  background:linear-gradient(160deg,#FFD840,#FFB020);
+  border-color:#CC8800;
+  box-shadow:0 4px 0 #AA6600, 0 6px 24px rgba(255,184,48,0.6);
+  animation:nodeGlow 2s ease-in-out infinite;
+}
+.node-locked{
+  width:56px;height:56px;
+  background:linear-gradient(160deg,#3A2A5A,#2A1A4A);
+  border-color:#4A3A6A;
+  box-shadow:0 3px 0 #1A0A3A;
+}
+.node-boss{
+  width:72px;height:72px;
+  border-width:4px;
+}
+.node-boss-done{
+  background:linear-gradient(160deg,#20D890,#00B870);
+  border-color:#00906A;
+  box-shadow:0 5px 0 #007A50, 0 8px 28px rgba(0,184,112,0.5);
+}
+.node-boss-locked{
+  border-width:4px;
+}
+
+.node-num{font-size:18px;line-height:1;color:white}
+.node-num-gold{font-size:18px;line-height:1;color:#7A4000}
+.node-stars{display:flex;gap:1px;margin-top:2px}
+.star-on{font-size:10px;color:#FFE840}
+.star-off{font-size:10px;color:rgba(255,255,255,0.2)}
+.node-lock{font-size:18px}
+.node-boss-icon{font-size:26px}
+
+/* Glow animations */
+@keyframes nodeGlow{
+  0%,100%{box-shadow:0 4px 0 #AA6600, 0 6px 24px rgba(255,184,48,0.6)}
+  50%{box-shadow:0 4px 0 #AA6600, 0 6px 40px rgba(255,184,48,0.9), 0 0 60px rgba(255,184,48,0.3)}
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes floatPlayer{0%,100%{transform:translate(-50%,-110%)}50%{transform:translate(-50%,calc(-110% - 9px))}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes coinBob{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-6px) rotate(8deg)}}
+@keyframes sparkle{0%,100%{opacity:0;transform:scale(0.5)}50%{opacity:1;transform:scale(1.3)}}
+@keyframes wavingFlag{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(8deg)}}
+@keyframes cloudDrift{0%{transform:translateX(0)}100%{transform:translateX(15px)}}
+@keyframes pathDash{to{stroke-dashoffset:-32}}
+
+/* Player marker */
+.player{
+  position:absolute;z-index:50;
+  animation:floatPlayer 2.6s ease-in-out infinite;
+  pointer-events:none;
+  transform:translate(-50%,-110%);
+}
+.player-pin{
+  width:0;height:0;
+  border-left:8px solid transparent;
+  border-right:8px solid transparent;
+  border-top:14px solid #FFB830;
+  margin:0 auto;
+  filter:drop-shadow(0 2px 4px rgba(255,184,48,0.5));
+}
+
+/* Zone popup */
+.zone-popup{
+  display:none;
+  position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+  width:350px;z-index:500;
+  background:white;
+  border-radius:24px;
+  border:2px solid rgba(0,0,0,0.06);
+  box-shadow:0 8px 0 rgba(0,0,0,0.12), 0 20px 60px rgba(0,0,0,0.4);
+  overflow:hidden;
+}
+.popup-strip{height:6px}
+.popup-body{padding:20px 22px 22px}
+.popup-title{font-family:'Fredoka One',cursive;font-size:24px;margin-bottom:2px}
+.popup-sub{font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#A090B0;margin-bottom:10px}
+.popup-desc{font-size:13px;color:#6A5A7A;line-height:1.6;margin-bottom:14px}
+.popup-footer{display:flex;align-items:center;justify-content:space-between}
+.popup-reward{font-size:13px;font-weight:900;color:#FF8C00}
+.popup-btn{
+  font-family:'Fredoka One',cursive;font-size:16px;
+  padding:10px 28px;border-radius:100px;border:none;cursor:pointer;
+  transition:transform .1s;
+}
+.popup-btn:active{transform:scale(0.95)}
+.popup-close{
+  position:absolute;top:14px;right:14px;
+  background:rgba(0,0,0,0.06);border:none;
+  width:28px;height:28px;border-radius:50%;cursor:pointer;
+  font-size:14px;display:flex;align-items:center;justify-content:center;
+  color:#8A7A9A;
+}
+
+/* Bottom Nav */
+.nav{
+  background:rgba(15,10,30,0.98);
+  border-top:2px solid rgba(255,184,48,0.12);
+  padding:8px 0 12px;
+  display:flex;justify-content:space-around;
+}
+.nav-btn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;padding:4px 14px;border-radius:14px;
+}
+.nav-btn.active{background:rgba(255,184,48,0.12)}
+.nav-icon{font-size:22px;line-height:1}
+.nav-label{font-size:9px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
+.nav-btn.active .nav-label{color:#FFB830}
+.nav-btn:not(.active) .nav-label{color:#3A2A5A}
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="eyebrow">✨ InvestQuest · Map v2.0</div>
+  <div class="page-title">🗺 World Map</div>
+  <p class="page-sub">8 bright worlds, each with its own personality. Tap any level to explore!</p>
+</div>
+
+<!-- ═══════════ PHONE ═══════════ -->
+<div class="phone">
+  <div class="notch">
+    <div class="notch-dot"></div>
+    <div class="notch-bar"></div>
+    <div class="notch-dot"></div>
+  </div>
+  <div class="status">
+    <span>9:41</span>
+    <span>▲▲▲ 🔋</span>
+  </div>
+
+  <!-- HUD -->
+  <div class="hud">
+    <div class="hud-left">
+      <div class="hud-avatar">🐂</div>
+      <div>
+        <div class="hud-name">Investor</div>
+        <div class="hud-level">⚡ Level 8 · Bronze</div>
+      </div>
+    </div>
+    <div class="hud-right">
+      <div class="hud-coins">
+        <div class="coin-icon">$</div>
+        8,240
+      </div>
+      <div class="hud-hearts">
+        <span class="heart">❤️</span>
+        <span class="heart">❤️</span>
+        <span class="heart">❤️</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAP SCROLL -->
+  <div class="map-scroll" id="mapScroll">
+  <div class="map-canvas" id="mapCanvas">
+
+  <!-- ╔══════════════════════════════════════════════╗ -->
+  <!-- ║  ZONE 8 — DRAGON'S VAULT  (Lv 71+)         ║ -->
+  <!-- ║  Theme: Magical cozy volcano — warm oranges  ║ -->
+  <!-- ╚══════════════════════════════════════════════╝ -->
+  <div class="zone" style="height:400px">
+    <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 366 400" preserveAspectRatio="xMidYMid slice">
+      <!-- Warm sunrise sky — coral/peach top, soft orange horizon -->
+      <defs>
+        <linearGradient id="sky8" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#FF6B35"/>
+          <stop offset="40%" stop-color="#FF9B5A"/>
+          <stop offset="80%" stop-color="#FFD090"/>
+          <stop offset="100%" stop-color="#FFE8C0"/>
+        </linearGradient>
+        <linearGradient id="volcano" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#C84020"/>
+          <stop offset="100%" stop-color="#8A2010"/>
+        </linearGradient>
+        <radialGradient id="lavaGlow" cx="50%" cy="0%" r="70%">
+          <stop offset="0%" stop-color="#FF6020" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#FF6020" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="366" height="400" fill="url(#sky8)"/>
+      <!-- Sun glow -->
+      <circle cx="183" cy="60" r="50" fill="#FFD040" opacity="0.3"/>
+      <circle cx="183" cy="60" r="36" fill="#FFE060" opacity="0.4"/>
+      <circle cx="183" cy="60" r="24" fill="#FFE880" opacity="0.6"/>
+      <!-- Sun rays -->
+      <line x1="183" y1="18" x2="183" y2="5" stroke="#FFE060" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+      <line x1="215" y1="28" x2="224" y2="19" stroke="#FFE060" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+      <line x1="225" y1="60" x2="240" y2="60" stroke="#FFE060" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+      <line x1="151" y1="28" x2="142" y2="19" stroke="#FFE060" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+      <line x1="141" y1="60" x2="126" y2="60" stroke="#FFE060" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+      <!-- Fluffy clouds (friendly!) -->
+      <g opacity="0.9" style="animation:cloudDrift 8s ease-in-out infinite alternate">
+        <ellipse cx="70" cy="100" rx="40" ry="24" fill="white"/>
+        <ellipse cx="50" cy="106" rx="28" ry="20" fill="white"/>
+        <ellipse cx="90" cy="108" rx="30" ry="18" fill="white"/>
+        <ellipse cx="70" cy="112" rx="38" ry="14" fill="white"/>
+      </g>
+      <g opacity="0.85" style="animation:cloudDrift 12s ease-in-out infinite alternate-reverse">
+        <ellipse cx="300" cy="85" rx="44" ry="26" fill="white"/>
+        <ellipse cx="278" cy="92" rx="30" ry="20" fill="white"/>
+        <ellipse cx="322" cy="94" rx="32" ry="20" fill="white"/>
+        <ellipse cx="300" cy="98" rx="40" ry="14" fill="white"/>
+      </g>
+      <!-- VOLCANO (cute, round, friendly shape) -->
+      <polygon points="60,380 183,180 306,380" fill="#C84020"/>
+      <polygon points="80,380 183,192 286,380" fill="#E05030"/>
+      <!-- Volcano snow-style lava rim -->
+      <path d="M150,210 Q183,195 216,210" fill="#FF8050" opacity="0.8"/>
+      <!-- Lava glow inside crater -->
+      <ellipse cx="183" cy="205" rx="28" ry="14" fill="url(#lavaGlow)"/>
+      <ellipse cx="183" cy="208" rx="20" ry="9" fill="#FF6020" opacity="0.6"/>
+      <ellipse cx="183" cy="210" rx="14" ry="6" fill="#FF8040" opacity="0.7"/>
+      <!-- Cute lava blobs floating up -->
+      <circle cx="174" cy="186" r="7" fill="#FF6020" opacity="0.8" style="animation:float 1.4s ease-in-out infinite"/>
+      <circle cx="192" cy="178" r="5" fill="#FF8040" opacity="0.7" style="animation:float 1.8s ease-in-out infinite 0.4s"/>
+      <circle cx="183" cy="172" r="4" fill="#FFA060" opacity="0.6" style="animation:float 1.2s ease-in-out infinite 0.8s"/>
+      <!-- Giant gold coins on sides of volcano (the vault!) -->
+      <g style="animation:coinBob 2s ease-in-out infinite">
+        <circle cx="70" cy="240" r="30" fill="#C8900A"/><circle cx="70" cy="237" r="30" fill="#E0A818"/><circle cx="70" cy="234" r="30" fill="#F5C518"/>
+        <circle cx="70" cy="234" r="22" fill="#FFD740"/>
+        <text x="70" y="241" text-anchor="middle" font-size="22" fill="#9A6800" font-weight="900" font-family="Arial">$</text>
+        <ellipse cx="62" cy="226" rx="8" ry="5" fill="white" opacity="0.4" transform="rotate(-30,62,226)"/>
+      </g>
+      <g style="animation:coinBob 2.4s ease-in-out infinite 0.6s">
+        <circle cx="296" cy="255" r="26" fill="#C8900A"/><circle cx="296" cy="252" r="26" fill="#E0A818"/><circle cx="296" cy="249" r="26" fill="#F5C518"/>
+        <circle cx="296" cy="249" r="19" fill="#FFD740"/>
+        <text x="296" y="256" text-anchor="middle" font-size="18" fill="#9A6800" font-weight="900" font-family="Arial">$</text>
+      </g>
+      <!-- Rocky ground (warm brown, friendly) -->
+      <path d="M0,340 Q40,320 80,335 Q120,348 160,328 Q200,312 240,330 Q280,346 320,330 Q344,322 366,332 L366,400 L0,400 Z" fill="#C87830"/>
+      <path d="M0,355 Q50,342 110,355 Q170,366 230,352 Q290,340 366,354 L366,400 L0,400 Z" fill="#D48840"/>
+      <!-- Treasure chests at bottom! -->
+      <rect x="22" y="340" width="44" height="34" rx="6" fill="#8A5010"/>
+      <rect x="22" y="340" width="44" height="34" rx="6" fill="none" stroke="#C87830" stroke-width="2"/>
+      <rect x="22" y="340" width="44" height="14" rx="6" fill="#A06020"/>
+      <rect x="36" y="348" width="16" height="10" rx="5" fill="#F5C518"/>
+      <text x="44" y="371" text-anchor="middle" font-size="9" fill="#FFD740" font-family="'Fredoka One',cursive">Chest!</text>
+
+      <!-- Stars/sparkles decorative -->
+      <text x="30" y="155" font-size="18" fill="#FFE060" opacity="0.7" font-family="sans-serif" style="animation:sparkle 2s infinite 0.3s">★</text>
+      <text x="326" y="168" font-size="14" fill="#FFD040" opacity="0.6" font-family="sans-serif" style="animation:sparkle 2.4s infinite 0.9s">★</text>
+      <text x="24" y="200" font-size="11" fill="#FFE060" opacity="0.5" font-family="sans-serif" style="animation:sparkle 1.8s infinite 1.4s">★</text>
+    </svg>
+
+    <!-- Zone label -->
+    <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);
+      background:white;border-radius:100px;padding:7px 20px;
+      font-family:'Fredoka One',cursive;font-size:14px;color:#E05020;
+      border:2px solid rgba(232,80,32,0.2);
+      box-shadow:0 4px 0 rgba(232,80,32,0.12), 0 8px 20px rgba(0,0,0,0.15);
+      display:flex;align-items:center;gap:8px;white-space:nowrap;z-index:30">
+      🐉 Dragon's Vault
+      <span style="font-size:10px;background:#FFE8D8;color:#E05020;border-radius:100px;padding:2px 8px;font-family:'Nunito',sans-serif;font-weight:900">Lv 71+</span>
+    </div>
+
+    <!-- PATH -->
+    <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:10" viewBox="0 0 366 400">
+      <path d="M183,380 Q120,350 100,305 Q80,265 150,245 Q210,230 260,270 Q310,305 270,345" fill="none" stroke="white" stroke-width="10" stroke-opacity="0.15" stroke-linecap="round"/>
+      <path d="M183,380 Q120,350 100,305 Q80,265 150,245 Q210,230 260,270 Q310,305 270,345" fill="none" stroke="white" stroke-width="4" stroke-opacity="0.5" stroke-dasharray="14 10" stroke-linecap="round" style="animation:pathDash 1.5s linear infinite"/>
+    </svg>
+
+    <!-- Nodes -->
+    <div class="node node-locked" style="left:183px;top:382px"><span class="node-boss-icon">🚫</span></div>
+    <div class="node node-locked node-boss" style="left:270px;top:310px;border-color:#5A3A8A;box-shadow:0 5px 0 #3A2060">
+      <span class="node-boss-icon">🐉</span>
+    </div>
+    <div class="node node-locked" style="left:152px;top:252px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:104px;top:306px"><span class="node-lock">🔒</span></div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════════╗ -->
+  <!-- ║  ZONE 7 — CRYPTO PEAKS  (Lv 61-70)         ║ -->
+  <!-- ║  Theme: Glowing crystal mountains, purples   ║ -->
+  <!-- ╚══════════════════════════════════════════════╝ -->
+  <div class="zone" style="height:380px">
+    <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 366 380" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="sky7" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0E0830"/>
+          <stop offset="50%" stop-color="#1E1050"/>
+          <stop offset="100%" stop-color="#2A1870"/>
+        </linearGradient>
+      </defs>
+      <rect width="366" height="380" fill="url(#sky7)"/>
+      <!-- Stars (lots! bright!) -->
+      <circle cx="20" cy="20" r="2" fill="white" opacity="0.9"/><circle cx="50" cy="8" r="1.5" fill="white" opacity="0.7"/><circle cx="90" cy="25" r="2.5" fill="#C8A8FF" opacity="0.8"/>
+      <circle cx="140" cy="12" r="1.5" fill="white" opacity="0.6"/><circle cx="180" cy="5" r="2" fill="#A0C0FF" opacity="0.8"/><circle cx="220" cy="18" r="2" fill="white" opacity="0.7"/>
+      <circle cx="270" cy="8" r="1.5" fill="#C8A8FF" opacity="0.7"/><circle cx="310" cy="22" r="2.5" fill="white" opacity="0.8"/><circle cx="350" cy="14" r="2" fill="#A0C0FF" opacity="0.6"/>
+      <circle cx="35" cy="55" r="1.5" fill="white" opacity="0.5"/><circle cx="115" cy="48" r="2" fill="#C8A8FF" opacity="0.6"/><circle cx="200" cy="45" r="1.5" fill="white" opacity="0.5"/>
+      <circle cx="290" cy="50" r="2" fill="white" opacity="0.6"/><circle cx="340" cy="55" r="1.5" fill="#C8A8FF" opacity="0.5"/>
+      <!-- Full moon (big and pretty!) -->
+      <circle cx="290" cy="65" r="42" fill="#E8E0C8" opacity="0.15"/>
+      <circle cx="290" cy="65" r="36" fill="#F0E8D0" opacity="0.25"/>
+      <circle cx="290" cy="65" r="28" fill="#FFF5E0" opacity="0.5"/>
+      <circle cx="290" cy="65" r="22" fill="#FFFAE8" opacity="0.7"/>
+      <!-- Moon craters (cute, round) -->
+      <circle cx="282" cy="58" r="5" fill="#EEE0C0" opacity="0.7"/>
+      <circle cx="298" cy="70" r="4" fill="#EEE0C0" opacity="0.6"/>
+      <circle cx="285" cy="74" r="3" fill="#EEE0C0" opacity="0.5"/>
+      <!-- CRYSTAL MOUNTAINS (sharp, colorful!) -->
+      <!-- Back mountains (dark purple) -->
+      <polygon points="0,380 60,210 120,280 180,160 240,250 300,170 366,220 366,380" fill="#1A0E40"/>
+      <!-- Mid mountains (rich purple) -->
+      <polygon points="0,380 80,240 140,300 200,190 260,270 320,200 366,240 366,380" fill="#2A1860"/>
+      <!-- FRONT CRYSTAL peaks (glowing!) -->
+      <!-- Crystal 1 (left, cyan/teal) -->
+      <polygon points="30,380 70,240 110,380" fill="#0A8080"/>
+      <polygon points="40,380 70,248 100,380" fill="#10A8A0"/>
+      <polygon points="50,380 70,252 90,380" fill="#20C8B8" opacity="0.8"/>
+      <polygon points="55,380 70,256 84,380" fill="#60E8D8" opacity="0.6"/>
+      <!-- Crystal glow -->
+      <ellipse cx="70" cy="260" rx="20" ry="10" fill="#20C8B8" opacity="0.3" style="animation:sparkle 2s ease-in-out infinite"/>
+      <!-- Crystal 2 (right, pink/magenta) -->
+      <polygon points="256,380 296,230 336,380" fill="#802060"/>
+      <polygon points="264,380 296,238 328,380" fill="#A02880"/>
+      <polygon points="272,380 296,242 320,380" fill="#C040A0" opacity="0.8"/>
+      <polygon points="278,380 296,246 314,380" fill="#F070D0" opacity="0.6"/>
+      <!-- Crystal glow -->
+      <ellipse cx="296" cy="250" rx="20" ry="10" fill="#E040B0" opacity="0.3" style="animation:sparkle 2.4s ease-in-out infinite 0.5s"/>
+      <!-- Crystal 3 (center, gold/yellow) -->
+      <polygon points="138,380 183,195 228,380" fill="#806000"/>
+      <polygon points="148,380 183,203 218,380" fill="#B08800"/>
+      <polygon points="158,380 183,208 208,380" fill="#E0B010" opacity="0.8"/>
+      <polygon points="165,380 183,213 202,380" fill="#F5C518" opacity="0.7"/>
+      <!-- Gold crystal shine -->
+      <ellipse cx="183" cy="220" rx="20" ry="8" fill="#F5C518" opacity="0.4" style="animation:sparkle 1.8s ease-in-out infinite 0.3s"/>
+      <!-- CRYPTO SYMBOLS floating -->
+      <text x="46" y="185" text-anchor="middle" font-size="22" fill="#F7931A" opacity="0.5" font-family="sans-serif">₿</text>
+      <text x="318" y="175" text-anchor="middle" font-size="20" fill="#627EEA" opacity="0.5" font-family="sans-serif">Ξ</text>
+      <!-- Ground glow -->
+      <ellipse cx="183" cy="380" rx="200" ry="40" fill="#C040A0" opacity="0.1"/>
+      <rect x="0" y="355" width="366" height="25" fill="#180C38"/>
+    </svg>
+
+    <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);
+      background:white;border-radius:100px;padding:7px 20px;
+      font-family:'Fredoka One',cursive;font-size:14px;color:#8040C0;
+      border:2px solid rgba(128,64,192,0.2);
+      box-shadow:0 4px 0 rgba(128,64,192,0.15), 0 8px 20px rgba(0,0,0,0.2);
+      display:flex;align-items:center;gap:8px;white-space:nowrap;z-index:30">
+      🏔 Crypto Peaks
+      <span style="font-size:10px;background:#F0E8FF;color:#8040C0;border-radius:100px;padding:2px 8px;font-family:'Nunito',sans-serif;font-weight:900">Lv 61–70</span>
+    </div>
+
+    <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:10" viewBox="0 0 366 380">
+      <path d="M183,370 Q110,340 100,290 Q92,252 140,235 Q190,220 245,255 Q290,282 260,325" fill="none" stroke="white" stroke-width="10" stroke-opacity="0.1" stroke-linecap="round"/>
+      <path d="M183,370 Q110,340 100,290 Q92,252 140,235 Q190,220 245,255 Q290,282 260,325" fill="none" stroke="#B8A8E8" stroke-width="3.5" stroke-opacity="0.6" stroke-dasharray="14 10" stroke-linecap="round" style="animation:pathDash 1.5s linear infinite"/>
+    </svg>
+
+    <div class="node node-locked node-boss" style="left:183px;top:340px;border-color:#8040C0;background:linear-gradient(160deg,#5A2888,#3A1860)">
+      <span class="node-boss-icon">💎</span>
+    </div>
+    <div class="node node-locked" style="left:256px;top:280px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:104px;top:246px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:230px;top:198px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:115px;top:158px"><span class="node-lock">🔒</span></div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════════╗ -->
+  <!-- ║  ZONE 6 — DIVIDEND VALLEY  (Lv 46-60)      ║ -->
+  <!-- ║  Theme: Lush green forest, golden money trees║ -->
+  <!-- ╚══════════════════════════════════════════════╝ -->
+  <div class="zone" style="height:380px">
+    <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 366 380" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="sky6" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4FC8FF"/>
+          <stop offset="60%" stop-color="#A0ECFF"/>
+          <stop offset="100%" stop-color="#D0F8E8"/>
+        </linearGradient>
+      </defs>
+      <rect width="366" height="380" fill="url(#sky6)"/>
+      <!-- Fluffy white clouds -->
+      <g style="animation:cloudDrift 10s ease-in-out infinite alternate">
+        <ellipse cx="80" cy="70" rx="48" ry="28" fill="white" opacity="0.9"/>
+        <ellipse cx="55" cy="78" rx="35" ry="24" fill="white" opacity="0.9"/>
+        <ellipse cx="108" cy="80" rx="38" ry="22" fill="white" opacity="0.9"/>
+        <ellipse cx="80" cy="86" rx="45" ry="16" fill="white" opacity="0.9"/>
+      </g>
+      <g style="animation:cloudDrift 15s ease-in-out infinite alternate-reverse">
+        <ellipse cx="290" cy="55" rx="52" ry="30" fill="white" opacity="0.85"/>
+        <ellipse cx="262" cy="64" rx="36" ry="24" fill="white" opacity="0.85"/>
+        <ellipse cx="318" cy="66" rx="38" ry="24" fill="white" opacity="0.85"/>
+        <ellipse cx="290" cy="72" rx="48" ry="17" fill="white" opacity="0.85"/>
+      </g>
+      <!-- Green rolling hills -->
+      <path d="M0,380 Q60,300 130,330 Q200,358 270,310 Q320,280 366,320 L366,380 Z" fill="#2DB860"/>
+      <path d="M0,380 Q80,320 180,345 Q280,368 366,338 L366,380 Z" fill="#38D470"/>
+      <path d="M0,380 Q100,350 200,362 Q300,374 366,358 L366,380 Z" fill="#50E880"/>
+      <!-- MONEY TREES! (big, colorful, fun) -->
+      <!-- Tree 1 (left) -->
+      <rect x="42" y="230" width="12" height="100" rx="5" fill="#8B5E3C"/>
+      <!-- 3 layers of leaves, round and lush -->
+      <circle cx="48" cy="225" r="42" fill="#1A9A40"/>
+      <circle cx="48" cy="215" r="38" fill="#20B848"/>
+      <circle cx="28" cy="228" r="28" fill="#1A9A40"/>
+      <circle cx="68" cy="228" r="30" fill="#1A9A40"/>
+      <circle cx="48" cy="205" r="34" fill="#2ACC58"/>
+      <!-- GOLD COINS on tree -->
+      <circle cx="30" cy="205" r="10" fill="#C8900A"/><circle cx="30" cy="203" r="10" fill="#F5C518"/>
+      <text x="30" y="207" text-anchor="middle" font-size="10" fill="#8A6000" font-weight="900" font-family="Arial">$</text>
+      <circle cx="58" cy="196" r="9" fill="#C8900A"/><circle cx="58" cy="194" r="9" fill="#F5C518"/>
+      <text x="58" y="198" text-anchor="middle" font-size="9" fill="#8A6000" font-weight="900" font-family="Arial">$</text>
+      <circle cx="44" cy="215" r="8" fill="#C8900A"/><circle cx="44" cy="213" r="8" fill="#F5C518"/>
+      <text x="44" y="217" text-anchor="middle" font-size="9" fill="#8A6000" font-weight="900" font-family="Arial">$</text>
+      <!-- Tree 2 (right) -->
+      <rect x="304" y="210" width="12" height="120" rx="5" fill="#8B5E3C"/>
+      <circle cx="310" cy="205" r="46" fill="#1A9A40"/>
+      <circle cx="310" cy="193" r="42" fill="#20B848"/>
+      <circle cx="286" cy="210" r="30" fill="#1A9A40"/>
+      <circle cx="334" cy="212" r="32" fill="#1A9A40"/>
+      <circle cx="310" cy="182" r="38" fill="#2ACC58"/>
+      <!-- Coins on tree 2 -->
+      <circle cx="290" cy="192" r="10" fill="#C8900A"/><circle cx="290" cy="190" r="10" fill="#F5C518"/>
+      <text x="290" y="194" text-anchor="middle" font-size="10" fill="#8A6000" font-weight="900" font-family="Arial">$</text>
+      <circle cx="326" cy="185" r="9" fill="#C8900A"/><circle cx="326" cy="183" r="9" fill="#F5C518"/>
+      <text x="326" y="187" text-anchor="middle" font-size="9" fill="#8A6000" font-weight="900" font-family="Arial">$</text>
+      <circle cx="310" cy="178" r="9" fill="#C8900A"/><circle cx="310" cy="176" r="9" fill="#F5C518"/>
+      <text x="310" y="180" text-anchor="middle" font-size="9" fill="#8A6000" font-weight="900" font-family="Arial">$</text>
+      <!-- Small tree center -->
+      <rect x="174" y="280" width="8" height="70" rx="4" fill="#8B5E3C"/>
+      <circle cx="178" cy="276" r="30" fill="#20B848"/>
+      <circle cx="178" cy="265" r="26" fill="#2ACC58"/>
+      <circle cx="161" cy="278" r="20" fill="#1A9A40"/>
+      <circle cx="195" cy="278" r="20" fill="#1A9A40"/>
+      <circle cx="162" cy="258" r="8" fill="#C8900A"/><circle cx="162" cy="256" r="8" fill="#F5C518"/>
+      <text x="162" y="260" text-anchor="middle" font-size="8" fill="#8A6000" font-weight="900" font-family="Arial">$</text>
+      <!-- Rainbow (cheerful!) -->
+      <path d="M20,160 Q183,50 346,160" fill="none" stroke="#FF6060" stroke-width="6" opacity="0.2"/>
+      <path d="M28,162 Q183,60 338,162" fill="none" stroke="#FF9030" stroke-width="6" opacity="0.2"/>
+      <path d="M36,164 Q183,70 330,164" fill="none" stroke="#FFE040" stroke-width="6" opacity="0.2"/>
+      <path d="M44,166 Q183,80 322,166" fill="none" stroke="#40D840" stroke-width="6" opacity="0.2"/>
+      <path d="M52,168 Q183,90 314,168" fill="none" stroke="#40A0FF" stroke-width="6" opacity="0.2"/>
+      <path d="M60,170 Q183,100 306,170" fill="none" stroke="#A040FF" stroke-width="6" opacity="0.2"/>
+      <!-- Coin rain drops (dividends!) -->
+      <circle cx="130" cy="155" r="7" fill="#F5C518" opacity="0.6" style="animation:coinBob 1.5s infinite 0.2s"/>
+      <circle cx="165" cy="138" r="5" fill="#F5C518" opacity="0.5" style="animation:coinBob 1.8s infinite 0.7s"/>
+      <circle cx="200" cy="148" r="6" fill="#F5C518" opacity="0.6" style="animation:coinBob 1.3s infinite 0.4s"/>
+      <circle cx="238" cy="140" r="5" fill="#F5C518" opacity="0.5" style="animation:coinBob 2s infinite 1s"/>
+    </svg>
+
+    <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);
+      background:white;border-radius:100px;padding:7px 20px;
+      font-family:'Fredoka One',cursive;font-size:14px;color:#1A9A40;
+      border:2px solid rgba(26,154,64,0.2);
+      box-shadow:0 4px 0 rgba(26,154,64,0.12), 0 8px 20px rgba(0,0,0,0.1);
+      display:flex;align-items:center;gap:8px;white-space:nowrap;z-index:30">
+      🌿 Dividend Valley
+      <span style="font-size:10px;background:#E0F8E8;color:#1A9A40;border-radius:100px;padding:2px 8px;font-family:'Nunito',sans-serif;font-weight:900">Lv 46–60</span>
+    </div>
+
+    <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:10" viewBox="0 0 366 380">
+      <path d="M183,370 Q115,345 105,298 Q96,258 142,238 Q188,220 242,258 Q280,286 258,328" fill="none" stroke="white" stroke-width="10" stroke-opacity="0.2" stroke-linecap="round"/>
+      <path d="M183,370 Q115,345 105,298 Q96,258 142,238 Q188,220 242,258 Q280,286 258,328" fill="none" stroke="#60D880" stroke-width="3.5" stroke-opacity="0.7" stroke-dasharray="14 10" stroke-linecap="round" style="animation:pathDash 1.5s linear infinite"/>
+    </svg>
+
+    <div class="node node-locked node-boss" style="left:183px;top:340px;border-color:#1A9A40;background:linear-gradient(160deg,#20C050,#128030)">
+      <span class="node-boss-icon">🌳</span>
+    </div>
+    <div class="node node-locked" style="left:254px;top:278px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:108px;top:240px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:250px;top:196px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:110px;top:154px"><span class="node-lock">🔒</span></div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════════╗ -->
+  <!-- ║  ZONE 5 — ETF EMPIRE  (Lv 36-45)           ║ -->
+  <!-- ║  Theme: Warm golden ancient city, sunny      ║ -->
+  <!-- ╚══════════════════════════════════════════════╝ -->
+  <div class="zone" style="height:370px">
+    <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 366 370" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="sky5" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#FFA040"/>
+          <stop offset="40%" stop-color="#FFCC70"/>
+          <stop offset="100%" stop-color="#FFE8A0"/>
+        </linearGradient>
+      </defs>
+      <rect width="366" height="370" fill="url(#sky5)"/>
+      <!-- Clouds (warm, golden tinted) -->
+      <g opacity="0.7" style="animation:cloudDrift 11s ease-in-out infinite alternate">
+        <ellipse cx="75" cy="80" rx="44" ry="26" fill="#FFF8E0"/>
+        <ellipse cx="52" cy="88" rx="30" ry="22" fill="#FFF8E0"/>
+        <ellipse cx="98" cy="90" rx="34" ry="20" fill="#FFF8E0"/>
+      </g>
+      <!-- GRAND TEMPLE (big, colorful, iconic) -->
+      <!-- Temple base steps -->
+      <rect x="68" y="280" width="230" height="12" rx="3" fill="#D4940A"/>
+      <rect x="60" y="268" width="246" height="14" rx="3" fill="#E0A818"/>
+      <rect x="52" y="254" width="262" height="16" rx="3" fill="#F5C518"/>
+      <!-- Temple main body -->
+      <rect x="88" y="160" width="190" height="98" rx="4" fill="#E8A018"/>
+      <!-- Columns (colorful!) -->
+      <rect x="100" y="165" width="16" height="93" rx="5" fill="#F0B428"/>
+      <rect x="126" y="165" width="16" height="93" rx="5" fill="#ECA020"/>
+      <rect x="152" y="165" width="16" height="93" rx="5" fill="#F0B428"/>
+      <rect x="178" y="165" width="16" height="93" rx="5" fill="#ECA020"/>
+      <rect x="204" y="165" width="16" height="93" rx="5" fill="#F0B428"/>
+      <rect x="230" y="165" width="16" height="93" rx="5" fill="#ECA020"/>
+      <rect x="250" y="165" width="16" height="93" rx="5" fill="#F0B428"/>
+      <!-- Temple roof (triangular pediment) -->
+      <polygon points="78,162 183,100 288,162" fill="#D4940A"/>
+      <polygon points="88,162 183,108 278,162" fill="#F5C518"/>
+      <polygon points="100,162 183,118 266,162" fill="#FFD740"/>
+      <!-- Temple pediment decoration (pie chart!) -->
+      <circle cx="183" cy="136" r="22" fill="#E8A018"/>
+      <path d="M183,136 L183,114 A22,22,0,0,1,203,147 Z" fill="#FF6B35" opacity="0.9"/>
+      <path d="M183,136 L203,147 A22,22,0,0,1,175,158 Z" fill="#00C896" opacity="0.9"/>
+      <path d="M183,136 L175,158 A22,22,0,0,1,163,127 Z" fill="#6B4FF8" opacity="0.9"/>
+      <path d="M183,136 L163,127 A22,22,0,0,1,183,114 Z" fill="#FF9B30" opacity="0.9"/>
+      <!-- Temple door -->
+      <rect x="162" y="230" width="42" height="28" rx="4" fill="#C88010"/>
+      <ellipse cx="183" cy="232" rx="21" ry="8" fill="#D89820"/>
+      <circle cx="183" cy="248" r="4" fill="#F5C518" opacity="0.7"/>
+      <!-- Gold flag on top -->
+      <rect x="182" y="68" width="4" height="36" rx="2" fill="#C88010"/>
+      <polygon points="186,70 205,78 186,86" fill="#F5C518" style="animation:wavingFlag 2s ease-in-out infinite"/>
+      <!-- Palm trees flanking -->
+      <rect x="28" y="260" width="8" height="90" rx="4" fill="#8B5E3C"/>
+      <ellipse cx="32" cy="255" rx="22" ry="30" fill="#20A840"/>
+      <ellipse cx="18" cy="265" rx="18" ry="16" fill="#28C050"/>
+      <ellipse cx="46" cy="265" rx="18" ry="16" fill="#1A9A38"/>
+      <rect x="330" y="260" width="8" height="90" rx="4" fill="#8B5E3C"/>
+      <ellipse cx="334" cy="255" rx="22" ry="30" fill="#20A840"/>
+      <ellipse cx="320" cy="265" rx="18" ry="16" fill="#28C050"/>
+      <ellipse cx="348" cy="265" rx="18" ry="16" fill="#1A9A38"/>
+      <!-- Sandy desert ground -->
+      <path d="M0,310 Q40,295 90,308 Q150,322 210,305 Q270,290 330,308 Q348,314 366,310 L366,370 L0,370 Z" fill="#E8B840"/>
+      <path d="M0,330 Q60,318 130,330 Q200,342 270,326 Q318,316 366,328 L366,370 L0,370 Z" fill="#F0C858"/>
+      <!-- Sparkle coins scattered on ground -->
+      <circle cx="48" cy="322" r="7" fill="#F5C518" style="animation:coinBob 2.2s infinite 0.5s"/>
+      <circle cx="316" cy="318" r="7" fill="#F5C518" style="animation:coinBob 1.8s infinite 1s"/>
+    </svg>
+
+    <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);
+      background:white;border-radius:100px;padding:7px 20px;
+      font-family:'Fredoka One',cursive;font-size:14px;color:#C87000;
+      border:2px solid rgba(200,112,0,0.2);
+      box-shadow:0 4px 0 rgba(200,112,0,0.12), 0 8px 20px rgba(0,0,0,0.1);
+      display:flex;align-items:center;gap:8px;white-space:nowrap;z-index:30">
+      🏛 ETF Empire
+      <span style="font-size:10px;background:#FFF3D0;color:#C87000;border-radius:100px;padding:2px 8px;font-family:'Nunito',sans-serif;font-weight:900">Lv 36–45</span>
+    </div>
+
+    <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:10" viewBox="0 0 366 370">
+      <path d="M183,360 Q110,332 102,285 Q94,248 142,230 Q192,214 246,252 Q284,280 256,320" fill="none" stroke="white" stroke-width="10" stroke-opacity="0.2" stroke-linecap="round"/>
+      <path d="M183,360 Q110,332 102,285 Q94,248 142,230 Q192,214 246,252 Q284,280 256,320" fill="none" stroke="#FFD040" stroke-width="3.5" stroke-opacity="0.7" stroke-dasharray="14 10" stroke-linecap="round" style="animation:pathDash 1.5s linear infinite"/>
+    </svg>
+
+    <div class="node node-locked node-boss" style="left:183px;top:330px;border-color:#C87000;background:linear-gradient(160deg,#F0A820,#C07800)">
+      <span class="node-boss-icon">🏛</span>
+    </div>
+    <div class="node node-locked" style="left:254px;top:270px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:105px;top:232px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:248px;top:188px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:112px;top:148px"><span class="node-lock">🔒</span></div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════════╗ -->
+  <!-- ║  ZONE 4 — BOND BAY  (Lv 26-35)             ║ -->
+  <!-- ║  Theme: Sunny tropical ocean, treasure       ║ -->
+  <!-- ╚══════════════════════════════════════════════╝ -->
+  <div class="zone" style="height:370px">
+    <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 366 370" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="sky4" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#38C8FF"/>
+          <stop offset="50%" stop-color="#70DEFF"/>
+          <stop offset="100%" stop-color="#A0F0FF"/>
+        </linearGradient>
+        <linearGradient id="ocean" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1890CC"/>
+          <stop offset="100%" stop-color="#0A5A90"/>
+        </linearGradient>
+      </defs>
+      <rect width="366" height="370" fill="url(#sky4)"/>
+      <!-- Sun (big, warm) -->
+      <circle cx="60" cy="60" r="36" fill="#FFE060" opacity="0.3"/>
+      <circle cx="60" cy="60" r="28" fill="#FFE860" opacity="0.5"/>
+      <circle cx="60" cy="60" r="20" fill="#FFF080" opacity="0.8"/>
+      <!-- Clouds -->
+      <g style="animation:cloudDrift 9s ease-in-out infinite alternate">
+        <ellipse cx="200" cy="65" rx="50" ry="28" fill="white" opacity="0.92"/>
+        <ellipse cx="174" cy="74" rx="34" ry="24" fill="white" opacity="0.92"/>
+        <ellipse cx="226" cy="76" rx="36" ry="22" fill="white" opacity="0.92"/>
+        <ellipse cx="200" cy="82" rx="46" ry="16" fill="white" opacity="0.92"/>
+      </g>
+      <!-- OCEAN (beautiful blue!) -->
+      <rect x="0" y="250" width="366" height="120" fill="url(#ocean)"/>
+      <!-- Wave tops -->
+      <path d="M0,252 Q30,242 60,252 Q90,262 120,252 Q150,242 180,252 Q210,262 240,252 Q270,242 300,252 Q330,262 366,252" fill="none" stroke="white" stroke-width="3" opacity="0.4"/>
+      <path d="M0,268 Q40,257 80,268 Q120,278 160,268 Q200,258 240,268 Q280,278 320,268 Q344,260 366,268" fill="none" stroke="white" stroke-width="2.5" opacity="0.3"/>
+      <path d="M0,284 Q50,273 100,284 Q150,294 200,284 Q250,274 300,284 Q330,290 366,284" fill="none" stroke="white" stroke-width="2" opacity="0.25"/>
+      <!-- Ocean shimmer -->
+      <ellipse cx="100" cy="300" rx="30" ry="6" fill="white" opacity="0.15"/>
+      <ellipse cx="260" cy="320" rx="25" ry="5" fill="white" opacity="0.12"/>
+      <ellipse cx="183" cy="340" rx="40" ry="6" fill="white" opacity="0.1"/>
+      <!-- CUTE SAILBOAT! -->
+      <rect x="150" y="230" width="66" height="24" rx="8" fill="#E87030"/>
+      <rect x="157" y="218" width="50" height="14" rx="4" fill="#F0A048"/>
+      <!-- Sail -->
+      <polygon points="183,180 183,232 220,232" fill="white" opacity="0.9"/>
+      <polygon points="183,192 183,232 148,232" fill="#FFE8D0" opacity="0.8"/>
+      <!-- Mast -->
+      <rect x="182" y="172" width="3" height="62" rx="1" fill="#8B5E3C"/>
+      <!-- Flag on mast -->
+      <polygon points="185,174 200,180 185,186" fill="#FF5050" style="animation:wavingFlag 1.5s ease-in-out infinite"/>
+      <!-- TREASURE FLOATING! -->
+      <g style="animation:coinBob 2s ease-in-out infinite">
+        <rect x="38" y="230" width="42" height="30" rx="8" fill="#8B5010"/>
+        <rect x="38" y="228" width="42" height="18" rx="8" fill="#A06020"/>
+        <rect x="50" y="234" width="18" height="10" rx="5" fill="#F5C518"/>
+        <text x="59" y="254" text-anchor="middle" font-size="8" fill="#F5C518" font-family="'Fredoka One',cursive">💰</text>
+      </g>
+      <g style="animation:coinBob 2.5s ease-in-out infinite 0.8s">
+        <rect x="286" y="234" width="42" height="28" rx="8" fill="#8B5010"/>
+        <rect x="286" y="232" width="42" height="16" rx="8" fill="#A06020"/>
+        <rect x="298" y="238" width="18" height="10" rx="5" fill="#F5C518"/>
+      </g>
+      <!-- BOND CERTIFICATE cards floating -->
+      <g transform="rotate(-8,100,165)" style="animation:float 2.2s ease-in-out infinite 0.3s">
+        <rect x="70" y="150" width="58" height="40" rx="8" fill="white"/>
+        <rect x="70" y="150" width="58" height="40" rx="8" fill="none" stroke="#3A70C0" stroke-width="2"/>
+        <text x="99" y="166" text-anchor="middle" font-size="10" fill="#3A70C0" font-family="'Fredoka One',cursive">BOND</text>
+        <text x="99" y="181" text-anchor="middle" font-size="8" fill="#60A0E0" font-family="'Courier New',monospace">5.2% APY</text>
+      </g>
+      <g transform="rotate(6,276,155)" style="animation:float 2.6s ease-in-out infinite 0.9s">
+        <rect x="248" y="142" width="58" height="40" rx="8" fill="white"/>
+        <rect x="248" y="142" width="58" height="40" rx="8" fill="none" stroke="#3A70C0" stroke-width="2"/>
+        <text x="277" y="158" text-anchor="middle" font-size="10" fill="#3A70C0" font-family="'Fredoka One',cursive">BOND</text>
+        <text x="277" y="173" text-anchor="middle" font-size="8" fill="#60A0E0" font-family="'Courier New',monospace">3.8% APY</text>
+      </g>
+      <!-- Island in background -->
+      <ellipse cx="320" cy="248" rx="28" ry="10" fill="#F0C858"/>
+      <rect x="318" y="220" width="5" height="30" rx="2" fill="#8B5E3C"/>
+      <ellipse cx="320" cy="218" rx="14" ry="18" fill="#20A840"/>
+      <ellipse cx="311" cy="224" rx="10" ry="10" fill="#28C050"/>
+    </svg>
+
+    <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);
+      background:white;border-radius:100px;padding:7px 20px;
+      font-family:'Fredoka One',cursive;font-size:14px;color:#1870C0;
+      border:2px solid rgba(24,112,192,0.2);
+      box-shadow:0 4px 0 rgba(24,112,192,0.12), 0 8px 20px rgba(0,0,0,0.1);
+      display:flex;align-items:center;gap:8px;white-space:nowrap;z-index:30">
+      🌊 Bond Bay
+      <span style="font-size:10px;background:#E0F0FF;color:#1870C0;border-radius:100px;padding:2px 8px;font-family:'Nunito',sans-serif;font-weight:900">Lv 26–35</span>
+    </div>
+
+    <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:10" viewBox="0 0 366 370">
+      <path d="M183,360 Q112,332 104,286 Q98,250 144,232 Q192,216 246,254 Q282,282 256,322" fill="none" stroke="white" stroke-width="10" stroke-opacity="0.2" stroke-linecap="round"/>
+      <path d="M183,360 Q112,332 104,286 Q98,250 144,232 Q192,216 246,254 Q282,282 256,322" fill="none" stroke="#60D0FF" stroke-width="3.5" stroke-opacity="0.8" stroke-dasharray="14 10" stroke-linecap="round" style="animation:pathDash 1.5s linear infinite"/>
+    </svg>
+
+    <div class="node node-locked node-boss" style="left:183px;top:330px;border-color:#1870C0;background:linear-gradient(160deg,#2898E8,#1060A8)">
+      <span class="node-boss-icon">🚢</span>
+    </div>
+    <div class="node node-locked" style="left:254px;top:270px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:106px;top:234px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:248px;top:192px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:116px;top:150px"><span class="node-lock">🔒</span></div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════════╗ -->
+  <!-- ║  ZONE 3 — STOCK MARKET STREET  (Lv 16-25)  ║ -->
+  <!-- ║  Theme: Vibrant colorful city, daytime       ║ -->
+  <!-- ╚══════════════════════════════════════════════╝ -->
+  <div class="zone" style="height:370px">
+    <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 366 370" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="sky3" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#60C8FF"/>
+          <stop offset="70%" stop-color="#A8E0FF"/>
+          <stop offset="100%" stop-color="#D0F0FF"/>
+        </linearGradient>
+      </defs>
+      <rect width="366" height="370" fill="url(#sky3)"/>
+      <!-- Clouds -->
+      <g opacity="0.9" style="animation:cloudDrift 13s ease-in-out infinite alternate">
+        <ellipse cx="110" cy="55" rx="46" ry="26" fill="white"/>
+        <ellipse cx="86" cy="63" rx="32" ry="22" fill="white"/>
+        <ellipse cx="134" cy="65" rx="34" ry="20" fill="white"/>
+        <ellipse cx="110" cy="70" rx="43" ry="15" fill="white"/>
+      </g>
+      <!-- COLORFUL CITY BUILDINGS -->
+      <!-- Building 1 (coral/salmon) -->
+      <rect x="0" y="180" width="56" height="190" rx="6" fill="#FF7060"/>
+      <rect x="0" y="170" width="56" height="16" rx="4" fill="#FF8878"/>
+      <rect x="8" y="190" width="14" height="12" rx="3" fill="#FFE8E0" opacity="0.8"/>
+      <rect x="28" y="190" width="14" height="12" rx="3" fill="#FFD8D0" opacity="0.7"/>
+      <rect x="8" y="210" width="14" height="12" rx="3" fill="#FFE8E0" opacity="0.9"/>
+      <rect x="28" y="210" width="14" height="12" rx="3" fill="#FFE8E0" opacity="0.8"/>
+      <rect x="8" y="230" width="14" height="12" rx="3" fill="#FFFBE0" opacity="0.6"/>
+      <rect x="28" y="230" width="14" height="12" rx="3" fill="#FFE8E0" opacity="0.8"/>
+      <!-- Building 2 (teal) -->
+      <rect x="50" y="155" width="66" height="215" rx="6" fill="#18B8A0"/>
+      <rect x="50" y="143" width="66" height="16" rx="4" fill="#20D0B0"/>
+      <!-- Stock ticker display! -->
+      <rect x="56" y="158" width="54" height="22" rx="4" fill="#0A2820"/>
+      <text x="83" y="172" text-anchor="middle" font-size="8" fill="#00E8B8" font-family="'Courier New',monospace" font-weight="bold">AAPL↑2.4%</text>
+      <rect x="56" y="186" width="12" height="10" rx="3" fill="#60FFDD" opacity="0.7"/>
+      <rect x="74" y="186" width="12" height="10" rx="3" fill="#FFFF80" opacity="0.6"/>
+      <rect x="92" y="186" width="12" height="10" rx="3" fill="#60FFDD" opacity="0.7"/>
+      <rect x="56" y="202" width="12" height="10" rx="3" fill="#FFFF80" opacity="0.5"/>
+      <rect x="74" y="202" width="12" height="10" rx="3" fill="#60FFDD" opacity="0.7"/>
+      <rect x="92" y="202" width="12" height="10" rx="3" fill="#60FFDD" opacity="0.6"/>
+      <rect x="56" y="218" width="12" height="10" rx="3" fill="#60FFDD" opacity="0.8"/>
+      <rect x="74" y="218" width="12" height="10" rx="3" fill="#FFFF80" opacity="0.6"/>
+      <!-- Building 3 (tall, purple) -->
+      <rect x="108" y="120" width="58" height="250" rx="6" fill="#8050E0"/>
+      <rect x="108" y="108" width="58" height="16" rx="4" fill="#9060F0"/>
+      <!-- Antenna -->
+      <rect x="135" y="76" width="4" height="36" rx="2" fill="#6040B0"/>
+      <circle cx="137" cy="74" r="7" fill="#FF5090" opacity="0.8"/>
+      <circle cx="137" cy="74" r="4.5" fill="#FF80B8" style="animation:sparkle 1.5s ease-in-out infinite"/>
+      <rect x="114" y="124" width="14" height="10" rx="3" fill="#C0A8FF" opacity="0.7"/>
+      <rect x="134" y="124" width="14" height="10" rx="3" fill="#C0A8FF" opacity="0.5"/>
+      <rect x="114" y="140" width="14" height="10" rx="3" fill="#FFFF80" opacity="0.6"/>
+      <rect x="134" y="140" width="14" height="10" rx="3" fill="#C0A8FF" opacity="0.7"/>
+      <rect x="114" y="156" width="14" height="10" rx="3" fill="#C0A8FF" opacity="0.8"/>
+      <rect x="134" y="156" width="14" height="10" rx="3" fill="#FFFF80" opacity="0.5"/>
+      <rect x="114" y="172" width="14" height="10" rx="3" fill="#FFFF80" opacity="0.6"/>
+      <rect x="134" y="172" width="14" height="10" rx="3" fill="#C0A8FF" opacity="0.7"/>
+      <rect x="114" y="188" width="14" height="10" rx="3" fill="#C0A8FF" opacity="0.5"/>
+      <rect x="134" y="188" width="14" height="10" rx="3" fill="#FFFF80" opacity="0.8"/>
+      <!-- Building 4 (yellow/gold, center) -->
+      <rect x="160" y="138" width="54" height="232" rx="6" fill="#E8B018"/>
+      <rect x="160" y="126" width="54" height="16" rx="4" fill="#F5C518"/>
+      <!-- Big $ sign on building! -->
+      <text x="187" y="178" text-anchor="middle" font-size="38" fill="#FFE060" font-weight="900" font-family="Arial" opacity="0.4">$</text>
+      <rect x="166" y="196" width="13" height="10" rx="3" fill="#FFF8A0" opacity="0.7"/>
+      <rect x="185" y="196" width="13" height="10" rx="3" fill="#FFF8A0" opacity="0.5"/>
+      <rect x="166" y="212" width="13" height="10" rx="3" fill="#FFF8A0" opacity="0.8"/>
+      <rect x="185" y="212" width="13" height="10" rx="3" fill="#FFF8A0" opacity="0.6"/>
+      <!-- Building 5 (blue) -->
+      <rect x="208" y="145" width="56" height="225" rx="6" fill="#3888E8"/>
+      <rect x="208" y="133" width="56" height="16" rx="4" fill="#50A0FF"/>
+      <rect x="214" y="150" width="14" height="10" rx="3" fill="#A0DFFF" opacity="0.8"/>
+      <rect x="234" y="150" width="14" height="10" rx="3" fill="#A0DFFF" opacity="0.6"/>
+      <rect x="214" y="166" width="14" height="10" rx="3" fill="#FFFF80" opacity="0.6"/>
+      <rect x="234" y="166" width="14" height="10" rx="3" fill="#A0DFFF" opacity="0.7"/>
+      <rect x="214" y="182" width="14" height="10" rx="3" fill="#A0DFFF" opacity="0.7"/>
+      <rect x="234" y="182" width="14" height="10" rx="3" fill="#FFFF80" opacity="0.5"/>
+      <rect x="214" y="198" width="14" height="10" rx="3" fill="#A0DFFF" opacity="0.8"/>
+      <rect x="234" y="198" width="14" height="10" rx="3" fill="#A0DFFF" opacity="0.6"/>
+      <!-- Building 6 (pink/magenta) -->
+      <rect x="258" y="165" width="52" height="205" rx="6" fill="#E840A0"/>
+      <rect x="258" y="153" width="52" height="16" rx="4" fill="#F060B8"/>
+      <rect x="264" y="170" width="12" height="10" rx="3" fill="#FFD0F0" opacity="0.8"/>
+      <rect x="282" y="170" width="12" height="10" rx="3" fill="#FFD0F0" opacity="0.6"/>
+      <rect x="264" y="186" width="12" height="10" rx="3" fill="#FFFF80" opacity="0.5"/>
+      <rect x="282" y="186" width="12" height="10" rx="3" fill="#FFD0F0" opacity="0.7"/>
+      <rect x="264" y="202" width="12" height="10" rx="3" fill="#FFD0F0" opacity="0.8"/>
+      <rect x="282" y="202" width="12" height="10" rx="3" fill="#FFFF80" opacity="0.6"/>
+      <!-- Building 7 (orange, right) -->
+      <rect x="304" y="188" width="62" height="182" rx="6" fill="#FF7020"/>
+      <rect x="304" y="176" width="62" height="16" rx="4" fill="#FF8838"/>
+      <rect x="310" y="193" width="13" height="10" rx="3" fill="#FFE8A0" opacity="0.7"/>
+      <rect x="329" y="193" width="13" height="10" rx="3" fill="#FFE8A0" opacity="0.5"/>
+      <rect x="348" y="193" width="13" height="10" rx="3" fill="#FFE8A0" opacity="0.7"/>
+      <rect x="310" y="209" width="13" height="10" rx="3" fill="#FFE8A0" opacity="0.8"/>
+      <rect x="329" y="209" width="13" height="10" rx="3" fill="#FFE8A0" opacity="0.6"/>
+      <!-- Sidewalk / road (cheerful) -->
+      <rect x="0" y="354" width="366" height="16" fill="#D0C8C0"/>
+      <!-- Cute sidewalk pattern -->
+      <rect x="0" y="354" width="60" height="16" rx="2" fill="#D8D0C8"/>
+      <rect x="62" y="354" width="60" height="16" rx="2" fill="#C8C0B8"/>
+      <rect x="124" y="354" width="60" height="16" rx="2" fill="#D8D0C8"/>
+      <rect x="186" y="354" width="60" height="16" rx="2" fill="#C8C0B8"/>
+      <rect x="248" y="354" width="60" height="16" rx="2" fill="#D8D0C8"/>
+      <rect x="310" y="354" width="56" height="16" rx="2" fill="#C8C0B8"/>
+      <!-- Cute upward arrow chart in sky -->
+      <polyline points="28,118 60,100 92,108 124,86 156,94 188,72 220,80 252,62 284,70 316,52 348,60" fill="none" stroke="#00E0B0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+      <polygon points="344,50 354,64 336,60" fill="#00E0B0" opacity="0.5"/>
+    </svg>
+
+    <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);
+      background:white;border-radius:100px;padding:7px 20px;
+      font-family:'Fredoka One',cursive;font-size:14px;color:#6040C0;
+      border:2px solid rgba(96,64,192,0.2);
+      box-shadow:0 4px 0 rgba(96,64,192,0.12), 0 8px 20px rgba(0,0,0,0.1);
+      display:flex;align-items:center;gap:8px;white-space:nowrap;z-index:30">
+      🏙 Stock Market Street
+      <span style="font-size:10px;background:#F0E8FF;color:#6040C0;border-radius:100px;padding:2px 8px;font-family:'Nunito',sans-serif;font-weight:900">Lv 16–25</span>
+    </div>
+
+    <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:10" viewBox="0 0 366 370">
+      <path d="M183,362 Q113,334 104,288 Q96,252 142,234 Q192,218 246,254 Q282,280 258,322" fill="none" stroke="white" stroke-width="10" stroke-opacity="0.2" stroke-linecap="round"/>
+      <path d="M183,362 Q113,334 104,288 Q96,252 142,234 Q192,218 246,254 Q282,280 258,322" fill="none" stroke="#B060FF" stroke-width="3.5" stroke-opacity="0.7" stroke-dasharray="14 10" stroke-linecap="round" style="animation:pathDash 1.5s linear infinite"/>
+    </svg>
+
+    <div class="node node-locked node-boss" style="left:183px;top:330px;border-color:#E840A0;background:linear-gradient(160deg,#F060B8,#C02880)">
+      <span class="node-boss-icon">📊</span>
+    </div>
+    <div class="node node-locked" style="left:254px;top:270px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:106px;top:234px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:248px;top:190px"><span class="node-lock">🔒</span></div>
+    <div class="node node-locked" style="left:112px;top:150px"><span class="node-lock">🔒</span></div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════════╗ -->
+  <!-- ║  ZONE 2 — DOLLAR DUNES  (Lv 11-15)         ║ -->
+  <!-- ║  Theme: Bright warm desert, fun cacti        ║ -->
+  <!-- ╚══════════════════════════════════════════════╝ -->
+  <div class="zone" style="height:370px">
+    <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 366 370" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#FFB830"/>
+          <stop offset="50%" stop-color="#FFD870"/>
+          <stop offset="100%" stop-color="#FFEC90"/>
+        </linearGradient>
+      </defs>
+      <rect width="366" height="370" fill="url(#sky2)"/>
+      <!-- Big bright sun -->
+      <circle cx="296" cy="68" r="50" fill="#FFE040" opacity="0.25"/>
+      <circle cx="296" cy="68" r="38" fill="#FFE840" opacity="0.4"/>
+      <circle cx="296" cy="68" r="28" fill="#FFF060" opacity="0.7"/>
+      <circle cx="296" cy="68" r="20" fill="#FFF880" opacity="0.9"/>
+      <!-- Cute clouds -->
+      <g opacity="0.85" style="animation:cloudDrift 12s ease-in-out infinite alternate">
+        <ellipse cx="90" cy="75" rx="48" ry="28" fill="white"/>
+        <ellipse cx="66" cy="83" rx="34" ry="24" fill="white"/>
+        <ellipse cx="114" cy="85" rx="36" ry="22" fill="white"/>
+      </g>
+      <!-- Sandy dunes (warm, bright) -->
+      <path d="M0,370 Q40,300 100,330 Q160,358 220,310 Q280,270 340,306 Q354,312 366,308 L366,370 Z" fill="#F0B820"/>
+      <path d="M0,370 Q60,318 140,340 Q220,360 300,330 Q340,320 366,328 L366,370 Z" fill="#F8C838"/>
+      <path d="M0,370 Q80,340 180,354 Q280,368 366,348 L366,370 Z" fill="#FFD858"/>
+      <!-- COLORFUL CACTI WITH COINS! -->
+      <!-- Cactus 1 -->
+      <rect x="44" y="238" width="18" height="110" rx="8" fill="#28A840"/>
+      <rect x="18" y="260" width="42" height="16" rx="8" fill="#28A840"/>
+      <rect x="48" y="285" width="38" height="16" rx="8" fill="#28A840"/>
+      <!-- Cactus spines -->
+      <line x1="44" y1="248" x2="36" y2="244" stroke="#20903A" stroke-width="2"/>
+      <line x1="62" y1="252" x2="70" y2="248" stroke="#20903A" stroke-width="2"/>
+      <line x1="44" y1="268" x2="36" y2="264" stroke="#20903A" stroke-width="2"/>
+      <line x1="62" y1="272" x2="70" y2="268" stroke="#20903A" stroke-width="2"/>
+      <!-- COINS on cactus arms! -->
+      <g style="animation:coinBob 2s ease-in-out infinite">
+        <circle cx="18" cy="258" r="12" fill="#C8900A"/><circle cx="18" cy="256" r="12" fill="#F5C518"/>
+        <circle cx="18" cy="256" r="9" fill="#FFD740"/>
+        <text x="18" y="260" text-anchor="middle" font-size="10" fill="#9A6800" font-weight="900" font-family="Arial">$</text>
+      </g>
+      <g style="animation:coinBob 1.7s ease-in-out infinite 0.5s">
+        <circle cx="86" cy="284" r="10" fill="#C8900A"/><circle cx="86" cy="282" r="10" fill="#F5C518"/>
+        <circle cx="86" cy="282" r="7" fill="#FFD740"/>
+        <text x="86" y="286" text-anchor="middle" font-size="9" fill="#9A6800" font-weight="900" font-family="Arial">$</text>
+      </g>
+      <!-- Cactus 2 (right, taller) -->
+      <rect x="296" y="218" width="20" height="130" rx="9" fill="#30C050"/>
+      <rect x="268" y="242" width="44" height="16" rx="8" fill="#30C050"/>
+      <rect x="300" y="270" width="40" height="16" rx="8" fill="#30C050"/>
+      <!-- Cactus spines -->
+      <line x1="296" y1="228" x2="287" y2="224" stroke="#28A840" stroke-width="2"/>
+      <line x1="316" y1="232" x2="325" y2="228" stroke="#28A840" stroke-width="2"/>
+      <!-- Coins on cactus 2 -->
+      <g style="animation:coinBob 2.3s ease-in-out infinite 0.3s">
+        <circle cx="268" cy="240" r="12" fill="#C8900A"/><circle cx="268" cy="238" r="12" fill="#F5C518"/>
+        <circle cx="268" cy="238" r="9" fill="#FFD740"/>
+        <text x="268" y="242" text-anchor="middle" font-size="10" fill="#9A6800" font-weight="900" font-family="Arial">$</text>
+      </g>
+      <g style="animation:coinBob 1.9s ease-in-out infinite 0.9s">
+        <circle cx="340" cy="270" r="10" fill="#C8900A"/><circle cx="340" cy="268" r="10" fill="#F5C518"/>
+        <circle cx="340" cy="268" r="7" fill="#FFD740"/>
+        <text x="340" y="272" text-anchor="middle" font-size="9" fill="#9A6800" font-weight="900" font-family="Arial">$</text>
+      </g>
+      <!-- PIGGY BANK (completed zone landmark!) -->
+      <ellipse cx="183" cy="270" rx="38" ry="32" fill="#FFB0D0"/>
+      <ellipse cx="183" cy="268" rx="34" ry="28" fill="#FFC8E0"/>
+      <circle cx="204" cy="260" r="12" fill="#FFC8E0"/>
+      <!-- Pig eyes -->
+      <circle cx="178" cy="260" r="5" fill="white"/>
+      <circle cx="190" cy="260" r="5" fill="white"/>
+      <circle cx="179" cy="261" r="3" fill="#3A2010"/>
+      <circle cx="191" cy="261" r="3" fill="#3A2010"/>
+      <circle cx="180" cy="260" r="1.5" fill="white"/>
+      <circle cx="192" cy="260" r="1.5" fill="white"/>
+      <!-- Pig nose -->
+      <ellipse cx="196" cy="265" rx="7" ry="5" fill="#FFAAC8"/>
+      <circle cx="193" cy="265" r="2" fill="#FF88B0" opacity="0.7"/>
+      <circle cx="199" cy="265" r="2" fill="#FF88B0" opacity="0.7"/>
+      <!-- Coin slot -->
+      <rect x="175" y="242" width="16" height="5" rx="2" fill="#E090B8"/>
+      <!-- Gold coin going in! -->
+      <ellipse cx="183" cy="240" rx="8" ry="5" fill="#F5C518" style="animation:coinBob 1.5s ease-in-out infinite"/>
+      <!-- Pig ears -->
+      <ellipse cx="162" cy="246" rx="11" ry="14" fill="#FFB0D0" transform="rotate(-20,162,246)"/>
+      <ellipse cx="162" cy="246" rx="7" ry="9" fill="#FFC8E0" transform="rotate(-20,162,246)"/>
+      <!-- Pig legs -->
+      <rect x="160" y="296" width="12" height="16" rx="6" fill="#FFB0D0"/>
+      <rect x="178" y="298" width="12" height="16" rx="6" fill="#FFB0D0"/>
+      <rect x="196" y="296" width="12" height="16" rx="6" fill="#FFB0D0"/>
+      <!-- Label -->
+      <rect x="152" y="317" width="62" height="16" rx="6" fill="white" opacity="0.7"/>
+      <text x="183" y="328" text-anchor="middle" font-size="9" fill="#E070A8" font-family="'Fredoka One',cursive">Savings Bank!</text>
+    </svg>
+
+    <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);
+      background:white;border-radius:100px;padding:7px 20px;
+      font-family:'Fredoka One',cursive;font-size:14px;color:#D08000;
+      border:2px solid rgba(208,128,0,0.2);
+      box-shadow:0 4px 0 rgba(208,128,0,0.12), 0 8px 20px rgba(0,0,0,0.1);
+      display:flex;align-items:center;gap:8px;white-space:nowrap;z-index:30">
+      🏜 Dollar Dunes
+      <span style="font-size:10px;background:#FFF3D0;color:#D08000;border-radius:100px;padding:2px 8px;font-family:'Nunito',sans-serif;font-weight:900">Lv 11–15</span>
+    </div>
+
+    <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:10" viewBox="0 0 366 370">
+      <path d="M183,362 Q112,335 103,288 Q96,252 142,234 Q190,218 245,255 Q282,280 256,322" fill="none" stroke="white" stroke-width="10" stroke-opacity="0.3" stroke-linecap="round"/>
+      <path d="M183,362 Q112,335 103,288 Q96,252 142,234 Q190,218 245,255 Q282,280 256,322" fill="none" stroke="#FFE040" stroke-width="4" stroke-opacity="0.8" stroke-dasharray="14 10" stroke-linecap="round" style="animation:pathDash 1.5s linear infinite"/>
+    </svg>
+
+    <!-- COMPLETED NODES (zone 2) -->
+    <div class="node node-done" style="left:183px;top:330px" onclick="openPopup('Level 15','Boss Battle! 🐻','Beat the Tax Monster to unlock Zone 3!','🎁 300 XP + 💎 Crystal Gem',true,'#E08820')">
+      <span class="node-num">15</span>
+      <div class="node-stars"><span class="star-on">★</span><span class="star-on">★</span><span class="star-off">★</span></div>
+    </div>
+    <div class="node node-done" style="left:254px;top:270px" onclick="openPopup('Level 13','Risk & Return 📊','Learn how risk and reward are related!','🎁 150 XP + 🪙 Coins',false,'#E08820')">
+      <span class="node-num">13</span>
+      <div class="node-stars"><span class="star-on">★</span><span class="star-on">★</span><span class="star-on">★</span></div>
+    </div>
+    <div class="node node-done" style="left:106px;top:234px" onclick="openPopup('Level 11','Savings Power 💰','Master the magic of compound interest!','🎁 120 XP + 🪙 Coins',false,'#E08820')">
+      <span class="node-num">11</span>
+      <div class="node-stars"><span class="star-on">★</span><span class="star-on">★</span><span class="star-on">★</span></div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════════╗ -->
+  <!-- ║  ZONE 1 — PENNY PLAINS  (Lv 1-10)          ║ -->
+  <!-- ║  Theme: Bright sunny green meadow, start!    ║ -->
+  <!-- ╚══════════════════════════════════════════════╝ -->
+  <div class="zone" style="height:420px">
+    <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 366 420" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="sky1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#60D0FF"/>
+          <stop offset="50%" stop-color="#98E8FF"/>
+          <stop offset="100%" stop-color="#C8F4FF"/>
+        </linearGradient>
+      </defs>
+      <rect width="366" height="420" fill="url(#sky1)"/>
+      <!-- BIG happy sun! -->
+      <circle cx="60" cy="70" r="48" fill="#FFE040" opacity="0.2"/>
+      <circle cx="60" cy="70" r="36" fill="#FFE840" opacity="0.35"/>
+      <circle cx="60" cy="70" r="26" fill="#FFF060" opacity="0.6"/>
+      <circle cx="60" cy="70" r="18" fill="#FFF880" opacity="0.9"/>
+      <!-- Sun face (kawaii sun!) -->
+      <circle cx="54" cy="65" r="3" fill="#F0A020"/>
+      <circle cx="66" cy="65" r="3" fill="#F0A020"/>
+      <path d="M52,72 Q60,78 68,72" stroke="#F0A020" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- Sun rays -->
+      <line x1="60" y1="38" x2="60" y2="26" stroke="#FFE040" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+      <line x1="85" y1="45" x2="93" y2="37" stroke="#FFE040" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+      <line x1="96" y1="70" x2="108" y2="70" stroke="#FFE040" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+      <line x1="35" y1="45" x2="27" y2="37" stroke="#FFE040" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+      <line x1="24" y1="70" x2="12" y2="70" stroke="#FFE040" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+      <!-- Fluffy clouds -->
+      <g style="animation:cloudDrift 11s ease-in-out infinite alternate">
+        <ellipse cx="240" cy="70" rx="52" ry="30" fill="white" opacity="0.95"/>
+        <ellipse cx="214" cy="80" rx="36" ry="26" fill="white" opacity="0.95"/>
+        <ellipse cx="266" cy="82" rx="40" ry="24" fill="white" opacity="0.95"/>
+        <ellipse cx="240" cy="88" rx="48" ry="17" fill="white" opacity="0.95"/>
+      </g>
+      <!-- ROLLING GREEN HILLS -->
+      <path d="M0,420 Q40,340 100,368 Q160,394 220,350 Q280,312 340,348 Q355,355 366,348 L366,420 Z" fill="#30C050"/>
+      <path d="M0,420 Q60,354 140,374 Q220,393 300,360 Q338,346 366,360 L366,420 Z" fill="#40D864"/>
+      <path d="M0,420 Q80,370 180,386 Q280,401 366,376 L366,420 Z" fill="#60E880"/>
+      <!-- CUTE FLOWERS! -->
+      <!-- Flower 1 -->
+      <circle cx="30" cy="365" r="3" fill="#FF6060"/><circle cx="36" cy="362" r="3" fill="#FF6060"/>
+      <circle cx="33" cy="357" r="3" fill="#FF6060"/><circle cx="27" cy="360" r="3" fill="#FF6060"/>
+      <circle cx="33" cy="361" r="5" fill="#FFE040"/>
+      <rect x="32" y="365" width="3" height="14" rx="1" fill="#30A840"/>
+      <!-- Flower 2 -->
+      <circle cx="88" cy="372" r="3" fill="#FF90C0"/><circle cx="94" cy="369" r="3" fill="#FF90C0"/>
+      <circle cx="91" cy="364" r="3" fill="#FF90C0"/><circle cx="85" cy="367" r="3" fill="#FF90C0"/>
+      <circle cx="91" cy="368" r="5" fill="#FFE040"/>
+      <rect x="90" y="372" width="3" height="12" rx="1" fill="#30A840"/>
+      <!-- Flower 3 -->
+      <circle cx="270" cy="368" r="3" fill="#B050FF"/><circle cx="276" cy="365" r="3" fill="#B050FF"/>
+      <circle cx="273" cy="360" r="3" fill="#B050FF"/><circle cx="267" cy="363" r="3" fill="#B050FF"/>
+      <circle cx="273" cy="364" r="5" fill="#FFE040"/>
+      <rect x="272" y="368" width="3" height="14" rx="1" fill="#30A840"/>
+      <!-- Flower 4 -->
+      <circle cx="330" cy="373" r="3" fill="#FF6060"/><circle cx="336" cy="370" r="3" fill="#FF6060"/>
+      <circle cx="333" cy="365" r="3" fill="#FF6060"/><circle cx="327" cy="368" r="3" fill="#FF6060"/>
+      <circle cx="333" cy="369" r="5" fill="#FFE040"/>
+      <rect x="332" y="373" width="3" height="12" rx="1" fill="#30A840"/>
+      <!-- Scattered coins on grass -->
+      <circle cx="148" cy="369" r="8" fill="#C8900A"/><circle cx="148" cy="367" r="8" fill="#F5C518"/>
+      <text x="148" y="371" text-anchor="middle" font-size="8" fill="#9A6800" font-weight="900" font-family="Arial">$</text>
+      <circle cx="220" cy="374" r="7" fill="#C8900A"/><circle cx="220" cy="372" r="7" fill="#F5C518"/>
+      <text x="220" y="376" text-anchor="middle" font-size="7" fill="#9A6800" font-weight="900" font-family="Arial">$</text>
+      <!-- START SIGN (big, fun, colorful!) -->
+      <!-- Sign post -->
+      <rect x="166" y="290" width="10" height="80" rx="4" fill="#8B5E3C"/>
+      <!-- Sign board (bouncy rounded rectangle) -->
+      <rect x="126" y="260" width="114" height="42" rx="14" fill="#FF5090"/>
+      <rect x="126" y="260" width="114" height="42" rx="14" fill="none" stroke="white" stroke-width="3"/>
+      <rect x="130" y="264" width="106" height="34" rx="11" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+      <text x="183" y="286" text-anchor="middle" font-size="20" font-family="'Fredoka One',cursive" fill="white">🚀 START!</text>
+      <!-- Arrow pointing up from sign -->
+      <polygon points="183,255 193,265 173,265" fill="white"/>
+      <!-- Small decorative flags on sign post -->
+      <polygon points="176,295 194,300 176,305" fill="#F5C518" style="animation:wavingFlag 2.5s ease-in-out infinite"/>
+      <!-- Rainbow arch in sky (greeting new players!) -->
+      <path d="M18,200 Q183,80 348,200" fill="none" stroke="#FF6060" stroke-width="7" opacity="0.18"/>
+      <path d="M26,204 Q183,92 340,204" fill="none" stroke="#FF9030" stroke-width="7" opacity="0.18"/>
+      <path d="M34,208 Q183,104 332,208" fill="none" stroke="#FFE040" stroke-width="7" opacity="0.18"/>
+      <path d="M42,212 Q183,116 324,212" fill="none" stroke="#40D840" stroke-width="7" opacity="0.18"/>
+      <path d="M50,216 Q183,128 316,216" fill="none" stroke="#40B0FF" stroke-width="7" opacity="0.18"/>
+      <path d="M58,220 Q183,140 308,220" fill="none" stroke="#A040FF" stroke-width="7" opacity="0.18"/>
+    </svg>
+
+    <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);
+      background:white;border-radius:100px;padding:7px 20px;
+      font-family:'Fredoka One',cursive;font-size:14px;color:#20A040;
+      border:2px solid rgba(32,160,64,0.2);
+      box-shadow:0 4px 0 rgba(32,160,64,0.12), 0 8px 20px rgba(0,0,0,0.1);
+      display:flex;align-items:center;gap:8px;white-space:nowrap;z-index:30">
+      🌱 Penny Plains
+      <span style="font-size:10px;background:#E0FFF0;color:#20A040;border-radius:100px;padding:2px 8px;font-family:'Nunito',sans-serif;font-weight:900">Lv 1–10</span>
+    </div>
+
+    <!-- PATH -->
+    <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:10" viewBox="0 0 366 420">
+      <path d="M255,410 Q183,390 115,370 Q176,350 258,330 Q183,312 108,295 Q183,275 262,255 Q183,235 108,215 Q183,195 255,178" fill="none" stroke="white" stroke-width="10" stroke-opacity="0.3" stroke-linecap="round"/>
+      <path d="M255,410 Q183,390 115,370 Q176,350 258,330 Q183,312 108,295 Q183,275 262,255 Q183,235 108,215 Q183,195 255,178" fill="none" stroke="#60E880" stroke-width="4" stroke-opacity="0.8" stroke-dasharray="14 10" stroke-linecap="round" style="animation:pathDash 1.5s linear infinite"/>
+    </svg>
+
+    <!-- PLAYER MARKER on Level 8 -->
+    <div class="player" style="left:262px;top:255px">
+      <svg viewBox="0 0 60 70" width="48">
+        <path d="M22,22 Q18,14 20,10 Q21,8 22,14 Q18,17 22,22" fill="#EDD88A"/>
+        <path d="M38,22 Q42,14 40,10 Q39,8 38,14 Q42,17 38,22" fill="#EDD88A"/>
+        <circle cx="12" cy="32" r="7" fill="#F0A848"/><circle cx="12" cy="32" r="4" fill="#F8B858"/>
+        <circle cx="48" cy="32" r="7" fill="#F0A848"/><circle cx="48" cy="32" r="4" fill="#F8B858"/>
+        <circle cx="30" cy="32" r="24" fill="#F0A848"/>
+        <ellipse cx="22" cy="28" rx="9" ry="10" fill="white"/>
+        <ellipse cx="38" cy="28" rx="9" ry="10" fill="white"/>
+        <circle cx="23" cy="30" r="6" fill="#2D1000"/><circle cx="39" cy="30" r="6" fill="#2D1000"/>
+        <circle cx="24" cy="31" r="3.5" fill="#080200"/><circle cx="40" cy="31" r="3.5" fill="#080200"/>
+        <circle cx="26" cy="26" r="3.5" fill="white"/><circle cx="42" cy="26" r="3.5" fill="white"/>
+        <ellipse cx="30" cy="40" rx="9" ry="7" fill="#F8C098"/>
+        <path d="M21,47 Q30,55 39,47" stroke="#C87040" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <ellipse cx="30" cy="60" rx="18" ry="11" fill="#5A88D8"/>
+        <rect x="18" y="12" width="24" height="8" rx="4" fill="#1A2856"/>
+        <rect x="13" y="19" width="34" height="5" rx="3" fill="#1A2856"/>
+        <rect x="18" y="19" width="24" height="2.5" fill="#F5C518"/>
+      </svg>
+      <div class="player-pin"></div>
+    </div>
+
+    <!-- Level nodes — Zone 1 -->
+    <div class="node node-done" style="left:255px;top:410px" onclick="openPopup('Level 10','BOSS: Market Bear 🐻','Survive the market crash to advance!','🎁 250 XP + 🏆 Trophy',true,'#20A040')">
+      <span class="node-num">10</span>
+      <div class="node-stars"><span class="star-on">★</span><span class="star-on">★</span><span class="star-off">★</span></div>
+    </div>
+    <div class="node node-done" style="left:108px;top:370px" onclick="openPopup('Level 9','Portfolio Mix 🎨','Balance your first virtual portfolio!','🎁 100 XP + 🪙 Coins',false,'#20A040')">
+      <span class="node-num">9</span>
+      <div class="node-stars"><span class="star-on">★</span><span class="star-on">★</span><span class="star-on">★</span></div>
+    </div>
+    <div class="node node-current" style="left:262px;top:255px" onclick="openPopup('Level 8 ⚡','Buy Low, Sell High! 📈','Learn market timing and entry points!','🎁 80 XP + 🪙 Coins',false,'#20A040')">
+      <span class="node-num-gold">8</span>
+      <div class="node-stars"><span class="star-on">★</span><span class="star-on">★</span><span class="star-on">★</span></div>
+    </div>
+    <div class="node node-done" style="left:108px;top:295px" onclick="openPopup('Level 7','Diversification 🌈','Don\'t put all eggs in one basket!','🎁 75 XP + 🪙 Coins',false,'#20A040')">
+      <span class="node-num">7</span>
+      <div class="node-stars"><span class="star-on">★</span><span class="star-on">★</span><span class="star-on">★</span></div>
+    </div>
+    <div class="node node-done" style="left:258px;top:217px" onclick="openPopup('Level 5','Stock Basics 📊','Buy your first virtual share!','🎁 60 XP + 🪙 Coins',false,'#20A040')">
+      <span class="node-num">5</span>
+      <div class="node-stars"><span class="star-on">★</span><span class="star-on">★</span><span class="star-off">★</span></div>
+    </div>
+    <div class="node node-done" style="left:110px;top:178px" onclick="openPopup('Level 3','Money Basics 💡','What is investing and why it matters!','🎁 40 XP + 🪙 Coins',false,'#20A040')">
+      <span class="node-num">3</span>
+      <div class="node-stars"><span class="star-on">★</span><span class="star-on">★</span><span class="star-on">★</span></div>
+    </div>
+    <div class="node node-done" style="left:255px;top:140px" onclick="openPopup('Level 1','First Steps! 🎉','Welcome to InvestQuest! Let\'s begin!','🎁 20 XP + 🥉 Bronze Badge',false,'#20A040')">
+      <span class="node-num">1</span>
+      <div class="node-stars"><span class="star-on">★</span><span class="star-on">★</span><span class="star-on">★</span></div>
+    </div>
+
+  </div><!-- end zone 1 -->
+  </div><!-- end map-canvas -->
+  </div><!-- end map-scroll -->
+
+  <!-- LEVEL POPUP (bottom sheet) -->
+  <div class="zone-popup" id="popup">
+    <div class="popup-strip" id="popupStrip"></div>
+    <div class="popup-body">
+      <button class="popup-close" onclick="closePopup()">✕</button>
+      <div class="popup-title" id="popupTitle"></div>
+      <div class="popup-sub" id="popupSub"></div>
+      <div class="popup-desc" id="popupDesc"></div>
+      <div class="popup-footer">
+        <div class="popup-reward" id="popupReward"></div>
+        <button class="popup-btn" id="popupBtn" onclick="closePopup()"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="nav">
+    <div class="nav-btn active">
+      <div class="nav-icon">🗺</div>
+      <div class="nav-label">Map</div>
+    </div>
+    <div class="nav-btn">
+      <div class="nav-icon">📊</div>
+      <div class="nav-label">Portfolio</div>
+    </div>
+    <div class="nav-btn">
+      <div class="nav-icon">🐂</div>
+      <div class="nav-label">Mascot</div>
+    </div>
+    <div class="nav-btn">
+      <div class="nav-icon">🏆</div>
+      <div class="nav-label">Ranks</div>
+    </div>
+    <div class="nav-btn">
+      <div class="nav-icon">👤</div>
+      <div class="nav-label">Profile</div>
+    </div>
+  </div>
+
+</div><!-- end phone -->
+
+<!-- ZONE LEGEND -->
+<div style="max-width:900px;width:100%;margin-top:52px">
+  <div style="text-align:center;margin-bottom:28px">
+    <div style="font-size:11px;font-weight:900;letter-spacing:4px;text-transform:uppercase;color:#FFB830;margin-bottom:8px">8 Unique Worlds to Conquer</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:32px;color:white">Color Concept per Zone</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px">
+    <div style="background:linear-gradient(135deg,#60D0FF,#98E8FF);border-radius:18px;padding:18px 16px">
+      <div style="font-size:26px;margin-bottom:6px">🌱</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#006A20">Penny Plains</div>
+      <div style="font-size:10px;font-weight:900;color:#008830;letter-spacing:1.5px;text-transform:uppercase;margin:3px 0">Lv 1–10 · Sky Blue + Green</div>
+      <div style="font-size:11px;color:#005A18">Bright meadow, rainbow, flowers, gentle start</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#FFB830,#FFD870);border-radius:18px;padding:18px 16px">
+      <div style="font-size:26px;margin-bottom:6px">🏜</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#7A4000">Dollar Dunes</div>
+      <div style="font-size:10px;font-weight:900;color:#9A5000;letter-spacing:1.5px;text-transform:uppercase;margin:3px 0">Lv 11–15 · Warm Gold</div>
+      <div style="font-size:11px;color:#7A4000">Sunny desert, coin cacti, piggy bank</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#60C8FF,#A8E0FF);border-radius:18px;padding:18px 16px">
+      <div style="font-size:26px;margin-bottom:6px">🏙</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#3030A0">Stock Market St.</div>
+      <div style="font-size:10px;font-weight:900;color:#4040B0;letter-spacing:1.5px;text-transform:uppercase;margin:3px 0">Lv 16–25 · Rainbow City</div>
+      <div style="font-size:11px;color:#3030A0">Colorful skyscrapers, neon tickers, daytime</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#38C8FF,#70DEFF);border-radius:18px;padding:18px 16px">
+      <div style="font-size:26px;margin-bottom:6px">🌊</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#0050A0">Bond Bay</div>
+      <div style="font-size:10px;font-weight:900;color:#0060B0;letter-spacing:1.5px;text-transform:uppercase;margin:3px 0">Lv 26–35 · Ocean Blue</div>
+      <div style="font-size:11px;color:#003A80">Tropical ocean, sailboat, treasure chests</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#FFA040,#FFD870);border-radius:18px;padding:18px 16px">
+      <div style="font-size:26px;margin-bottom:6px">🏛</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#7A4800">ETF Empire</div>
+      <div style="font-size:10px;font-weight:900;color:#9A5800;letter-spacing:1.5px;text-transform:uppercase;margin:3px 0">Lv 36–45 · Ancient Gold</div>
+      <div style="font-size:11px;color:#7A4800">Desert temple, columns, gold flags</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#60D0FF,#A0F8D0);border-radius:18px;padding:18px 16px">
+      <div style="font-size:26px;margin-bottom:6px">🌿</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#006820">Dividend Valley</div>
+      <div style="font-size:10px;font-weight:900;color:#008828;letter-spacing:1.5px;text-transform:uppercase;margin:3px 0">Lv 46–60 · Lush Green</div>
+      <div style="font-size:11px;color:#005818">Money trees, rainbow, coin rain</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#0E0830,#2A1870);border-radius:18px;padding:18px 16px">
+      <div style="font-size:26px;margin-bottom:6px">🏔</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#C8A8FF">Crypto Peaks</div>
+      <div style="font-size:10px;font-weight:900;color:#A888E8;letter-spacing:1.5px;text-transform:uppercase;margin:3px 0">Lv 61–70 · Cosmic Purple</div>
+      <div style="font-size:11px;color:#9878D8">Night sky, crystal mountains, moon</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#FF6B35,#FFD090);border-radius:18px;padding:18px 16px">
+      <div style="font-size:26px;margin-bottom:6px">🐉</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#8A2800">Dragon's Vault</div>
+      <div style="font-size:10px;font-weight:900;color:#AA3800;letter-spacing:1.5px;text-transform:uppercase;margin:3px 0">Lv 71+ · Volcano Sunrise</div>
+      <div style="font-size:11px;color:#8A2800">Warm volcano, gold coins, treasure chests</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Auto-scroll to show Zone 1 (current player zone) on load
+window.addEventListener('load',()=>{
+  const s=document.getElementById('mapScroll')
+  const c=document.getElementById('mapCanvas')
+  setTimeout(()=>{s.scrollTop=c.scrollHeight-s.clientHeight-60},300)
+})
+
+function openPopup(title,sub,desc,reward,isBoss,color){
+  const p=document.getElementById('popup')
+  document.getElementById('popupTitle').textContent=title
+  document.getElementById('popupTitle').style.color=isBoss?'#E05020':color||'#2A1A06'
+  document.getElementById('popupSub').textContent=sub
+  document.getElementById('popupDesc').textContent=desc
+  document.getElementById('popupReward').textContent=reward
+  const strip=document.getElementById('popupStrip')
+  strip.style.background=isBoss
+    ?'linear-gradient(90deg,#FF5020,#FF8040,#FF5020)'
+    :`linear-gradient(90deg,${color||'#20A040'},${color||'#40D860'},${color||'#20A040'})`
+  const btn=document.getElementById('popupBtn')
+  btn.textContent=isBoss?'⚔️ Fight Boss!':'▶ Play!'
+  btn.style.background=isBoss
+    ?'linear-gradient(135deg,#CC3010,#FF5030)'
+    :'linear-gradient(135deg,#20C050,#40E870)'
+  btn.style.color='white'
+  btn.style.boxShadow=isBoss?'0 4px 0 #991000':'0 4px 0 #159030'
+  p.style.display='block'
+}
+function closePopup(){document.getElementById('popup').style.display='none'}
+document.getElementById('mapScroll').addEventListener('scroll',closePopup)
+
+document.querySelectorAll('.nav-btn').forEach(b=>{
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'))
+    this.classList.add('active')
+  })
+})
+</script>
+
+</body>
+</html>

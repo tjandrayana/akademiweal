@@ -1,0 +1,377 @@
+/* InvestQuest profile — tokens from @theme (index.css) */
+
+.profile-iq {
+  --iq-navy: var(--color-iq-navy);
+  --iq-navy2: var(--color-iq-navy-mid);
+  --iq-gold: var(--color-iq-gold-bright);
+  --iq-gold2: var(--color-iq-gold-soft);
+  --iq-teal: var(--color-iq-teal);
+  --iq-cream: var(--color-iq-cream);
+  --iq-muted: var(--color-iq-muted-blue);
+  --iq-slate: var(--color-iq-slate);
+  font-family: 'Nunito', sans-serif;
+}
+
+.profile-iq-sub {
+  font-size: 12px;
+  color: var(--color-iq-hint);
+  margin-top: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+.profile-iq-tag {
+  display: inline-block;
+  margin-top: 12px;
+  background: color-mix(in srgb, var(--color-iq-teal) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-iq-teal) 30%, transparent);
+  color: var(--color-iq-teal);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-weight: 800;
+}
+
+/* Mascot stage */
+.profile-iq-stage-wrap {
+  padding: 0 16px 20px;
+  background: var(--color-iq-navy);
+}
+.profile-iq-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  background: var(--color-iq-navy-mid);
+  border-radius: 24px;
+  border: 1px solid rgba(245, 197, 24, 0.15);
+  padding: 28px 20px 32px;
+  overflow: hidden;
+}
+.profile-iq-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 40% 40%, rgba(196, 129, 58, 0.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+.profile-iq-stage::after {
+  content: '';
+  position: absolute;
+  width: min(280px, 90vw);
+  height: 280px;
+  border-radius: 50%;
+  border: 1px solid rgba(245, 197, 24, 0.06);
+  top: 45%;
+  left: 42%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.profile-iq-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.profile-iq-stage-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.profile-iq-char-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(32px, 10vw, 44px);
+  color: var(--iq-gold);
+  line-height: 1;
+  text-align: center;
+}
+.profile-iq-char-sub {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-iq-hint);
+  font-weight: 800;
+  margin-top: 6px;
+  text-align: center;
+}
+.profile-iq-char-desc {
+  font-size: 13px;
+  color: var(--iq-slate);
+  line-height: 1.65;
+  text-align: center;
+  max-width: 300px;
+  margin-top: 8px;
+}
+
+.profile-iq-stat-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--iq-muted);
+  margin-bottom: 6px;
+}
+.profile-iq-stat-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.profile-iq-stat-fill-gold {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(
+    90deg,
+    var(--color-gold),
+    var(--color-iq-gold-bright),
+    var(--color-iq-gold-soft)
+  );
+  transition: width 0.8s ease;
+}
+.profile-iq-stat-fill-teal {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, var(--color-iq-teal-dark), var(--color-iq-teal));
+  transition: width 0.8s ease;
+}
+
+.profile-iq-trait-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 16px;
+}
+.profile-iq-chip {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 100px;
+  border: 1px solid;
+}
+.profile-iq-chip-gold {
+  color: var(--iq-gold);
+  border-color: rgba(245, 197, 24, 0.35);
+  background: rgba(245, 197, 24, 0.08);
+}
+.profile-iq-chip-teal {
+  color: var(--iq-teal);
+  border-color: rgba(0, 200, 150, 0.35);
+  background: rgba(0, 200, 150, 0.08);
+}
+
+/* Evolution timeline */
+.profile-iq-timeline-wrap {
+  background: var(--color-iq-navy);
+  padding: 8px 12px 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.profile-iq-timeline-wrap::-webkit-scrollbar {
+  display: none;
+}
+.profile-iq-timeline {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  min-width: min-content;
+  padding: 8px 4px;
+}
+.profile-iq-evo-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: default;
+  flex-shrink: 0;
+}
+
+button.profile-iq-evo-node {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+button.profile-iq-evo-node:hover {
+  filter: brightness(1.12);
+}
+button.profile-iq-evo-node:focus-visible {
+  outline: 2px solid var(--color-iq-teal);
+  outline-offset: 4px;
+  border-radius: 14px;
+}
+.profile-iq-evo-dot {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 14px;
+  border: 3px solid;
+  transition: transform 0.2s;
+  position: relative;
+}
+.profile-iq-evo-dot::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.profile-iq-evo-node.active .profile-iq-evo-dot {
+  transform: scale(1.08);
+}
+.profile-iq-evo-node.active .profile-iq-evo-dot::after {
+  opacity: 1;
+}
+.profile-iq-evo-name {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 8px;
+  color: #4a6a9a;
+  max-width: 72px;
+  text-align: center;
+  line-height: 1.2;
+}
+.profile-iq-evo-node.active .profile-iq-evo-name {
+  color: var(--iq-cream);
+}
+.profile-iq-evo-lvl {
+  font-size: 9px;
+  color: #3a5a8a;
+  margin-top: 2px;
+  font-weight: 700;
+}
+.profile-iq-evo-arrow {
+  flex: 0 0 24px;
+  height: 3px;
+  margin-bottom: 36px;
+  margin-left: 2px;
+  margin-right: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
+  position: relative;
+  align-self: center;
+}
+.profile-iq-evo-arrow::after {
+  content: '▶';
+  position: absolute;
+  right: -6px;
+  top: -7px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.15);
+}
+
+/* Tier dot colors */
+.t-bronze .profile-iq-evo-dot {
+  background: rgba(205, 127, 50, 0.15);
+  border-color: #cd7f32;
+  color: #e8a060;
+}
+.t-bronze .profile-iq-evo-dot::after {
+  border-color: #cd7f32;
+}
+.t-silver .profile-iq-evo-dot {
+  background: rgba(168, 184, 208, 0.12);
+  border-color: #a8b8d0;
+  color: #c8d8e8;
+}
+.t-silver .profile-iq-evo-dot::after {
+  border-color: #a8b8d0;
+}
+.t-gold .profile-iq-evo-dot {
+  background: rgba(245, 197, 24, 0.12);
+  border-color: #f5c518;
+  color: #ffe97a;
+}
+.t-gold .profile-iq-evo-dot::after {
+  border-color: #f5c518;
+}
+.t-platinum .profile-iq-evo-dot {
+  background: rgba(184, 168, 232, 0.12);
+  border-color: #b8a8e8;
+  color: #e8e0f8;
+}
+.t-platinum .profile-iq-evo-dot::after {
+  border-color: #b8a8e8;
+}
+.t-legend .profile-iq-evo-dot {
+  background: rgba(255, 215, 0, 0.15);
+  border-color: #ffd700;
+  color: #ffd700;
+}
+.t-legend .profile-iq-evo-dot::after {
+  border-color: #ffd700;
+}
+
+/* Detail / quote panel */
+.profile-iq-detail {
+  margin: 0 16px 20px;
+  background: var(--color-iq-navy-mid);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 24px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.profile-iq-quote {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--iq-slate);
+  font-style: italic;
+  margin: 0 0 16px;
+  padding-left: 14px;
+  border-left: 3px solid rgba(255, 255, 255, 0.1);
+}
+.profile-iq-perks-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #3a5a8a;
+  margin-bottom: 10px;
+}
+.profile-iq-perk-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #7a95be;
+}
+
+/* Light section cards (stats below) */
+.profile-iq-light {
+  background: var(--color-bg);
+  border-radius: 24px 24px 0 0;
+  margin-top: -12px;
+  padding-top: 16px;
+  padding-bottom: 8px;
+}
+
+/* Evolution info modal */
+.profile-evo-modal-overlay {
+  background: rgba(6, 17, 42, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}

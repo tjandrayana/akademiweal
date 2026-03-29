@@ -2,12 +2,25 @@
 @import 'tailwindcss';
 
 @theme {
-  /* ── Brand colors ── */
+  /* ── Brand colors (AkademiWeal — primary UI: nav, lessons, success) ── */
   --color-primary: #22C55E;
   --color-primary-dark: #16A34A;
   --color-primary-light: #DCFCE7;
 
-  /* ── Gold / reward ── */
+  /* ── InvestQuest quest layer (map, profile, celebrations) + shared accents ── */
+  --color-iq-navy: #06112a;
+  --color-iq-navy-mid: #0b1c44;
+  --color-iq-gold-bright: #f5c518;
+  --color-iq-gold-deep: #e8a800;
+  --color-iq-gold-soft: #ffe97a;
+  --color-iq-teal: #00c896;
+  --color-iq-teal-dark: #00a87a;
+  --color-iq-cream: #f0e6c8;
+  --color-iq-slate: #a0bee8;
+  --color-iq-muted-blue: #6a85b2;
+  --color-iq-hint: #7b95c8;
+
+  /* ── Gold / reward (legacy token — warm amber) ── */
   --color-gold: #F59E0B;
   --color-gold-light: #FEF3C7;
 
@@ -219,6 +232,32 @@
 @keyframes mascot-float {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(-7px); }
+}
+
+@keyframes mcard-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-12px); }
+}
+
+@keyframes mcard-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25%       { transform: rotate(-6deg); }
+  75%       { transform: rotate(6deg); }
+}
+
+@keyframes mcard-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.05); }
+}
+
+@keyframes mcard-sparkle {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50%       { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes mcard-coin-bounce {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50%       { transform: translateY(-8px) rotate(5deg); }
 }
 
 /* ─────────────────────────────────────────────────────────────

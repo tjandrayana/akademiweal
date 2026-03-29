@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 315" width="280" height="315">
+  <!-- AURUM — Golden Dragon · Legend Tier -->
+  <!-- Shadow -->
+  <ellipse cx="140" cy="308" rx="90" ry="10" fill="#C89000" opacity="0.22"/>
+  <!-- Legend aura rings -->
+  <circle cx="140" cy="148" r="118" fill="none" stroke="rgba(255,215,0,0.06)" stroke-width="2"/>
+  <circle cx="140" cy="148" r="100" fill="none" stroke="rgba(255,215,0,0.09)" stroke-width="1.5"/>
+  <circle cx="140" cy="148" r="84" fill="none" stroke="rgba(255,215,0,0.06)" stroke-width="1"/>
+
+  <!-- WINGS (behind body) -->
+  <!-- Left wing -->
+  <path d="M44,155 Q8,78 32,38 Q62,20 78,84 Q56,98 60,136" fill="#5A3A00" opacity="0.88"/>
+  <path d="M52,152 Q22,88 46,58 Q68,44 76,98 Q58,108 64,138" fill="#9A7000" opacity="0.7"/>
+  <!-- Left wing membrane veins -->
+  <path d="M52,150 Q40,116 46,80" stroke="#D4A020" stroke-width="1.5" fill="none" opacity="0.4"/>
+  <path d="M60,148 Q52,122 56,94" stroke="#C89010" stroke-width="1" fill="none" opacity="0.3"/>
+  <!-- Right wing -->
+  <path d="M236,155 Q272,78 248,38 Q218,20 202,84 Q224,98 220,136" fill="#5A3A00" opacity="0.88"/>
+  <path d="M228,152 Q258,88 234,58 Q212,44 204,98 Q222,108 216,138" fill="#9A7000" opacity="0.7"/>
+  <!-- Right wing membrane veins -->
+  <path d="M228,150 Q240,116 234,80" stroke="#D4A020" stroke-width="1.5" fill="none" opacity="0.4"/>
+  <path d="M220,148 Q228,122 224,94" stroke="#C89010" stroke-width="1" fill="none" opacity="0.3"/>
+  <!-- Wing tips (spikes) -->
+  <path d="M32,38 Q24,20 36,8" stroke="#C89000" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M248,38 Q256,20 244,8" stroke="#C89000" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- DRAGON HEAD (main body) -->
+  <ellipse cx="140" cy="148" rx="82" ry="84" fill="#8A6000"/>
+  <ellipse cx="140" cy="144" rx="78" ry="80" fill="#B08000"/>
+  <ellipse cx="140" cy="138" rx="72" ry="74" fill="#C89000"/>
+
+  <!-- Scale texture rows -->
+  <path d="M76,116 Q96,108 116,114" stroke="#D4A020" stroke-width="1.5" fill="none" opacity="0.35"/>
+  <path d="M164,114 Q184,108 204,116" stroke="#D4A020" stroke-width="1.5" fill="none" opacity="0.35"/>
+  <path d="M82,136 Q102,130 122,136" stroke="#D4A020" stroke-width="1.2" fill="none" opacity="0.25"/>
+  <path d="M158,136 Q178,130 198,136" stroke="#D4A020" stroke-width="1.2" fill="none" opacity="0.25"/>
+  <path d="M88,158 Q108,152 128,158" stroke="#D4A020" stroke-width="1" fill="none" opacity="0.2"/>
+  <path d="M152,158 Q172,152 192,158" stroke="#D4A020" stroke-width="1" fill="none" opacity="0.2"/>
+
+  <!-- MAGNIFICENT HORNS (curled) -->
+  <path d="M96,74 Q66,38 76,10 Q82,2 84,32 Q68,48 98,74" fill="#E8C000"/>
+  <path d="M184,74 Q214,38 204,10 Q198,2 196,32 Q212,48 182,74" fill="#E8C000"/>
+  <!-- Horn inner highlight -->
+  <path d="M96,74 Q66,38 76,10" stroke="#FFE060" stroke-width="2.5" fill="none" opacity="0.65"/>
+  <path d="M184,74 Q214,38 204,10" stroke="#FFE060" stroke-width="2.5" fill="none" opacity="0.65"/>
+  <!-- Horn tip glow dots -->
+  <circle cx="76" cy="10" r="3" fill="#FFE060" opacity="0.7"/>
+  <circle cx="204" cy="10" r="3" fill="#FFE060" opacity="0.7"/>
+  <!-- Small side spines on head -->
+  <path d="M72,78 Q60,62 64,50" stroke="#C89000" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M208,78 Q220,62 216,50" stroke="#C89000" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- ELONGATED DRAGON SNOUT -->
+  <path d="M88,158 Q140,143 192,158 L196,186 Q140,202 84,186 Z" fill="#A87000"/>
+  <!-- Snout ridge detail -->
+  <path d="M100,152 Q140,143 180,152" stroke="#C89000" stroke-width="1.5" fill="none" opacity="0.4"/>
+  <!-- Nostril slits -->
+  <ellipse cx="114" cy="178" rx="9" ry="5.5" fill="#5A3800" transform="rotate(-12,114,178)"/>
+  <ellipse cx="166" cy="178" rx="9" ry="5.5" fill="#5A3800" transform="rotate(12,166,178)"/>
+  <!-- Nose bridge -->
+  <path d="M128,158 Q140,153 152,158" stroke="#8A5800" stroke-width="2" fill="none"/>
+
+  <!-- Teeth hint in half-open mouth -->
+  <path d="M98,196 Q140,212 182,196" fill="#1A0A00" opacity="0.5"/>
+  <rect x="118" y="194" width="8" height="8" rx="2" fill="#F8F0E0" opacity="0.7"/>
+  <rect x="132" y="194" width="8" height="8" rx="2" fill="#F8F0E0" opacity="0.7"/>
+  <rect x="146" y="194" width="8" height="8" rx="2" fill="#F8F0E0" opacity="0.7"/>
+
+  <!-- FIRE EYES (legendary, glowing) -->
+  <!-- Eye socket depth -->
+  <ellipse cx="107" cy="126" rx="23" ry="21" fill="#080400"/>
+  <ellipse cx="173" cy="126" rx="23" ry="21" fill="#080400"/>
+  <!-- Fiery outer iris -->
+  <ellipse cx="109" cy="125" rx="18" ry="19" fill="#E85030"/>
+  <!-- Mid iris gold -->
+  <ellipse cx="109" cy="125" rx="12" ry="13" fill="#F5C518"/>
+  <ellipse cx="175" cy="125" rx="18" ry="19" fill="#E85030"/>
+  <ellipse cx="175" cy="125" rx="12" ry="13" fill="#F5C518"/>
+  <!-- Slit pupils -->
+  <ellipse cx="109" cy="125" rx="4" ry="13" fill="#0A0400"/>
+  <ellipse cx="175" cy="125" rx="4" ry="13" fill="#0A0400"/>
+  <!-- Eye glow ring -->
+  <ellipse cx="109" cy="125" rx="19" ry="17" fill="none" stroke="#F5C518" stroke-width="2" opacity="0.5"/>
+  <ellipse cx="175" cy="125" rx="19" ry="17" fill="none" stroke="#F5C518" stroke-width="2" opacity="0.5"/>
+  <!-- Outer glow ring -->
+  <ellipse cx="109" cy="125" rx="22" ry="20" fill="none" stroke="#FF8C00" stroke-width="1" opacity="0.3"/>
+  <ellipse cx="175" cy="125" rx="22" ry="20" fill="none" stroke="#FF8C00" stroke-width="1" opacity="0.3"/>
+  <!-- Catchlights -->
+  <ellipse cx="115" cy="116" rx="7" ry="5" fill="white" opacity="0.8"/>
+  <ellipse cx="181" cy="116" rx="7" ry="5" fill="white" opacity="0.8"/>
+  <!-- Heavy brow ridge (dragon) -->
+  <path d="M88,108 Q108,100 126,106" stroke="#7A5000" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M154,106 Q172,100 192,108" stroke="#7A5000" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+  <!-- Flame wisps from nostrils -->
+  <path d="M114,170 Q108,152 116,140" stroke="#FF8C00" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.65"/>
+  <path d="M114,170 Q110,155 118,145" stroke="#FFD700" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>
+  <path d="M166,170 Q172,152 164,140" stroke="#FF8C00" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.65"/>
+  <path d="M166,170 Q170,155 162,145" stroke="#FFD700" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- BODY ARMOR (golden scales) -->
+  <path d="M30,304 Q30,252 66,236 Q140,218 214,236 Q250,252 250,304 Z" fill="#6A4800"/>
+
+  <!-- Chest plate (layered gold) -->
+  <ellipse cx="140" cy="278" rx="62" ry="48" fill="#9A7000"/>
+  <ellipse cx="140" cy="272" rx="52" ry="40" fill="#B88000"/>
+  <ellipse cx="140" cy="266" rx="42" ry="32" fill="#D4A000"/>
+  <ellipse cx="140" cy="260" rx="34" ry="24" fill="#E8B800"/>
+  <ellipse cx="140" cy="255" rx="26" ry="18" fill="#F5C518"/>
+
+  <!-- Legend star on chest -->
+  <text x="140" y="264" text-anchor="middle" font-size="24" fill="#8A6000" font-family="sans-serif" font-weight="900">★</text>
+
+  <!-- Scale rows on body armor -->
+  <path d="M76,242 Q140,230 204,242" stroke="#F5C518" stroke-width="1.5" fill="none" opacity="0.3"/>
+  <path d="M56,262 Q140,248 224,262" stroke="#F5C518" stroke-width="1" fill="none" opacity="0.2"/>
+  <path d="M44,282 Q140,268 236,282" stroke="#F5C518" stroke-width="1" fill="none" opacity="0.15"/>
+
+  <!-- Shoulder armor spikes -->
+  <path d="M64,234 Q50,220 56,208" stroke="#C89000" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M64,234 Q46,225 48,210" stroke="#A87000" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M216,234 Q230,220 224,208" stroke="#C89000" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M216,234 Q234,225 232,210" stroke="#A87000" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>

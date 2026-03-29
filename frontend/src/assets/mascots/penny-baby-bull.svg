@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 290" width="260" height="290">
+  <!-- PENNY — Baby Bull · Bronze Tier -->
+  <!-- Shadow -->
+  <ellipse cx="130" cy="280" rx="72" ry="10" fill="#CD7F32" opacity="0.18"/>
+  <!-- Ambient glow -->
+  <ellipse cx="130" cy="180" rx="80" ry="50" fill="#CD7F32" opacity="0.07"/>
+
+  <!-- Short baby horns -->
+  <path d="M98,88 Q84,60 90,42 Q93,34 95,56 Q84,66 99,88" fill="#EDD88A"/>
+  <path d="M162,88 Q176,60 170,42 Q167,34 165,56 Q176,66 161,88" fill="#EDD88A"/>
+
+  <!-- Ears -->
+  <circle cx="58" cy="128" r="24" fill="#C4813A"/>
+  <circle cx="58" cy="128" r="15" fill="#E09B5E"/>
+  <circle cx="58" cy="128" r="8" fill="#D08848"/>
+  <circle cx="202" cy="128" r="24" fill="#C4813A"/>
+  <circle cx="202" cy="128" r="15" fill="#E09B5E"/>
+  <circle cx="202" cy="128" r="8" fill="#D08848"/>
+
+  <!-- Big round head (baby proportion) -->
+  <circle cx="130" cy="132" r="88" fill="#C4813A"/>
+  <ellipse cx="130" cy="208" rx="64" ry="16" fill="#8B5A1E" opacity="0.14"/>
+
+  <!-- Bow tie (cute!) -->
+  <path d="M104,208 L126,216 L104,224 Z" fill="#E85030"/>
+  <path d="M156,208 L134,216 L156,224 Z" fill="#E85030"/>
+  <ellipse cx="130" cy="216" rx="9" ry="6.5" fill="#FF6B50"/>
+
+  <!-- Big sparkly eyes (baby proportion) -->
+  <ellipse cx="104" cy="120" rx="26" ry="28" fill="white"/>
+  <ellipse cx="156" cy="120" rx="26" ry="28" fill="white"/>
+  <circle cx="107" cy="124" r="18" fill="#2D1000"/>
+  <circle cx="159" cy="124" r="18" fill="#2D1000"/>
+  <circle cx="107" cy="125" r="10" fill="#080200"/>
+  <circle cx="159" cy="125" r="10" fill="#080200"/>
+  <!-- Primary catchlights -->
+  <circle cx="116" cy="113" r="8" fill="white"/>
+  <circle cx="168" cy="113" r="8" fill="white"/>
+  <!-- Secondary catchlights -->
+  <circle cx="101" cy="130" r="4" fill="white" opacity="0.55"/>
+  <circle cx="153" cy="130" r="4" fill="white" opacity="0.55"/>
+  <!-- Eyelashes -->
+  <path d="M82,108 Q104,98 124,108" stroke="#5A2A00" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+  <path d="M136,108 Q156,98 178,108" stroke="#5A2A00" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+
+  <!-- Snout -->
+  <ellipse cx="130" cy="154" rx="36" ry="27" fill="#E09B5E"/>
+  <!-- Highlight on snout -->
+  <ellipse cx="118" cy="145" rx="16" ry="8" fill="#EDB880" opacity="0.45"/>
+  <!-- Nostrils -->
+  <ellipse cx="117" cy="161" rx="9" ry="7" fill="#7A3A10"/>
+  <ellipse cx="143" cy="161" rx="9" ry="7" fill="#7A3A10"/>
+  <!-- Big happy grin -->
+  <path d="M102,178 Q130,198 158,178" stroke="#7A3A10" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <!-- Tongue peek -->
+  <ellipse cx="130" cy="184" rx="14" ry="8" fill="#E85030" opacity="0.7" clip-path="url(#smileClip)"/>
+
+  <!-- Blush cheeks -->
+  <ellipse cx="76" cy="146" rx="20" ry="11" fill="#E85030" opacity="0.26"/>
+  <ellipse cx="184" cy="146" rx="20" ry="11" fill="#E85030" opacity="0.26"/>
+
+  <!-- Chubby body — denim overalls -->
+  <ellipse cx="130" cy="248" rx="58" ry="42" fill="#4A78C8"/>
+  <!-- Overall straps -->
+  <rect x="110" y="208" width="11" height="36" rx="5" fill="#3A68B8"/>
+  <rect x="139" y="208" width="11" height="36" rx="5" fill="#3A68B8"/>
+  <!-- Bib pocket -->
+  <rect x="116" y="226" width="28" height="20" rx="5" fill="#3A68B8"/>
+  <!-- Gold coin sticker on overalls -->
+  <circle cx="130" cy="240" r="11" fill="#C8900A"/>
+  <circle cx="130" cy="238" r="11" fill="#F5C518"/>
+  <circle cx="130" cy="238" r="9" fill="#FFD700"/>
+  <text x="130" y="243" text-anchor="middle" font-size="12" fill="#8A6000" font-weight="900" font-family="Arial, sans-serif">$</text>
+
+  <!-- Small round feet -->
+  <ellipse cx="96" cy="272" rx="22" ry="11" fill="#2A3866"/>
+  <ellipse cx="164" cy="272" rx="22" ry="11" fill="#2A3866"/>
+  <!-- Shoe shine -->
+  <ellipse cx="90" cy="268" rx="8" ry="4" fill="#3A4876" opacity="0.7"/>
+  <ellipse cx="158" cy="268" rx="8" ry="4" fill="#3A4876" opacity="0.7"/>
+
+  <!-- Sparkle stars around (baby magic) -->
+  <text x="42" y="88" font-size="14" fill="#F5C518" opacity="0.8" font-family="sans-serif">★</text>
+  <text x="202" y="80" font-size="10" fill="#F5C518" opacity="0.6" font-family="sans-serif">★</text>
+  <text x="214" y="168" font-size="8" fill="#F5C518" opacity="0.5" font-family="sans-serif">★</text>
+</svg>

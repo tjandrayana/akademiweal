@@ -1,6 +1,6 @@
 # AkademiWeal — App Audit Report
 
-**Date**: 2026-03-28 (v3 — full re-audit after UI overhaul + sound implementation)
+**Date**: 2026-03-29 (v4 — post-improvement audit + new issue triage)
 **Auditor**: Claude Code (Senior UI/UX + Engineering Review)
 **Scope**: Frontend — UI/UX, code quality, gamification design, product gaps
 **Files read**: All 13 pages/components, gamification.js, useGamificationStats.js, sounds.js, api/client.js, tracking/events.js, index.css, App.jsx
@@ -120,6 +120,54 @@ All previously open issues (N1, N3) are now resolved. No issues remain open.
 
 ---
 
+## v4 Post-Audit: New Issues Found (2026-03-29)
+
+Code verification pass against all 10 source files. All v3 fixes confirmed present.
+Three new issues found — one was a false alarm.
+
+---
+
+### B1. Lives display hardcoded — ✅ Fixed
+
+**Root cause**: `Home.jsx` hardcoded `❤️ 3` — the number never changed regardless of wrong answers. No lives logic existed in `gamification.js`.
+
+**Fix applied**:
+- `gamification.js` — Added `LIVES_KEY`, `MAX_LIVES = 3`, `LIVES_UPDATED_EVENT`, `getLives()`, `deductLife()`, `resetLives()`
+- `useGamificationStats.js` — Added `lives` to returned stats; listens to `LIVES_UPDATED_EVENT`
+- `Home.jsx` — Replaced hardcoded `3` with `lives` from hook; `aria-label` now dynamic
+- `Lesson.jsx` — Calls `deductLife()` on every wrong answer submission
+- `Result.jsx` — Calls `resetLives()` on `handleContinue()` (lives fully restored after completing a session)
+
+**Lives rules**:
+| Event | Lives change |
+|-------|-------------|
+| Wrong answer in Lesson | −1 (floor 0) |
+| Session complete (Result → Lanjut) | Reset to 3 |
+| App first launch | Defaults to 3 |
+
+> Note: 0 lives does not block lesson entry yet — display-only for now. Hard-blocking is a future improvement (B1-future).
+
+---
+
+### B2. XP double-counting — ✅ Not a bug (closed)
+
+**Investigation**: Suspected `addXp()` was called twice — once in `Lesson.jsx` per correct answer and once in `Result.jsx`.
+
+**Actual finding**: `Lesson.jsx` only updates local React state (`setSessionXp`). It never calls `addXp()`. `Result.jsx` is the sole committer via `addXp(xp)` in `handleContinue()`. XP is committed exactly once per session. No fix needed.
+
+---
+
+### B3. Leaderboard page is a stub — ⏳ Open (product gap)
+
+**Finding**: `Leaderboard.jsx` renders a single "Segera Hadir" placeholder with no data. The backend has no `/leaderboard` API endpoint. This is a known product gap, not a bug.
+
+**Plan when ready**:
+1. Backend: Add `GET /leaderboard` returning top-N users sorted by XP
+2. Frontend: Replace stub with ranked list (avatar, username, XP, level badge)
+3. Requires user accounts to be tied to XP — currently XP lives in `localStorage` only
+
+---
+
 ## Priority Fix Summary (all issues, ranked)
 
 | # | Issue | Priority | Status |
@@ -129,24 +177,39 @@ All previously open issues (N1, N3) are now resolved. No issues remain open.
 | N1 | Level tabs flicker as locked on load | 🟠 P1 | ✅ Fixed — localStorage cache seeded after fetch |
 | A3 | Profile weekly chart is fake data | 🟠 P1 | ✅ Fixed — real daily XP via `getWeeklyXp()` |
 | A4 | Profile "Ikuti"/"Bagikan" are dead buttons | 🟠 P1 | ✅ Fixed — Ikuti disabled, Bagikan uses Web Share API |
+| B1 | Lives hardcoded to 3, never deducts | 🟠 P1 | ✅ Fixed — lives tracked in localStorage, deducted on wrong answer, reset on session complete |
 | A5 | Login.jsx English error strings | 🟡 P2 | ✅ Fixed |
 | A6 | No audio mute toggle | 🟡 P2 | ✅ Fixed — header toggle + `isMuted()` guard in `tone()` |
 | N3 | Level gating silently fails on API error | 🟡 P2 | ✅ Fixed — catch block no longer clears cached data |
+| B2 | XP double-counting (suspected) | 🟡 P2 | ✅ Not a bug — `addXp()` called once in `Result.jsx` only |
 | A7 | `XP_KEY` duplicated in useGamificationStats | 🔵 P3 | ✅ Fixed |
 | A8 | `trackAppOpen` called redundantly in Login | 🔵 P3 | ✅ Fixed |
 | A9 | `max-w-md` redundant in Result + Lesson | 🔵 P3 | ✅ Fixed |
 | A10 | `getLevelName` redundant call in Profile | 🔵 P3 | ✅ Fixed |
 | A11 | `<div pb-20 />` ghost spacer in Profile | 🔵 P3 | ✅ Fixed |
+| B3 | Leaderboard is a stub, no backend API | 🔵 P3 | ⏳ Open — product gap, needs backend + user-linked XP |
 
 ---
 
-## What's Working Well (v3)
+## Remaining Known Gaps (not bugs)
+
+| Gap | Notes |
+|-----|-------|
+| Lives block at 0 | Lives display shows 0 but lesson still starts — hard-block is a future improvement |
+| Backend progress sync | All XP, streaks, stars, lives in `localStorage` — cleared if user switches device or clears storage |
+| Daily reward feature | Replaced with "Fitur ini akan menyusul" placeholder — feature not built |
+| "Pelajaran" / "Hadiah" tabs | Permanently disabled "segera hadir" — content not built |
+| Leaderboard | Stub page, no backend — see B3 above |
+
+---
+
+## What's Working Well (v4)
 
 - **Learning path map** — 3-state visual hierarchy (84/58/50px), pulse ring, "Mulai" CTA, opacity dimming on completed/locked nodes. Duolingo-level clarity.
 - **Lesson quiz flow** — two-zone layout, reactive mascot (🎉/😅/🐂), speech bubble, instruction badge, chip word-bank, color-coded feedback panel, exit confirmation.
 - **SVG landscape scenes** — inline SVG hero in Lesson + LessonIntro with hills, trees, sky gradient. Edge-to-edge, no external assets needed.
 - **Sound design** — 10 distinct effects across all interactions (chip tap, submit, correct, wrong, complete, celebration, navigation, step advance, locked, launch). Web Audio API, no files, lazy init. Now with mute toggle persisted to localStorage.
-- **Gamification core** — streak calendar math, XP counter, level thresholds, star persistence per lesson, daily XP tracking (rolling 30-day log), all in localStorage with custom events for reactivity.
+- **Gamification core** — streak calendar math, XP counter, level thresholds, star persistence per lesson, daily XP tracking (rolling 30-day log), lives system (deducted on wrong answer, reset on session complete), all in localStorage with custom events for reactivity.
 - **Responsive shell** — `App.jsx` green-gradient outer + `max-w-md` white card with `sm:shadow` ring. Works on desktop and mobile.
 - **Glassmorphism BottomNav** — `bg-white/85 backdrop-blur-xl`, opacity-45 on inactive, active pill, safe-area inset support. Disabled tabs at opacity-25.
 - **Result celebration screen** — gradient hero (green/blue based on score), star-pop animation, XP counter animation, confetti, correct fan-fare.

@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 300" width="260" height="300">
+  <!-- VIXEN — Cunning Fox · Gold Tier -->
+  <!-- Shadow -->
+  <ellipse cx="130" cy="293" rx="72" ry="9" fill="#C8900A" opacity="0.18"/>
+  <!-- Ambient glow -->
+  <ellipse cx="130" cy="190" rx="78" ry="42" fill="#F5C518" opacity="0.07"/>
+
+  <!-- Pointy fox ears -->
+  <polygon points="78,88 58,38 104,72" fill="#D4601A"/>
+  <polygon points="78,88 66,55 100,76" fill="#F2934A"/>
+  <polygon points="182,88 202,38 156,72" fill="#D4601A"/>
+  <polygon points="182,88 194,55 160,76" fill="#F2934A"/>
+  <!-- White ear tufts -->
+  <polygon points="78,86 68,62 94,78" fill="#F8F0E0" opacity="0.85"/>
+  <polygon points="182,86 192,62 166,78" fill="#F8F0E0" opacity="0.85"/>
+
+  <!-- Sharp fox head -->
+  <ellipse cx="130" cy="135" rx="74" ry="74" fill="#D4601A"/>
+  <!-- White face blaze -->
+  <ellipse cx="130" cy="148" rx="52" ry="50" fill="#F2934A"/>
+  <!-- White muzzle -->
+  <ellipse cx="130" cy="162" rx="36" ry="28" fill="#F8F0E0"/>
+
+  <!-- Cunning almond eyes -->
+  <ellipse cx="100" cy="120" rx="19" ry="17" fill="white"/>
+  <ellipse cx="160" cy="120" rx="19" ry="17" fill="white"/>
+  <!-- Amber irises -->
+  <ellipse cx="102" cy="121" rx="13" ry="14" fill="#C8780A"/>
+  <ellipse cx="162" cy="121" rx="13" ry="14" fill="#C8780A"/>
+  <!-- Pupils -->
+  <ellipse cx="102" cy="122" rx="8" ry="9" fill="#060400"/>
+  <ellipse cx="162" cy="122" rx="8" ry="9" fill="#060400"/>
+  <!-- Catchlights -->
+  <ellipse cx="108" cy="115" rx="5" ry="4" fill="white"/>
+  <ellipse cx="168" cy="115" rx="5" ry="4" fill="white"/>
+  <!-- Small secondary catchlight -->
+  <circle cx="98" cy="125" r="2.5" fill="white" opacity="0.5"/>
+  <circle cx="158" cy="125" r="2.5" fill="white" opacity="0.5"/>
+  <!-- Sly eyebrow arch -->
+  <path d="M84,106 Q100,99 116,104" stroke="#8A3800" stroke-width="3.8" fill="none" stroke-linecap="round"/>
+  <path d="M144,104 Q160,99 176,106" stroke="#8A3800" stroke-width="3.8" fill="none" stroke-linecap="round"/>
+
+  <!-- Sharp nose -->
+  <ellipse cx="130" cy="158" rx="9" ry="7" fill="#2A0800"/>
+  <!-- Philtrum line -->
+  <line x1="130" y1="165" x2="130" y2="172" stroke="#8A3800" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Whiskers (4 per side) -->
+  <line x1="96" y1="166" x2="46" y2="158" stroke="rgba(80,40,0,0.35)" stroke-width="1.8"/>
+  <line x1="96" y1="172" x2="46" y2="172" stroke="rgba(80,40,0,0.35)" stroke-width="1.8"/>
+  <line x1="96" y1="178" x2="52" y2="184" stroke="rgba(80,40,0,0.35)" stroke-width="1.8"/>
+  <line x1="164" y1="166" x2="214" y2="158" stroke="rgba(80,40,0,0.35)" stroke-width="1.8"/>
+  <line x1="164" y1="172" x2="214" y2="172" stroke="rgba(80,40,0,0.35)" stroke-width="1.8"/>
+  <line x1="164" y1="178" x2="208" y2="184" stroke="rgba(80,40,0,0.35)" stroke-width="1.8"/>
+  <!-- Sly smirk (one-sided) -->
+  <path d="M114,182 Q130,194 148,182" stroke="#8A3800" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- Smart casual navy vest body -->
+  <path d="M30,290 Q30,248 58,235 Q130,218 202,235 Q230,248 230,290 Z" fill="#1A3070"/>
+  <!-- Shoulder body mass -->
+  <ellipse cx="46" cy="256" rx="26" ry="40" fill="#1A3070"/>
+  <ellipse cx="214" cy="256" rx="26" ry="40" fill="#1A3070"/>
+
+  <!-- White dress shirt collar -->
+  <path d="M100,220 L130,228 L160,220 L166,212 Q130,204 94,212 Z" fill="#E8E8DC"/>
+  <path d="M130,228 L100,220" stroke="#D0CDC6" stroke-width="1" fill="none"/>
+  <path d="M130,228 L160,220" stroke="#D0CDC6" stroke-width="1" fill="none"/>
+
+  <!-- Gold pocket square -->
+  <rect x="42" y="235" width="20" height="22" rx="4" fill="#1A3070"/>
+  <path d="M42,235 L52,230 L62,235 L62,244 Q52,242 42,244 Z" fill="#F5C518" opacity="0.9"/>
+
+  <!-- Paw (right) holding tablet/chart -->
+  <ellipse cx="206" cy="228" rx="20" ry="17" fill="#D4601A"/>
+  <!-- Chart tablet -->
+  <rect x="176" y="204" width="44" height="34" rx="6" fill="#060E22"/>
+  <rect x="178" y="206" width="40" height="30" rx="4" fill="#0A1228"/>
+  <!-- Chart line on tablet -->
+  <polyline points="184,230 193,220 204,224 215,212" fill="none" stroke="#00C896" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Chart label -->
+  <text x="186" y="215" font-size="7" fill="#F5C518" font-family="'Courier New', monospace" font-weight="bold">+12.4%</text>
+
+  <!-- Bushy tail -->
+  <path d="M218,268 Q256,250 252,214 Q248,192 236,200" stroke="#D4601A" stroke-width="20" fill="none" stroke-linecap="round"/>
+  <path d="M218,268 Q256,250 252,214 Q248,192 236,200" stroke="#F8F0E0" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.55"/>
+  <!-- Tail tip stripe -->
+  <path d="M246,204 Q240,196 236,200" stroke="#F8F0E0" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.7"/>
+</svg>

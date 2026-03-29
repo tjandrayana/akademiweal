@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchLessonsByLevel } from '../api/lessons'
-import { XP_PER_CORRECT, XP_PER_LESSON_COMPLETE, markLessonComplete } from '../lib/gamification'
+import { XP_PER_CORRECT, XP_PER_LESSON_COMPLETE, markLessonComplete, deductLife } from '../lib/gamification'
 import { playCorrect, playWrong, playComplete, playTap, playSelect, playStepNext } from '../lib/sounds'
 import { EVENTS, trackEvent } from '../tracking/events'
+import { AppHeader } from '../components/AppHeader'
 import { Button } from '../components/Button'
 import { LessonIntro } from '../components/LessonIntro'
 import { ProgressBar } from '../components/ProgressBar'
@@ -19,34 +20,46 @@ function hasIntroContent(lesson) {
 ───────────────────────────────────────────── */
 function LessonHeader({ onExit, progressValue, sessionXp, xpGain, answered, result }) {
   return (
-    <header className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
-      <div className="mx-auto max-w-md px-4 py-3 flex items-center gap-3">
+    <AppHeader
+      mode="lesson"
+      variant="light"
+      className="py-2"
+      left={
         <button
           type="button"
           onClick={onExit}
-          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 text-muted text-lg font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg font-bold text-muted transition-colors hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
           aria-label="Keluar dari pelajaran"
         >
           ✕
         </button>
-
-        <div className="flex-1">
+      }
+      center={
+        <div className="w-full min-w-0">
           <ProgressBar value={progressValue} />
         </div>
-
-        <div className="flex items-center gap-1 bg-yellow-50 border border-yellow-100 rounded-full px-3 py-1.5">
-          <span className="text-sm leading-none" aria-hidden="true">⭐</span>
-          <span className={cn('text-sm font-extrabold tabular-nums', sessionXp > 0 ? 'text-yellow-600' : 'text-gray-400')}>
+      }
+      right={
+        <div className="inline-flex max-w-[min(100%,9rem)] items-center gap-0.5 rounded-full border border-yellow-100 bg-yellow-50 px-2 py-1.5 sm:px-3">
+          <span className="shrink-0 text-sm leading-none" aria-hidden="true">
+            ⭐
+          </span>
+          <span
+            className={cn(
+              'text-xs font-extrabold tabular-nums sm:text-sm',
+              sessionXp > 0 ? 'text-yellow-600' : 'text-gray-400',
+            )}
+          >
             {sessionXp}
           </span>
           {answered && result === 'correct' && xpGain != null && (
-            <span className="animate-lesson-xp-pop text-sm font-extrabold text-primary ml-0.5">
+            <span className="animate-lesson-xp-pop ml-0.5 text-xs font-extrabold text-primary sm:text-sm">
               +{xpGain}
             </span>
           )}
         </div>
-      </div>
-    </header>
+      }
+    />
   )
 }
 
@@ -208,6 +221,7 @@ export function Lesson() {
       setResult('correct')
     } else {
       playWrong()
+      deductLife()
       setWrongBeforeCorrect((n) => n + 1)
       setResult('wrong')
     }

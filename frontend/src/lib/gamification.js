@@ -192,6 +192,64 @@ export function getXpInCurrentLevel(xp) {
   return safeXp - levelStart
 }
 
+/**
+ * Maps total XP to the numeric level used by MascotEvolution (tiers 1–10, 11–25, …).
+ * Grows with XP so the mascot evolves alongside the learning path.
+ */
+export function getMascotEvolutionLevel(xp) {
+  const safeXp = Math.max(0, Math.floor(Number(xp) || 0))
+  return Math.max(1, Math.min(120, 1 + Math.floor(safeXp / 6)))
+}
+
+/* ── Lives ── */
+
+export const LIVES_KEY = 'akademiweal_lives'
+export const MAX_LIVES = 3
+export const LIVES_UPDATED_EVENT = 'akademiweal-lives-updated'
+
+function notifyLivesUpdated() {
+  try {
+    window.dispatchEvent(new CustomEvent(LIVES_UPDATED_EVENT))
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Returns current lives (0–MAX_LIVES). Defaults to MAX_LIVES if never set. */
+export function getLives() {
+  try {
+    const raw = localStorage.getItem(LIVES_KEY)
+    if (raw === null) return MAX_LIVES
+    const n = parseInt(raw, 10)
+    return Number.isFinite(n) ? Math.min(Math.max(n, 0), MAX_LIVES) : MAX_LIVES
+  } catch {
+    return MAX_LIVES
+  }
+}
+
+/** Removes one life. Floors at 0. */
+export function deductLife() {
+  try {
+    const current = getLives()
+    const next = Math.max(0, current - 1)
+    localStorage.setItem(LIVES_KEY, String(next))
+    notifyLivesUpdated()
+    return next
+  } catch {
+    return 0
+  }
+}
+
+/** Restores lives to MAX_LIVES. Call on lesson completion. */
+export function resetLives() {
+  try {
+    localStorage.setItem(LIVES_KEY, String(MAX_LIVES))
+    notifyLivesUpdated()
+  } catch {
+    /* ignore */
+  }
+}
+
 /* ── Completed lessons ── */
 
 export const COMPLETED_LESSONS_KEY = 'akademiweal_completed_lessons'
