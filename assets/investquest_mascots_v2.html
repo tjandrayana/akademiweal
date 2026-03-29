@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>InvestQuest — Mascot Redesign v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#FFF8EE;
+  font-family:'Nunito',sans-serif;
+  min-height:100vh;
+}
+
+/* ── WARM PAPER TEXTURE BG ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(255,200,80,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 90%, rgba(255,160,60,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,220,120,0.06) 0%, transparent 70%);
+  pointer-events:none;z-index:0;
+}
+
+/* ── HEADER ── */
+.header{
+  text-align:center;padding:60px 24px 40px;
+  position:relative;z-index:1;
+}
+.header-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(245,197,24,0.15);border:1.5px solid rgba(245,197,24,0.4);
+  border-radius:100px;padding:6px 18px;
+  font-size:11px;font-weight:900;letter-spacing:3px;text-transform:uppercase;
+  color:#C8860A;margin-bottom:20px;
+}
+.header-title{
+  font-family:'Fredoka One',cursive;font-size:52px;
+  color:#2A1A06;line-height:1;letter-spacing:2px;margin-bottom:8px;
+}
+.header-title span{
+  background:linear-gradient(135deg,#F5A518,#F5C518,#E88A00);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.header-sub{font-size:16px;color:#8A6A3A;max-width:480px;margin:0 auto;line-height:1.6}
+
+/* ── MASCOT GRID ── */
+.mascot-grid{
+  max-width:1260px;margin:0 auto;
+  padding:20px 24px 80px;
+  display:flex;flex-wrap:wrap;gap:20px;
+  justify-content:center;
+  position:relative;z-index:1;
+}
+
+/* ── INDIVIDUAL MASCOT CARD ── */
+.mcard{
+  background:#FFFFFF;
+  border-radius:32px;
+  border:2px solid rgba(0,0,0,0.06);
+  box-shadow:
+    0 4px 0 rgba(0,0,0,0.06),
+    0 12px 40px rgba(200,140,20,0.1);
+  width:224px;
+  overflow:hidden;
+  transition:transform .2s, box-shadow .2s;
+  cursor:pointer;
+  position:relative;
+}
+.mcard:hover{
+  transform:translateY(-10px) rotate(-1deg);
+  box-shadow:0 8px 0 rgba(0,0,0,0.08), 0 24px 60px rgba(200,140,20,0.18);
+}
+.mcard:nth-child(even):hover{transform:translateY(-10px) rotate(1deg)}
+
+/* Color accent top strip */
+.mcard-strip{height:8px;width:100%}
+
+/* Mascot display area */
+.mcard-stage{
+  height:240px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.mcard-stage-bg{
+  position:absolute;inset:0;border-radius:0;
+}
+.mcard-mascot{position:relative;z-index:2}
+
+/* Tier pill */
+.tier-pill{
+  position:absolute;top:12px;right:12px;z-index:10;
+  font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;
+  padding:4px 12px;border-radius:100px;border:1.5px solid;
+}
+
+/* Level unlock badge */
+.unlock-pill{
+  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:10;
+  font-size:10px;font-weight:900;letter-spacing:1px;
+  padding:4px 14px;border-radius:100px;
+  background:rgba(0,0,0,0.08);color:rgba(0,0,0,0.4);
+  white-space:nowrap;
+}
+
+/* Card body text */
+.mcard-body{padding:18px 20px 22px}
+.mcard-name{
+  font-family:'Fredoka One',cursive;font-size:30px;
+  line-height:1;margin-bottom:2px;
+}
+.mcard-species{
+  font-size:10px;font-weight:900;letter-spacing:2.5px;
+  text-transform:uppercase;color:#B0A090;margin-bottom:10px;
+}
+.mcard-quote{
+  font-size:12px;font-style:italic;color:#7A6A5A;
+  line-height:1.6;margin-bottom:14px;padding-left:12px;
+  border-left:3px solid rgba(0,0,0,0.08);
+}
+.mcard-perks{display:flex;flex-wrap:wrap;gap:5px}
+.perk-chip{
+  font-size:10px;font-weight:800;
+  padding:3px 10px;border-radius:100px;
+  background:rgba(0,0,0,0.05);color:#5A4A3A;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes wiggle{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+@keyframes pulse-scale{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes sparkle{0%,100%{opacity:0;transform:scale(0.5)}50%{opacity:1;transform:scale(1.2)}}
+@keyframes spin-slow{to{transform:rotate(360deg)}}
+@keyframes coin-bounce{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-8px) rotate(5deg)}}
+@keyframes tail-wag{0%,100%{transform:rotate(0deg) translate(0,0)}50%{transform:rotate(15deg) translate(4px,-3px)}}
+
+.bounce{animation:bounce 2.4s ease-in-out infinite}
+.wiggle{animation:wiggle 3s ease-in-out infinite}
+.pulse{animation:pulse-scale 2s ease-in-out infinite}
+
+/* ── COMPARISON FOOTER ── */
+.compare-section{
+  max-width:900px;margin:0 auto;padding:0 24px 80px;
+  position:relative;z-index:1;
+}
+.compare-title{
+  font-family:'Fredoka One',cursive;font-size:28px;
+  color:#2A1A06;text-align:center;margin-bottom:28px;
+}
+.compare-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;
+}
+.compare-item{
+  background:#fff;border-radius:16px;
+  border:2px solid rgba(0,0,0,0.06);
+  padding:16px 14px;text-align:center;
+}
+.compare-emoji{font-size:28px;margin-bottom:8px}
+.compare-name{font-family:'Fredoka One',cursive;font-size:18px;color:#2A1A06;margin-bottom:2px}
+.compare-level{font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-badge">✨ Mascot Redesign · Version 2.0</div>
+  <h1 class="header-title">Meet Your <span>Friendly</span> Crew!</h1>
+  <p class="header-sub">Rounder. Warmer. Funnier. These buddies are here to make investing the most fun thing you do all day.</p>
+</header>
+
+<!-- MASCOT GRID -->
+<div class="mascot-grid">
+
+  <!-- ══════════════════════════════════════════════
+       MASCOT 1 — PENNY (Baby Bull) · Bronze
+  ══════════════════════════════════════════════ -->
+  <div class="mcard">
+    <div class="mcard-strip" style="background:linear-gradient(90deg,#F0A030,#F5C518,#F0A030)"></div>
+    <div class="mcard-stage">
+      <div class="mcard-stage-bg" style="background:linear-gradient(160deg,#FFF8E0 0%,#FFF0C0 100%)"></div>
+      <!-- Decorative dots bg -->
+      <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.4" viewBox="0 0 224 240">
+        <circle cx="20" cy="30" r="5" fill="#F5C518" opacity="0.4"/>
+        <circle cx="200" cy="40" r="7" fill="#F0A030" opacity="0.3"/>
+        <circle cx="30" cy="190" r="6" fill="#F5C518" opacity="0.3"/>
+        <circle cx="190" cy="200" r="5" fill="#F0A030" opacity="0.4"/>
+        <circle cx="112" cy="20" r="4" fill="#F5C518" opacity="0.3"/>
+        <circle cx="40" cy="120" r="4" fill="#F0A030" opacity="0.25"/>
+        <circle cx="185" cy="130" r="5" fill="#F5C518" opacity="0.3"/>
+      </svg>
+
+      <div class="tier-pill" style="color:#C8860A;border-color:rgba(200,134,10,0.35);background:rgba(255,248,220,0.9)">Bronze</div>
+      <div class="unlock-pill">Lv 1 · Starter</div>
+
+      <!-- PENNY SVG — Super chibi, huge eyes, maximum cute -->
+      <svg class="mcard-mascot bounce" viewBox="0 0 200 230" width="175">
+
+        <!-- Shadow under body -->
+        <ellipse cx="100" cy="224" rx="52" ry="8" fill="#D4A020" opacity="0.2"/>
+
+        <!-- ── BODY (super round chibi) ── -->
+        <ellipse cx="100" cy="185" rx="46" ry="40" fill="#6B9FE8"/>
+        <!-- Tummy highlight -->
+        <ellipse cx="100" cy="180" rx="28" ry="25" fill="#8AB8F0" opacity="0.5"/>
+        <!-- Overall buckle -->
+        <rect x="88" y="162" width="24" height="16" rx="6" fill="#3A78D8"/>
+        <rect x="92" y="165" width="16" height="10" rx="4" fill="#5A90E8"/>
+        <!-- Straps -->
+        <rect x="82" y="148" width="8" height="20" rx="4" fill="#3A78D8"/>
+        <rect x="110" y="148" width="8" height="20" rx="4" fill="#3A78D8"/>
+
+        <!-- ── ARMS ── -->
+        <!-- Left arm (waving!) -->
+        <ellipse cx="54" cy="175" rx="14" ry="11" fill="#E8A048" transform="rotate(-20,54,175)"/>
+        <ellipse cx="40" cy="162" rx="12" ry="10" fill="#E8A048" transform="rotate(-40,40,162)"/>
+        <!-- Right arm holding coin -->
+        <ellipse cx="146" cy="175" rx="14" ry="11" fill="#E8A048" transform="rotate(20,146,175)"/>
+        <ellipse cx="160" cy="162" rx="12" ry="10" fill="#E8A048" transform="rotate(40,160,162)"/>
+
+        <!-- COIN in right hand -->
+        <g style="animation:coin-bounce 1.8s ease-in-out infinite">
+          <circle cx="168" cy="148" r="18" fill="#D4940A"/>
+          <circle cx="168" cy="146" r="18" fill="#F0B020"/>
+          <circle cx="168" cy="144" r="18" fill="#F5C518"/>
+          <circle cx="168" cy="144" r="14" fill="#FFD740"/>
+          <text x="168" y="150" text-anchor="middle" font-size="16" font-weight="900" fill="#9A6800" font-family="Arial,sans-serif">$</text>
+          <!-- Coin shine -->
+          <ellipse cx="162" cy="138" rx="5" ry="3" fill="white" opacity="0.5" transform="rotate(-30,162,138)"/>
+        </g>
+
+        <!-- ── LEGS ── -->
+        <ellipse cx="80" cy="218" rx="16" ry="11" fill="#3A78D8"/>
+        <ellipse cx="120" cy="218" rx="16" ry="11" fill="#3A78D8"/>
+        <!-- Shoes -->
+        <ellipse cx="78" cy="220" rx="18" ry="9" fill="#2A2A3A"/>
+        <ellipse cx="122" cy="220" rx="18" ry="9" fill="#2A2A3A"/>
+        <!-- Shoe highlight -->
+        <ellipse cx="72" cy="217" rx="7" ry="4" fill="#3A3A4A" opacity="0.7"/>
+        <ellipse cx="116" cy="217" rx="7" ry="4" fill="#3A3A4A" opacity="0.7"/>
+
+        <!-- ── HEAD (super round, huge) ── -->
+        <!-- Head shadow/base -->
+        <ellipse cx="102" cy="116" rx="72" ry="70" fill="#D48830" opacity="0.2"/>
+        <!-- Main head -->
+        <circle cx="100" cy="112" r="70" fill="#F0A848"/>
+        <!-- Head highlight -->
+        <ellipse cx="82" cy="76" rx="30" ry="22" fill="#F8C870" opacity="0.5"/>
+
+        <!-- HORNS (tiny cute nubs) -->
+        <ellipse cx="68" cy="50" rx="11" ry="16" fill="#F8D870" transform="rotate(-12,68,50)"/>
+        <ellipse cx="132" cy="50" rx="11" ry="16" fill="#F8D870" transform="rotate(12,132,50)"/>
+        <!-- Horn tips -->
+        <ellipse cx="66" cy="38" rx="7" ry="9" fill="#FFE898" transform="rotate(-12,66,38)"/>
+        <ellipse cx="134" cy="38" rx="7" ry="9" fill="#FFE898" transform="rotate(12,134,38)"/>
+
+        <!-- EARS -->
+        <circle cx="30" cy="100" r="22" fill="#E89838"/>
+        <circle cx="30" cy="100" r="14" fill="#F8B858"/>
+        <circle cx="30" cy="100" r="8" fill="#F0A848"/>
+        <circle cx="170" cy="100" r="22" fill="#E89838"/>
+        <circle cx="170" cy="100" r="14" fill="#F8B858"/>
+        <circle cx="170" cy="100" r="8" fill="#F0A848"/>
+
+        <!-- ── EYES (HUGE sparkly chibi eyes!) ── -->
+        <!-- Eye bg whites -->
+        <ellipse cx="74" cy="105" rx="26" ry="28" fill="white"/>
+        <ellipse cx="126" cy="105" rx="26" ry="28" fill="white"/>
+        <!-- Eye shadow top -->
+        <ellipse cx="74" cy="94" rx="26" ry="14" fill="#E8D4B8" opacity="0.3"/>
+        <ellipse cx="126" cy="94" rx="26" ry="14" fill="#E8D4B8" opacity="0.3"/>
+        <!-- Iris (warm brown) -->
+        <circle cx="74" cy="108" r="18" fill="#5A3010"/>
+        <circle cx="126" cy="108" r="18" fill="#5A3010"/>
+        <!-- Iris color ring -->
+        <circle cx="74" cy="108" r="16" fill="#7A4820"/>
+        <circle cx="126" cy="108" r="16" fill="#7A4820"/>
+        <!-- Pupil -->
+        <circle cx="76" cy="110" r="10" fill="#1A0800"/>
+        <circle cx="128" cy="110" r="10" fill="#1A0800"/>
+        <!-- BIG primary catchlight -->
+        <circle cx="82" cy="100" r="8" fill="white"/>
+        <circle cx="134" cy="100" r="8" fill="white"/>
+        <!-- Secondary catchlight -->
+        <circle cx="70" cy="114" r="4" fill="white" opacity="0.7"/>
+        <circle cx="122" cy="114" r="4" fill="white" opacity="0.7"/>
+        <!-- Tiny star catchlight -->
+        <circle cx="85" cy="104" r="2.5" fill="white" opacity="0.5"/>
+        <circle cx="137" cy="104" r="2.5" fill="white" opacity="0.5"/>
+        <!-- Eye outline/lash -->
+        <ellipse cx="74" cy="105" rx="26" ry="28" fill="none" stroke="#E8A048" stroke-width="2" opacity="0.3"/>
+        <ellipse cx="126" cy="105" rx="26" ry="28" fill="none" stroke="#E8A048" stroke-width="2" opacity="0.3"/>
+        <!-- Top lash curve -->
+        <path d="M50,90 Q74,78 98,90" stroke="#3A1A00" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <path d="M102,90 Q126,78 150,90" stroke="#3A1A00" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+        <!-- ── SNOUT (round and sweet) ── -->
+        <ellipse cx="100" cy="132" rx="28" ry="20" fill="#F8C098"/>
+        <!-- Snout highlight -->
+        <ellipse cx="90" cy="125" rx="12" ry="7" fill="#FFDAC0" opacity="0.6"/>
+        <!-- Cute little heart nose! -->
+        <path d="M100,131 C100,131 96,127 93,129 C90,131 90,135 100,140 C110,135 110,131 107,129 C104,127 100,131 100,131 Z" fill="#E05050"/>
+        <!-- Dimple smile -->
+        <path d="M76,146 Q100,162 124,146" stroke="#C87040" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <!-- Cute teeth -->
+        <rect x="88" y="148" width="12" height="9" rx="4" fill="white"/>
+        <rect x="102" y="148" width="12" height="9" rx="4" fill="white"/>
+
+        <!-- ROSY CHEEKS ── -->
+        <ellipse cx="46" cy="124" rx="18" ry="12" fill="#FF9090" opacity="0.32"/>
+        <ellipse cx="154" cy="124" rx="18" ry="12" fill="#FF9090" opacity="0.32"/>
+
+        <!-- SPARKLES around head -->
+        <g style="animation:sparkle 2s ease-in-out infinite 0.2s">
+          <path d="M24,60 L26,52 L28,60 L36,62 L28,64 L26,72 L24,64 L16,62 Z" fill="#F5C518" opacity="0.8"/>
+        </g>
+        <g style="animation:sparkle 2.4s ease-in-out infinite 0.8s">
+          <path d="M175,58 L177,52 L179,58 L185,60 L179,62 L177,68 L175,62 L169,60 Z" fill="#F5C518" opacity="0.7"/>
+        </g>
+        <circle cx="18" cy="85" r="3" fill="#F5C518" style="animation:sparkle 1.8s ease-in-out infinite 0.5s"/>
+        <circle cx="182" cy="80" r="2.5" fill="#F0A030" style="animation:sparkle 2.2s ease-in-out infinite 1s"/>
+        <circle cx="20" cy="140" r="2" fill="#F5C518" style="animation:sparkle 2s ease-in-out infinite 1.4s"/>
+      </svg>
+
+    </div>
+    <div class="mcard-body">
+      <div class="mcard-name" style="color:#E08010">Penny</div>
+      <div class="mcard-species">Baby Bull · Bronze Tier</div>
+      <div class="mcard-quote">"Every coin counts! I'm gonna be rich... eventually! 🪙"</div>
+      <div class="mcard-perks">
+        <span class="perk-chip">🍀 Lucky</span>
+        <span class="perk-chip">🛡 Beginner Shield</span>
+        <span class="perk-chip">✨ Coin Magnet</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       MASCOT 2 — TORO (Smart Bull) · Silver
+  ══════════════════════════════════════════════ -->
+  <div class="mcard">
+    <div class="mcard-strip" style="background:linear-gradient(90deg,#A8C8E0,#C8DCF0,#A8C8E0)"></div>
+    <div class="mcard-stage">
+      <div class="mcard-stage-bg" style="background:linear-gradient(160deg,#EEF6FF 0%,#DAEcFF 100%)"></div>
+      <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.35" viewBox="0 0 224 240">
+        <circle cx="25" cy="35" r="6" fill="#6AAAE0" opacity="0.35"/>
+        <circle cx="195" cy="45" r="8" fill="#A8C8E0" opacity="0.3"/>
+        <circle cx="35" cy="195" r="5" fill="#6AAAE0" opacity="0.3"/>
+        <circle cx="188" cy="195" r="6" fill="#A8C8E0" opacity="0.35"/>
+        <circle cx="112" cy="18" r="4" fill="#6AAAE0" opacity="0.3"/>
+      </svg>
+
+      <div class="tier-pill" style="color:#5A90C0;border-color:rgba(90,144,192,0.35);background:rgba(238,246,255,0.9)">Silver</div>
+      <div class="unlock-pill">Lv 11 · Investor</div>
+
+      <!-- TORO SVG — Friendly confident bull with glasses and cute tie -->
+      <svg class="mcard-mascot pulse" viewBox="0 0 200 230" width="175">
+
+        <ellipse cx="100" cy="224" rx="50" ry="8" fill="#6090B0" opacity="0.18"/>
+
+        <!-- BODY — smart casual, chunky -->
+        <ellipse cx="100" cy="185" rx="48" ry="42" fill="#2A4A8A"/>
+        <!-- Shirt highlight -->
+        <ellipse cx="100" cy="178" rx="30" ry="28" fill="#3A5AAA" opacity="0.5"/>
+
+        <!-- White collar -->
+        <path d="M78,155 L100,163 L122,155 L126,148 Q100,142 74,148 Z" fill="#F0F0E8"/>
+        <path d="M100,163 L78,155" stroke="#D8D8CC" stroke-width="1" fill="none"/>
+        <path d="M100,163 L122,155" stroke="#D8D8CC" stroke-width="1" fill="none"/>
+
+        <!-- Fun polka-dot tie -->
+        <path d="M92,155 L100,161 L108,155 L106,200 L100,208 L94,200 Z" fill="#E85A30"/>
+        <circle cx="98" cy="168" r="3" fill="white" opacity="0.7"/>
+        <circle cx="102" cy="178" r="3" fill="white" opacity="0.7"/>
+        <circle cx="99" cy="188" r="2.5" fill="white" opacity="0.6"/>
+        <!-- Tie knot -->
+        <rect x="93" y="151" width="14" height="10" rx="4" fill="#C84020"/>
+
+        <!-- Arms -->
+        <ellipse cx="52" cy="178" rx="16" ry="12" fill="#C89040" transform="rotate(-15,52,178)"/>
+        <ellipse cx="148" cy="178" rx="16" ry="12" fill="#C89040" transform="rotate(15,148,178)"/>
+        <!-- Thumbs up left hand! -->
+        <ellipse cx="38" cy="168" rx="13" ry="14" fill="#C89040"/>
+        <rect x="32" y="155" width="10" height="16" rx="5" fill="#C89040"/>
+        <ellipse cx="37" cy="154" rx="7" ry="8" fill="#D8A050"/>
+
+        <!-- Briefcase right hand -->
+        <rect x="148" y="158" width="32" height="24" rx="6" fill="#3A2A18"/>
+        <rect x="148" y="158" width="32" height="24" rx="6" fill="none" stroke="#5A4030" stroke-width="1.5"/>
+        <rect x="156" y="153" width="16" height="8" rx="4" fill="none" stroke="#5A4030" stroke-width="2"/>
+        <line x1="148" y1="170" x2="180" y2="170" stroke="#5A4030" stroke-width="1.5"/>
+        <circle cx="164" cy="170" r="3" fill="#C89040"/>
+
+        <!-- LEGS -->
+        <ellipse cx="82" cy="218" rx="16" ry="10" fill="#1A3A7A"/>
+        <ellipse cx="118" cy="218" rx="16" ry="10" fill="#1A3A7A"/>
+        <ellipse cx="80" cy="220" rx="18" ry="9" fill="#181820"/>
+        <ellipse cx="120" cy="220" rx="18" ry="9" fill="#181820"/>
+
+        <!-- HEAD -->
+        <ellipse cx="102" cy="110" rx="72" ry="68" fill="#8A6028" opacity="0.15"/>
+        <circle cx="100" cy="108" r="68" fill="#C89A50"/>
+        <ellipse cx="82" cy="72" rx="28" ry="20" fill="#E0B870" opacity="0.5"/>
+
+        <!-- Horns (bigger, more defined, still friendly) -->
+        <path d="M64,52 Q48,22 58,10 Q64,4 66,28 Q54,36 66,54" fill="#F0D080" rx="8"/>
+        <path d="M136,52 Q152,22 142,10 Q136,4 134,28 Q146,36 134,54" fill="#F0D080"/>
+        <!-- Horn sheen -->
+        <ellipse cx="60" cy="28" rx="5" ry="8" fill="white" opacity="0.3" transform="rotate(-15,60,28)"/>
+        <ellipse cx="140" cy="28" rx="5" ry="8" fill="white" opacity="0.3" transform="rotate(15,140,28)"/>
+
+        <!-- Ears -->
+        <circle cx="28" cy="98" r="24" fill="#B88840"/>
+        <circle cx="28" cy="98" r="15" fill="#D8A858"/>
+        <circle cx="28" cy="98" r="8" fill="#C89A50"/>
+        <circle cx="172" cy="98" r="24" fill="#B88840"/>
+        <circle cx="172" cy="98" r="15" fill="#D8A858"/>
+        <circle cx="172" cy="98" r="8" fill="#C89A50"/>
+
+        <!-- EYES — confident wink! -->
+        <!-- Left eye normal -->
+        <ellipse cx="72" cy="102" rx="25" ry="26" fill="white"/>
+        <ellipse cx="72" cy="90" rx="24" ry="12" fill="#D4C0A0" opacity="0.2"/>
+        <circle cx="72" cy="106" r="17" fill="#3A2010"/>
+        <circle cx="72" cy="106" r="14" fill="#5A3418"/>
+        <circle cx="74" cy="108" r="9" fill="#0C0400"/>
+        <circle cx="80" cy="98" r="8" fill="white"/>
+        <circle cx="68" cy="112" r="4" fill="white" opacity="0.6"/>
+        <circle cx="82" cy="100" r="2.5" fill="white" opacity="0.5"/>
+        <path d="M48,88 Q72,76 96,88" stroke="#3A2010" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+        <!-- RIGHT EYE — winking! (^_^) -->
+        <path d="M100,102 Q126,88 150,102" stroke="#3A2010" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <!-- Wink crinkle -->
+        <path d="M108,100 Q126,94 144,100" stroke="#3A2010" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.4"/>
+
+        <!-- GLASSES! -->
+        <circle cx="72" cy="102" rx="28" ry="28" fill="none" stroke="#3A2A1A" stroke-width="3"/>
+        <circle cx="128" cy="102" rx="25" ry="25" fill="none" stroke="#3A2A1A" stroke-width="3"/>
+        <line x1="100" y1="102" x2="103" y2="102" stroke="#3A2A1A" stroke-width="3"/>
+        <line x1="44" y1="96" x2="24" y2="90" stroke="#3A2A1A" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="153" y1="96" x2="176" y2="90" stroke="#3A2A1A" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Glasses shine -->
+        <path d="M56,90 Q64,86 72,88" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.5"/>
+        <path d="M114,90 Q122,86 130,88" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.5"/>
+
+        <!-- SNOUT -->
+        <ellipse cx="100" cy="128" rx="30" ry="21" fill="#E0B090"/>
+        <ellipse cx="88" cy="120" rx="13" ry="8" fill="#F0C8A8" opacity="0.55"/>
+        <!-- Cute nose -->
+        <ellipse cx="100" cy="126" rx="8" ry="6" fill="#9A5A20"/>
+        <ellipse cx="97" cy="124" rx="3" ry="2" fill="#B87040" opacity="0.5"/>
+        <!-- Big happy smile -->
+        <path d="M74,140 Q100,158 126,140" stroke="#9A5A20" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <!-- Teeth -->
+        <rect x="86" y="143" width="13" height="10" rx="4" fill="white"/>
+        <rect x="101" y="143" width="13" height="10" rx="4" fill="white"/>
+        <line x1="100" y1="143" x2="100" y2="153" stroke="#D0C0B0" stroke-width="1"/>
+
+        <!-- Cheeks -->
+        <ellipse cx="44" cy="122" rx="18" ry="11" fill="#FF8888" opacity="0.3"/>
+        <ellipse cx="156" cy="122" rx="18" ry="11" fill="#FF8888" opacity="0.3"/>
+
+        <!-- Stars -->
+        <g style="animation:sparkle 2s ease-in-out infinite 0.3s">
+          <path d="M18,60 L20,54 L22,60 L28,62 L22,64 L20,70 L18,64 L12,62 Z" fill="#6AAAE0" opacity="0.8"/>
+        </g>
+        <g style="animation:sparkle 2.6s ease-in-out infinite 1s">
+          <path d="M175,55 L177,50 L179,55 L184,57 L179,59 L177,64 L175,59 L170,57 Z" fill="#6AAAE0" opacity="0.7"/>
+        </g>
+      </svg>
+
+    </div>
+    <div class="mcard-body">
+      <div class="mcard-name" style="color:#3A70C0">Toro</div>
+      <div class="mcard-species">Smart Bull · Silver Tier</div>
+      <div class="mcard-quote">"Two bear markets survived. Zero chill lost. 📊"</div>
+      <div class="mcard-perks">
+        <span class="perk-chip">🔍 Market Scanner</span>
+        <span class="perk-chip">📈 Portfolio Pro</span>
+        <span class="perk-chip">😎 Cool Factor</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       MASCOT 3 — VIXEN (Fox) · Gold
+  ══════════════════════════════════════════════ -->
+  <div class="mcard">
+    <div class="mcard-strip" style="background:linear-gradient(90deg,#F5A518,#F5C518,#F5A518)"></div>
+    <div class="mcard-stage">
+      <div class="mcard-stage-bg" style="background:linear-gradient(160deg,#FFFBEC 0%,#FFF3C8 100%)"></div>
+      <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.4" viewBox="0 0 224 240">
+        <circle cx="22" cy="32" r="7" fill="#F5C518" opacity="0.35"/>
+        <circle cx="196" cy="42" r="8" fill="#F0A030" opacity="0.3"/>
+        <circle cx="30" cy="200" r="5" fill="#F5C518" opacity="0.3"/>
+        <circle cx="190" cy="195" r="6" fill="#F0A030" opacity="0.35"/>
+        <path d="M15,60 L17,54 L19,60 L25,62 L19,64 L17,70 L15,64 L9,62 Z" fill="#F5C518" opacity="0.4"/>
+        <path d="M180,160 L182,155 L184,160 L189,162 L184,164 L182,169 L180,164 L175,162 Z" fill="#F5C518" opacity="0.35"/>
+      </svg>
+
+      <div class="tier-pill" style="color:#C89000;border-color:rgba(200,144,0,0.35);background:rgba(255,251,236,0.9)">Gold</div>
+      <div class="unlock-pill">Lv 26 · Analyst</div>
+
+      <!-- VIXEN SVG — Super friendly playful fox, no sly, pure joy -->
+      <svg class="mcard-mascot wiggle" viewBox="0 0 210 240" width="180">
+
+        <ellipse cx="105" cy="234" rx="52" ry="8" fill="#C89000" opacity="0.2"/>
+
+        <!-- BIG FLUFFY TAIL -->
+        <ellipse cx="172" cy="190" rx="32" ry="42" fill="#D4601A" transform="rotate(-20,172,190)"/>
+        <ellipse cx="172" cy="190" rx="24" ry="34" fill="#E87030" transform="rotate(-20,172,190)"/>
+        <!-- Tail white tip -->
+        <ellipse cx="182" cy="162" rx="16" ry="22" fill="#F8EEE0" transform="rotate(-20,182,162)"/>
+        <ellipse cx="184" cy="156" rx="11" ry="15" fill="white" transform="rotate(-20,184,156)" opacity="0.8"/>
+
+        <!-- BODY -->
+        <ellipse cx="100" cy="192" rx="50" ry="44" fill="#E8701A"/>
+        <ellipse cx="100" cy="185" rx="32" ry="30" fill="#F8F0E0"/>
+        <!-- Belly pattern dots (playful!) -->
+        <circle cx="92" cy="182" r="4" fill="#F5C518" opacity="0.6"/>
+        <circle cx="105" cy="188" r="3.5" fill="#F5C518" opacity="0.5"/>
+        <circle cx="108" cy="175" r="3" fill="#F5C518" opacity="0.5"/>
+        <circle cx="95" cy="196" r="3" fill="#F5C518" opacity="0.4"/>
+
+        <!-- Arms -->
+        <ellipse cx="50" cy="182" rx="18" ry="13" fill="#D4601A" transform="rotate(-20,50,182)"/>
+        <ellipse cx="150" cy="182" rx="18" ry="13" fill="#D4601A" transform="rotate(20,150,182)"/>
+        <!-- Left paw wave -->
+        <ellipse cx="36" cy="170" rx="16" ry="14" fill="#D4601A"/>
+        <ellipse cx="36" cy="170" rx="12" ry="10" fill="#E87030"/>
+        <!-- Right paw holding chart tablet -->
+        <ellipse cx="164" cy="170" rx="14" ry="12" fill="#D4601A"/>
+        <!-- Tiny chart -->
+        <rect x="152" y="150" width="30" height="22" rx="5" fill="#0A1228"/>
+        <polyline points="157,166 163,159 169,162 176,154" fill="none" stroke="#00C896" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="166" y="160" font-size="5" fill="#F5C518" font-family="monospace" font-weight="bold">+15%</text>
+
+        <!-- LEGS -->
+        <ellipse cx="82" cy="226" rx="16" ry="10" fill="#C45010"/>
+        <ellipse cx="118" cy="226" rx="16" ry="10" fill="#C45010"/>
+        <ellipse cx="80" cy="228" rx="18" ry="9" fill="#2A1A08"/>
+        <ellipse cx="120" cy="228" rx="18" ry="9" fill="#2A1A08"/>
+
+        <!-- HEAD (round, warm) -->
+        <ellipse cx="102" cy="105" rx="72" ry="68" fill="#D4601A" opacity="0.15"/>
+        <circle cx="100" cy="100" r="68" fill="#E8701A"/>
+
+        <!-- FOX EARS (big fluffy triangles!) -->
+        <polygon points="52,52 28,8 76,40" fill="#D4601A"/>
+        <polygon points="52,52 34,16 70,44" fill="#F07030"/>
+        <!-- Ear inner white -->
+        <polygon points="54,50 38,22 68,42" fill="#F8EEE0"/>
+        <polygon points="148,52 172,8 124,40" fill="#D4601A"/>
+        <polygon points="148,52 166,16 130,44" fill="#F07030"/>
+        <polygon points="146,50 162,22 132,42" fill="#F8EEE0"/>
+
+        <!-- Face white blaze -->
+        <ellipse cx="100" cy="110" rx="48" ry="44" fill="#F8EEE0"/>
+        <!-- Muzzle -->
+        <ellipse cx="100" cy="128" rx="28" ry="20" fill="white"/>
+
+        <!-- EYES — big, happy, sparkly -->
+        <ellipse cx="72" cy="98" rx="24" ry="25" fill="white"/>
+        <ellipse cx="128" cy="98" rx="24" ry="25" fill="white"/>
+        <!-- Irises (amber/gold — warm!) -->
+        <circle cx="72" cy="101" r="16" fill="#C07800"/>
+        <circle cx="128" cy="101" r="16" fill="#C07800"/>
+        <circle cx="72" cy="101" r="13" fill="#E09000"/>
+        <circle cx="128" cy="101" r="13" fill="#E09000"/>
+        <!-- Pupils -->
+        <circle cx="74" cy="103" r="9" fill="#0A0400"/>
+        <circle cx="130" cy="103" r="9" fill="#0A0400"/>
+        <!-- BIG catchlights -->
+        <circle cx="80" cy="94" r="7" fill="white"/>
+        <circle cx="136" cy="94" r="7" fill="white"/>
+        <circle cx="68" cy="108" r="3.5" fill="white" opacity="0.65"/>
+        <circle cx="124" cy="108" r="3.5" fill="white" opacity="0.65"/>
+        <!-- Star sparkle in eye -->
+        <circle cx="83" cy="97" r="2" fill="white" opacity="0.5"/>
+        <!-- Lashes -->
+        <path d="M50,85 Q72,73 94,85" stroke="#5A2800" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <path d="M106,85 Q128,73 150,85" stroke="#5A2800" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+        <!-- NOSE (little round pink!) -->
+        <ellipse cx="100" cy="128" rx="9" ry="7" fill="#E05050"/>
+        <ellipse cx="97" cy="126" rx="3.5" ry="2.5" fill="#F08080" opacity="0.6"/>
+
+        <!-- WHISKERS (cute) -->
+        <line x1="72" y1="133" x2="36" y2="125" stroke="#C87040" stroke-width="1.5" opacity="0.5"/>
+        <line x1="72" y1="138" x2="36" y2="138" stroke="#C87040" stroke-width="1.5" opacity="0.5"/>
+        <line x1="128" y1="133" x2="164" y2="125" stroke="#C87040" stroke-width="1.5" opacity="0.5"/>
+        <line x1="128" y1="138" x2="164" y2="138" stroke="#C87040" stroke-width="1.5" opacity="0.5"/>
+
+        <!-- BIG SMILE -->
+        <path d="M74,144 Q100,162 126,144" stroke="#9A4010" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <rect x="86" y="147" width="12" height="10" rx="4" fill="white"/>
+        <rect x="100" y="147" width="12" height="10" rx="4" fill="white"/>
+        <line x1="99" y1="147" x2="99" y2="157" stroke="#D0C0B0" stroke-width="1"/>
+
+        <!-- Cheeks -->
+        <ellipse cx="48" cy="118" rx="18" ry="11" fill="#FF9090" opacity="0.32"/>
+        <ellipse cx="152" cy="118" rx="18" ry="11" fill="#FF9090" opacity="0.32"/>
+
+        <!-- Sparkles -->
+        <g style="animation:sparkle 2.2s ease-in-out infinite 0.4s">
+          <path d="M22,60 L24,54 L26,60 L32,62 L26,64 L24,70 L22,64 L16,62 Z" fill="#F5C518" opacity="0.8"/>
+        </g>
+        <g style="animation:sparkle 1.9s ease-in-out infinite 1.1s">
+          <path d="M178,60 L180,55 L182,60 L187,62 L182,64 L180,69 L178,64 L173,62 Z" fill="#F5C518" opacity="0.7"/>
+        </g>
+      </svg>
+
+    </div>
+    <div class="mcard-body">
+      <div class="mcard-name" style="color:#D08000">Vixen</div>
+      <div class="mcard-species">Clever Fox · Gold Tier</div>
+      <div class="mcard-quote">"I find deals others miss. Also I have the fluffiest tail! 🦊"</div>
+      <div class="mcard-perks">
+        <span class="perk-chip">🎯 Pattern Finder</span>
+        <span class="perk-chip">📡 Deal Radar</span>
+        <span class="perk-chip">🦊 Fluffy Power</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       MASCOT 4 — MANE (Lion) · Platinum
+  ══════════════════════════════════════════════ -->
+  <div class="mcard">
+    <div class="mcard-strip" style="background:linear-gradient(90deg,#C8A8F8,#D8C0FF,#C8A8F8)"></div>
+    <div class="mcard-stage">
+      <div class="mcard-stage-bg" style="background:linear-gradient(160deg,#F8F0FF 0%,#EEE0FF 100%)"></div>
+      <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.35" viewBox="0 0 224 240">
+        <circle cx="22" cy="32" r="7" fill="#C8A8F8" opacity="0.4"/>
+        <circle cx="196" cy="42" r="8" fill="#B898E8" opacity="0.35"/>
+        <circle cx="30" cy="195" r="5" fill="#C8A8F8" opacity="0.35"/>
+        <circle cx="190" cy="195" r="6" fill="#D8C0FF" opacity="0.4"/>
+      </svg>
+
+      <div class="tier-pill" style="color:#9060D0;border-color:rgba(144,96,208,0.35);background:rgba(248,240,255,0.9)">Platinum</div>
+      <div class="unlock-pill">Lv 46 · Portfolio King</div>
+
+      <!-- MANE SVG — Round friendly king lion, cute crown, big smile -->
+      <svg class="mcard-mascot bounce" viewBox="0 0 210 240" width="178" style="animation-duration:3s">
+
+        <ellipse cx="105" cy="234" rx="54" ry="8" fill="#8A5A10" opacity="0.18"/>
+
+        <!-- BODY — royal but round! -->
+        <ellipse cx="105" cy="192" rx="52" ry="46" fill="#8A4A90"/>
+        <ellipse cx="105" cy="184" rx="34" ry="32" fill="#A060A8" opacity="0.5"/>
+        <!-- Royal robe pattern -->
+        <!-- Gold trim stripes -->
+        <path d="M58,175 Q105,165 152,175" stroke="#F5C518" stroke-width="2" fill="none" opacity="0.5"/>
+        <path d="M52,190 Q105,180 158,190" stroke="#F5C518" stroke-width="1.5" fill="none" opacity="0.3"/>
+        <!-- Star emblem on chest -->
+        <circle cx="105" cy="195" r="18" fill="#6A3878"/>
+        <circle cx="105" cy="193" r="16" fill="#7A4888"/>
+        <path d="M105,181 L107,189 L115,189 L109,194 L111,202 L105,197 L99,202 L101,194 L95,189 L103,189 Z" fill="#F5C518"/>
+
+        <!-- Arms -->
+        <ellipse cx="52" cy="185" rx="18" ry="13" fill="#C89838" transform="rotate(-20,52,185)"/>
+        <ellipse cx="158" cy="185" rx="18" ry="13" fill="#C89838" transform="rotate(20,158,185)"/>
+        <!-- Left paw wave -->
+        <ellipse cx="36" cy="174" rx="16" ry="14" fill="#C89838"/>
+        <ellipse cx="36" cy="174" rx="12" ry="10" fill="#D8A848"/>
+        <!-- Right paw holding scepter -->
+        <ellipse cx="174" cy="172" rx="14" ry="12" fill="#C89838"/>
+        <!-- Cute scepter -->
+        <rect x="168" y="148" width="6" height="32" rx="3" fill="#C89838"/>
+        <circle cx="171" cy="145" r="10" fill="#C8900A"/>
+        <circle cx="171" cy="143" r="10" fill="#F5C518"/>
+        <circle cx="171" cy="143" r="7" fill="#FFD740"/>
+        <path d="M167,137 L171,128 L175,137 L184,140 L175,143 L171,152 L167,143 L158,140 Z" fill="#F5C518"/>
+
+        <!-- LEGS -->
+        <ellipse cx="85" cy="228" rx="17" ry="11" fill="#6A3878"/>
+        <ellipse cx="125" cy="228" rx="17" ry="11" fill="#6A3878"/>
+        <ellipse cx="83" cy="230" rx="19" ry="10" fill="#2A1828"/>
+        <ellipse cx="127" cy="230" rx="19" ry="10" fill="#2A1828"/>
+
+        <!-- BIG FLUFFY MANE -->
+        <circle cx="105" cy="105" r="82" fill="#D4780A"/>
+        <circle cx="105" cy="105" r="76" fill="#E88A18"/>
+        <circle cx="105" cy="105" r="70" fill="#F0A030"/>
+        <!-- Mane texture bumps (fluffy!) -->
+        <circle cx="34" cy="80" r="22" fill="#E88A18"/>
+        <circle cx="176" cy="80" r="22" fill="#E88A18"/>
+        <circle cx="28" cy="110" r="20" fill="#D4780A"/>
+        <circle cx="182" cy="110" r="20" fill="#D4780A"/>
+        <circle cx="42" cy="52" r="18" fill="#E88A18"/>
+        <circle cx="168" cy="52" r="18" fill="#E88A18"/>
+        <circle cx="72" cy="36" r="17" fill="#F0A030"/>
+        <circle cx="138" cy="36" r="17" fill="#F0A030"/>
+        <circle cx="105" cy="28" r="18" fill="#E88A18"/>
+
+        <!-- Main face -->
+        <circle cx="105" cy="108" r="62" fill="#E8B050"/>
+        <ellipse cx="88" cy="74" rx="25" ry="18" fill="#F0C870" opacity="0.5"/>
+
+        <!-- CUTE CROWN! -->
+        <rect x="74" y="46" width="62" height="20" rx="6" fill="#F5C518"/>
+        <!-- Crown points (rounded, toy-like!) -->
+        <rect x="74" y="26" width="14" height="22" rx="7" fill="#F5C518"/>
+        <rect x="98" y="20" width="14" height="28" rx="7" fill="#F5C518"/>
+        <rect x="122" y="26" width="14" height="22" rx="7" fill="#F5C518"/>
+        <!-- Crown gems (big round ones!) -->
+        <circle cx="81" cy="30" r="6" fill="#FF5050"/>
+        <circle cx="81" cy="30" r="4" fill="#FF8080"/>
+        <circle cx="105" cy="24" r="7" fill="#8050FF"/>
+        <circle cx="105" cy="24" r="5" fill="#B090FF"/>
+        <circle cx="129" cy="30" r="6" fill="#00C896"/>
+        <circle cx="129" cy="30" r="4" fill="#60E8B8"/>
+        <!-- Crown band shine -->
+        <rect x="76" y="48" width="58" height="6" rx="3" fill="white" opacity="0.3"/>
+
+        <!-- EARS -->
+        <circle cx="36" cy="92" r="22" fill="#D4901A"/>
+        <circle cx="36" cy="92" r="14" fill="#E8A830"/>
+        <circle cx="36" cy="92" r="8" fill="#E8B050"/>
+        <circle cx="174" cy="92" r="22" fill="#D4901A"/>
+        <circle cx="174" cy="92" r="14" fill="#E8A830"/>
+        <circle cx="174" cy="92" r="8" fill="#E8B050"/>
+
+        <!-- EYES — big warm friendly -->
+        <ellipse cx="80" cy="108" rx="26" ry="27" fill="white"/>
+        <ellipse cx="130" cy="108" rx="26" ry="27" fill="white"/>
+        <ellipse cx="80" cy="96" rx="25" ry="13" fill="#D4C0A0" opacity="0.2"/>
+        <ellipse cx="130" cy="96" rx="25" ry="13" fill="#D4C0A0" opacity="0.2"/>
+        <!-- Golden irises (lion!) -->
+        <circle cx="80" cy="112" r="18" fill="#806010"/>
+        <circle cx="130" cy="112" r="18" fill="#806010"/>
+        <circle cx="80" cy="112" r="15" fill="#C09020"/>
+        <circle cx="130" cy="112" r="15" fill="#C09020"/>
+        <circle cx="82" cy="114" r="10" fill="#0A0600"/>
+        <circle cx="132" cy="114" r="10" fill="#0A0600"/>
+        <!-- Catchlights -->
+        <circle cx="88" cy="104" r="8" fill="white"/>
+        <circle cx="138" cy="104" r="8" fill="white"/>
+        <circle cx="76" cy="118" r="4" fill="white" opacity="0.65"/>
+        <circle cx="126" cy="118" r="4" fill="white" opacity="0.65"/>
+        <circle cx="90" cy="106" r="2.5" fill="white" opacity="0.5"/>
+        <!-- Lashes -->
+        <path d="M56,94 Q80,82 104,94" stroke="#6A4010" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M106,94 Q130,82 154,94" stroke="#6A4010" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+        <!-- Nose (big round lion nose) -->
+        <ellipse cx="105" cy="132" rx="14" ry="10" fill="#9A5A10"/>
+        <ellipse cx="101" cy="129" rx="5" ry="3.5" fill="#C07A30" opacity="0.5"/>
+        <!-- Nostrils -->
+        <ellipse cx="100" cy="135" rx="4" ry="3" fill="#7A4008"/>
+        <ellipse cx="110" cy="135" rx="4" ry="3" fill="#7A4008"/>
+
+        <!-- BIG GOOFY HAPPY SMILE -->
+        <path d="M72,148 Q105,172 138,148" stroke="#9A5A10" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <!-- Teeth! 3 cute teeth -->
+        <rect x="85" y="151" width="12" height="11" rx="5" fill="white"/>
+        <rect x="99" y="151" width="12" height="11" rx="5" fill="white"/>
+        <rect x="113" y="151" width="12" height="11" rx="5" fill="white"/>
+        <line x1="98" y1="151" x2="98" y2="162" stroke="#D0C0B0" stroke-width="1"/>
+        <line x1="112" y1="151" x2="112" y2="162" stroke="#D0C0B0" stroke-width="1"/>
+        <!-- Tongue! -->
+        <ellipse cx="105" cy="164" rx="12" ry="8" fill="#FF7070" opacity="0.85"/>
+        <line x1="105" y1="157" x2="105" y2="172" stroke="#E05060" stroke-width="1.5" opacity="0.5"/>
+
+        <!-- Big rosy cheeks -->
+        <ellipse cx="50" cy="130" rx="20" ry="13" fill="#FF8888" opacity="0.35"/>
+        <ellipse cx="160" cy="130" rx="20" ry="13" fill="#FF8888" opacity="0.35"/>
+
+        <!-- Sparkles -->
+        <g style="animation:sparkle 2.1s ease-in-out infinite 0.5s">
+          <path d="M18,65 L20,59 L22,65 L28,67 L22,69 L20,75 L18,69 L12,67 Z" fill="#C8A8F8" opacity="0.8"/>
+        </g>
+        <g style="animation:sparkle 2.5s ease-in-out infinite 1.2s">
+          <path d="M182,60 L184,55 L186,60 L191,62 L186,64 L184,69 L182,64 L177,62 Z" fill="#C8A8F8" opacity="0.8"/>
+        </g>
+        <circle cx="20" cy="100" r="3" fill="#F5C518" style="animation:sparkle 1.8s ease-in-out infinite 0.8s"/>
+        <circle cx="190" cy="98" r="3" fill="#F5C518" style="animation:sparkle 2.2s ease-in-out infinite 1.4s"/>
+      </svg>
+
+    </div>
+    <div class="mcard-body">
+      <div class="mcard-name" style="color:#8040C0">Mane</div>
+      <div class="mcard-species">Royal Lion · Platinum Tier</div>
+      <div class="mcard-quote">"My portfolio roars louder than me! 🦁👑"</div>
+      <div class="mcard-perks">
+        <span class="perk-chip">👑 Royal Bonus</span>
+        <span class="perk-chip">🌍 Global Access</span>
+        <span class="perk-chip">💰 Dividend King</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       MASCOT 5 — AURUM (Dragon) · Legend
+  ══════════════════════════════════════════════ -->
+  <div class="mcard" style="border-color:rgba(245,197,24,0.3);box-shadow:0 4px 0 rgba(200,144,0,0.15), 0 12px 40px rgba(245,197,24,0.2)">
+    <div class="mcard-strip" style="background:linear-gradient(90deg,#C89000,#F5C518,#FFE97A,#F5C518,#C89000)"></div>
+    <div class="mcard-stage">
+      <div class="mcard-stage-bg" style="background:linear-gradient(160deg,#FFFBEC 0%,#FFF6D0 100%)"></div>
+      <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.5" viewBox="0 0 224 240">
+        <circle cx="22" cy="32" r="7" fill="#F5C518" opacity="0.5"/>
+        <circle cx="196" cy="42" r="8" fill="#F0A030" opacity="0.4"/>
+        <circle cx="30" cy="200" r="5" fill="#F5C518" opacity="0.4"/>
+        <circle cx="190" cy="195" r="6" fill="#F0A030" opacity="0.45"/>
+        <path d="M15,60 L17,54 L19,60 L25,62 L19,64 L17,70 L15,64 L9,62 Z" fill="#F5C518" opacity="0.55"/>
+        <path d="M178,48 L180,43 L182,48 L187,50 L182,52 L180,57 L178,52 L173,50 Z" fill="#F0A030" opacity="0.5"/>
+        <path d="M185,170 L187,165 L189,170 L194,172 L189,174 L187,179 L185,174 L180,172 Z" fill="#F5C518" opacity="0.5"/>
+      </svg>
+
+      <div class="tier-pill" style="color:#C89000;border-color:rgba(200,144,0,0.4);background:rgba(255,251,236,0.95);font-weight:900">⭐ Legend</div>
+      <div class="unlock-pill">Lv 71 · Top 1%</div>
+
+      <!-- AURUM SVG — CHUBBY ROUND FRIENDLY DRAGON! Breathing coins not fire! -->
+      <svg class="mcard-mascot pulse" viewBox="0 0 220 248" width="185" style="animation-duration:2.5s">
+
+        <ellipse cx="110" cy="242" rx="58" ry="9" fill="#B08800" opacity="0.22"/>
+
+        <!-- LITTLE WINGS (comically tiny for big body — funny!) -->
+        <!-- Left wing (tiny!) -->
+        <path d="M42,120 Q10,80 22,55 Q36,42 52,72 Q38,85 50,108" fill="#D4A000" opacity="0.9"/>
+        <path d="M44,118 Q18,84 28,64 Q38,56 50,80 Q40,90 52,110" fill="#F5C518" opacity="0.7"/>
+        <!-- Wing membrane lines -->
+        <path d="M44,116 Q34,98 38,78" stroke="#D4A000" stroke-width="1.2" fill="none" opacity="0.5"/>
+        <!-- Right wing (tiny!) -->
+        <path d="M178,120 Q210,80 198,55 Q184,42 168,72 Q182,85 170,108" fill="#D4A000" opacity="0.9"/>
+        <path d="M176,118 Q202,84 192,64 Q182,56 170,80 Q180,90 168,110" fill="#F5C518" opacity="0.7"/>
+        <path d="M176,116 Q186,98 182,78" stroke="#D4A000" stroke-width="1.2" fill="none" opacity="0.5"/>
+
+        <!-- ROUND CHUBBY BODY -->
+        <ellipse cx="110" cy="200" rx="62" ry="52" fill="#C89000"/>
+        <ellipse cx="110" cy="200" rx="58" ry="48" fill="#D4A010"/>
+        <!-- GOLDEN BELLY (round, prominent!) -->
+        <ellipse cx="110" cy="200" rx="42" ry="38" fill="#F0C030"/>
+        <ellipse cx="110" cy="198" rx="34" ry="30" fill="#F5C840"/>
+        <!-- Belly scale pattern (cute!) -->
+        <ellipse cx="98" cy="192" rx="10" ry="7" fill="#F8D860" opacity="0.6"/>
+        <ellipse cx="118" cy="188" rx="10" ry="7" fill="#F8D860" opacity="0.6"/>
+        <ellipse cx="106" cy="208" rx="12" ry="7" fill="#F8D860" opacity="0.5"/>
+        <!-- Star on belly -->
+        <path d="M110,186 L112,194 L120,194 L114,199 L116,207 L110,202 L104,207 L106,199 L100,194 L108,194 Z" fill="#F5C518"/>
+
+        <!-- Scale rows on back -->
+        <path d="M64,185 Q110,175 156,185" stroke="#C89000" stroke-width="1.5" fill="none" opacity="0.4"/>
+        <path d="M58,205 Q110,195 162,205" stroke="#B88000" stroke-width="1" fill="none" opacity="0.3"/>
+
+        <!-- LITTLE ARMS (stubby and cute!) -->
+        <ellipse cx="50" cy="188" rx="20" ry="14" fill="#C89000"/>
+        <ellipse cx="44" cy="192" rx="16" ry="13" fill="#D4A010"/>
+        <!-- Tiny claws (friendly rounded!) -->
+        <ellipse cx="34" cy="190" rx="7" ry="6" fill="#E8B820"/>
+        <ellipse cx="30" cy="197" rx="6" ry="5" fill="#E8B820"/>
+        <ellipse cx="36" cy="202" rx="6" ry="5" fill="#E8B820"/>
+
+        <ellipse cx="170" cy="188" rx="20" ry="14" fill="#C89000"/>
+        <ellipse cx="176" cy="192" rx="16" ry="13" fill="#D4A010"/>
+        <!-- Right claw doing thumbs up! -->
+        <ellipse cx="186" cy="190" rx="7" ry="6" fill="#E8B820"/>
+        <ellipse cx="190" cy="197" rx="6" ry="5" fill="#E8B820"/>
+        <ellipse cx="184" cy="202" rx="6" ry="5" fill="#E8B820"/>
+
+        <!-- Stubby legs -->
+        <ellipse cx="86" cy="236" rx="18" ry="12" fill="#B88000"/>
+        <ellipse cx="134" cy="236" rx="18" ry="12" fill="#B88000"/>
+        <ellipse cx="84" cy="238" rx="20" ry="10" fill="#7A5800"/>
+        <ellipse cx="136" cy="238" rx="20" ry="10" fill="#7A5800"/>
+
+        <!-- SHORT CHUBBY TAIL -->
+        <path d="M162,220 Q190,230 192,215 Q190,200 178,205" stroke="#C89000" stroke-width="22" fill="none" stroke-linecap="round"/>
+        <path d="M162,220 Q190,230 192,215 Q190,200 178,205" stroke="#D4A010" stroke-width="14" fill="none" stroke-linecap="round"/>
+        <!-- Tail spikes (cute small ones) -->
+        <ellipse cx="192" cy="204" rx="8" ry="12" fill="#F5C518" transform="rotate(30,192,204)"/>
+        <ellipse cx="185" cy="196" rx="6" ry="10" fill="#F0B820" transform="rotate(20,185,196)"/>
+
+        <!-- COIN BREATHING! (instead of fire) -->
+        <circle cx="88" cy="148" r="11" fill="#B88000" style="animation:coin-bounce 1.2s ease-in-out infinite 0s"/>
+        <circle cx="88" cy="146" r="11" fill="#F5C518" style="animation:coin-bounce 1.2s ease-in-out infinite 0s"/>
+        <text x="88" y="151" text-anchor="middle" font-size="11" fill="#8A5800" font-weight="900" font-family="Arial,sans-serif" style="animation:coin-bounce 1.2s ease-in-out infinite 0s">$</text>
+
+        <circle cx="66" cy="135" r="8" fill="#C89000" style="animation:coin-bounce 1.2s ease-in-out infinite 0.3s"/>
+        <circle cx="66" cy="133" r="8" fill="#F5C518" style="animation:coin-bounce 1.2s ease-in-out infinite 0.3s"/>
+        <text x="66" y="137" text-anchor="middle" font-size="8" fill="#8A5800" font-weight="900" font-family="Arial,sans-serif" style="animation:coin-bounce 1.2s ease-in-out infinite 0.3s">$</text>
+
+        <circle cx="50" cy="120" r="6" fill="#D4A010" style="animation:coin-bounce 1.2s ease-in-out infinite 0.6s"/>
+        <circle cx="50" cy="118" r="6" fill="#F5C518" style="animation:coin-bounce 1.2s ease-in-out infinite 0.6s"/>
+        <text x="50" y="122" text-anchor="middle" font-size="7" fill="#8A5800" font-weight="900" font-family="Arial,sans-serif" style="animation:coin-bounce 1.2s ease-in-out infinite 0.6s">$</text>
+
+        <!-- HEAD (big round chubby!) -->
+        <ellipse cx="112" cy="112" rx="82" ry="78" fill="#B08000" opacity="0.15"/>
+        <circle cx="110" cy="108" r="78" fill="#C89000"/>
+        <circle cx="110" cy="104" r="74" fill="#D4A010"/>
+        <!-- Head highlight -->
+        <ellipse cx="90" cy="68" rx="32" ry="22" fill="#E8B820" opacity="0.45"/>
+
+        <!-- Scale texture on head -->
+        <path d="M60,95 Q80,88 100,93" stroke="#B88000" stroke-width="1.5" fill="none" opacity="0.3"/>
+        <path d="M120,93 Q140,88 160,95" stroke="#B88000" stroke-width="1.5" fill="none" opacity="0.3"/>
+
+        <!-- DRAGON HORNS (curved, cute not scary!) -->
+        <path d="M72,50 Q50,22 62,8 Q70,2 72,24 Q58,34 74,50" fill="#F5C518"/>
+        <ellipse cx="64" cy="18" rx="7" ry="10" fill="#FFE060" transform="rotate(-15,64,18)"/>
+        <path d="M148,50 Q170,22 158,8 Q150,2 148,24 Q162,34 146,50" fill="#F5C518"/>
+        <ellipse cx="156" cy="18" rx="7" ry="10" fill="#FFE060" transform="rotate(15,156,18)"/>
+
+        <!-- Cute round bumps on head (friendly dragon!) -->
+        <circle cx="90" cy="48" r="10" fill="#E8B020"/>
+        <circle cx="110" cy="42" r="11" fill="#E8B020"/>
+        <circle cx="130" cy="48" r="10" fill="#E8B020"/>
+        <circle cx="90" cy="48" r="7" fill="#F0C030"/>
+        <circle cx="110" cy="42" r="8" fill="#F0C030"/>
+        <circle cx="130" cy="48" r="7" fill="#F0C030"/>
+
+        <!-- EYES — HUGE, friendly, sparkly fire-like but warm not scary! -->
+        <ellipse cx="79" cy="105" rx="28" ry="29" fill="white"/>
+        <ellipse cx="141" cy="105" rx="28" ry="29" fill="white"/>
+        <!-- Warm amber irises -->
+        <circle cx="79" cy="109" r="20" fill="#A06000"/>
+        <circle cx="141" cy="109" r="20" fill="#A06000"/>
+        <circle cx="79" cy="109" r="17" fill="#D08010"/>
+        <circle cx="141" cy="109" r="17" fill="#D08010"/>
+        <circle cx="79" cy="109" r="13" fill="#F0A020"/>
+        <circle cx="141" cy="109" r="13" fill="#F0A020"/>
+        <!-- Pupils (round, not slit!) -->
+        <circle cx="81" cy="111" r="9" fill="#0A0600"/>
+        <circle cx="143" cy="111" r="9" fill="#0A0600"/>
+        <!-- BIG warm catchlights -->
+        <circle cx="88" cy="100" r="9" fill="white"/>
+        <circle cx="150" cy="100" r="9" fill="white"/>
+        <circle cx="75" cy="116" r="4.5" fill="white" opacity="0.65"/>
+        <circle cx="137" cy="116" r="4.5" fill="white" opacity="0.65"/>
+        <circle cx="90" cy="102" r="3" fill="white" opacity="0.5"/>
+        <!-- Eye outline -->
+        <ellipse cx="79" cy="105" rx="28" ry="29" fill="none" stroke="#C89000" stroke-width="2" opacity="0.3"/>
+        <ellipse cx="141" cy="105" rx="28" ry="29" fill="none" stroke="#C89000" stroke-width="2" opacity="0.3"/>
+        <!-- Lashes -->
+        <path d="M54,91 Q79,78 104,91" stroke="#7A5000" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M116,91 Q141,78 166,91" stroke="#7A5000" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+        <!-- SNOUT (cute and round, not elongated scary) -->
+        <ellipse cx="110" cy="132" rx="32" ry="22" fill="#E8A820"/>
+        <ellipse cx="98" cy="124" rx="14" ry="9" fill="#F0B840" opacity="0.5"/>
+        <!-- Cute nostrils with tiny smoke rings -->
+        <ellipse cx="100" cy="132" rx="7" ry="5" fill="#9A7000"/>
+        <ellipse cx="120" cy="132" rx="7" ry="5" fill="#9A7000"/>
+
+        <!-- BIG GOOFY HAPPY SMILE (showing teeth!) -->
+        <path d="M76,148 Q110,170 144,148" stroke="#9A6800" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <rect x="88" y="151" width="13" height="12" rx="5" fill="white"/>
+        <rect x="103" y="149" width="14" height="13" rx="5" fill="white"/>
+        <rect x="119" y="151" width="13" height="12" rx="5" fill="white"/>
+        <line x1="102" y1="149" x2="102" y2="162" stroke="#D0C0A0" stroke-width="1"/>
+        <line x1="118" y1="149" x2="118" y2="162" stroke="#D0C0A0" stroke-width="1"/>
+        <!-- Happy tongue -->
+        <ellipse cx="110" cy="165" rx="14" ry="9" fill="#FF7070" opacity="0.8"/>
+        <line x1="110" y1="158" x2="110" y2="174" stroke="#E05060" stroke-width="1.5" opacity="0.5"/>
+
+        <!-- BIG rosy cheeks -->
+        <ellipse cx="48" cy="124" rx="22" ry="14" fill="#FF9090" opacity="0.35"/>
+        <ellipse cx="172" cy="124" rx="22" ry="14" fill="#FF9090" opacity="0.35"/>
+
+        <!-- LEGEND sparkles (gold!) -->
+        <g style="animation:sparkle 1.8s ease-in-out infinite 0s">
+          <path d="M20,62 L23,54 L26,62 L34,65 L26,68 L23,76 L20,68 L12,65 Z" fill="#F5C518" opacity="0.9"/>
+        </g>
+        <g style="animation:sparkle 2.1s ease-in-out infinite 0.6s">
+          <path d="M190,58 L193,51 L196,58 L203,61 L196,64 L193,71 L190,64 L183,61 Z" fill="#F5C518" opacity="0.9"/>
+        </g>
+        <g style="animation:sparkle 2.5s ease-in-out infinite 1.1s">
+          <path d="M12,130 L14,125 L16,130 L21,132 L16,134 L14,139 L12,134 L7,132 Z" fill="#F5C518" opacity="0.8"/>
+        </g>
+        <g style="animation:sparkle 1.9s ease-in-out infinite 1.6s">
+          <path d="M198,128 L200,124 L202,128 L207,130 L202,132 L200,136 L198,132 L193,130 Z" fill="#F5C518" opacity="0.8"/>
+        </g>
+        <circle cx="30" cy="98" r="4" fill="#F5C518" style="animation:sparkle 2.3s ease-in-out infinite 0.9s"/>
+        <circle cx="190" cy="95" r="4" fill="#F5C518" style="animation:sparkle 2s ease-in-out infinite 1.5s"/>
+      </svg>
+
+    </div>
+    <div class="mcard-body" style="background:linear-gradient(180deg,#FFFBEC,#FFFFFF)">
+      <div class="mcard-name" style="background:linear-gradient(135deg,#C89000,#F5C518,#E88A00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Aurum</div>
+      <div class="mcard-species">Golden Dragon · ⭐ Legend</div>
+      <div class="mcard-quote">"I breathe COINS, not fire. Much more profitable! 🪙🐉"</div>
+      <div class="mcard-perks">
+        <span class="perk-chip" style="background:rgba(245,197,24,0.12);color:#9A6800;border:1px solid rgba(245,197,24,0.3)">🪙 Coin Breath</span>
+        <span class="perk-chip" style="background:rgba(245,197,24,0.12);color:#9A6800;border:1px solid rgba(245,197,24,0.3)">✨ All Powers</span>
+        <span class="perk-chip" style="background:rgba(245,197,24,0.12);color:#9A6800;border:1px solid rgba(245,197,24,0.3)">🌍 Market Lord</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end mascot-grid -->
+
+<!-- ZONE REFERENCE TABLE -->
+<div class="compare-section">
+  <div class="compare-title">Evolution Path 🐂 → 🦬 → 🦊 → 🦁 → 🐉</div>
+  <div class="compare-grid">
+    <div class="compare-item">
+      <div class="compare-emoji">🐂</div>
+      <div class="compare-name" style="color:#E08010">Penny</div>
+      <div class="compare-level" style="color:#C87800">Bronze · Lv 1–10</div>
+    </div>
+    <div class="compare-item">
+      <div class="compare-emoji">🦬</div>
+      <div class="compare-name" style="color:#3A70C0">Toro</div>
+      <div class="compare-level" style="color:#3A70C0">Silver · Lv 11–25</div>
+    </div>
+    <div class="compare-item">
+      <div class="compare-emoji">🦊</div>
+      <div class="compare-name" style="color:#D08000">Vixen</div>
+      <div class="compare-level" style="color:#C08000">Gold · Lv 26–45</div>
+    </div>
+    <div class="compare-item">
+      <div class="compare-emoji">🦁</div>
+      <div class="compare-name" style="color:#8040C0">Mane</div>
+      <div class="compare-level" style="color:#8040C0">Platinum · Lv 46–70</div>
+    </div>
+    <div class="compare-item" style="border-color:rgba(245,197,24,0.3);background:linear-gradient(160deg,#FFFBEC,#FFF6D0)">
+      <div class="compare-emoji">🐉</div>
+      <div class="compare-name" style="background:linear-gradient(135deg,#C89000,#F5C518);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Aurum</div>
+      <div class="compare-level" style="color:#C08000">⭐ Legend · Lv 71+</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

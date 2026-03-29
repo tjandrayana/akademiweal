@@ -1,5 +1,11 @@
 import { useEffect } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import {
+  ensureBackgroundMusicStarted,
+  registerBackgroundMusicAutostart,
+  stopBackgroundMusic,
+} from './lib/backgroundMusic'
+import { isMuted } from './lib/sounds'
 import { UnauthorizedRedirect } from './UnauthorizedRedirect'
 import { trackAppOpen } from './tracking/events'
 import { Home } from './pages/Home'
@@ -22,14 +28,27 @@ function RootRedirect() {
   return <Navigate to="/onboarding" replace />
 }
 
+/** Pause BGM during lesson / result; resume on other routes when unmuted. */
+function BackgroundMusicRouteSync() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    const lessonLike = pathname === '/lesson' || pathname === '/result'
+    if (lessonLike) stopBackgroundMusic()
+    else if (!isMuted()) ensureBackgroundMusicStarted()
+  }, [pathname])
+  return null
+}
+
 export default function App() {
   useEffect(() => {
     trackAppOpen()
+    return registerBackgroundMusicAutostart()
   }, [])
 
   return (
-    <div className="min-h-svh bg-gradient-to-br from-[#F0FDF4] via-white to-[#F0FDF4]">
+    <div className="min-h-svh bg-gradient-to-br from-primary-light via-white to-primary-light">
       <div className="relative mx-auto min-h-svh w-full max-w-md bg-bg sm:shadow-[0_0_80px_rgba(0,0,0,0.10)] sm:ring-1 sm:ring-black/[0.04]">
+        <BackgroundMusicRouteSync />
         <UnauthorizedRedirect />
         <Routes>
           <Route path="/" element={<RootRedirect />} />

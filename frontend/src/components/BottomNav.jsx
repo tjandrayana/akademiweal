@@ -98,7 +98,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navigasi utama"
-      className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-white/60 bg-white/85 backdrop-blur-xl shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+      className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-primary/20 bg-white/90 backdrop-blur-xl shadow-[0_-4px_20px_rgba(0,0,0,0.08),inset_0_1px_0_0_rgba(0,200,150,0.1)]"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}
     >
       <div className="flex h-16 items-stretch">

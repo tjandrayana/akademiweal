@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { addXp, recordDailyStreak } from '../lib/gamification'
+import { addXp, recordDailyStreak, resetLives } from '../lib/gamification'
 import { Button } from '../components/Button'
 import { XPDisplay } from '../components/XPDisplay'
 import { useGamificationStats } from '../hooks/useGamificationStats'
@@ -56,6 +56,7 @@ export function Result() {
     playNavigate()
     recordDailyStreak()
     addXp(xp)
+    resetLives()
     navigate('/home', { replace: true })
   }
 
@@ -66,9 +67,10 @@ export function Result() {
       <div
         className="relative shrink-0 flex flex-col items-center justify-end pb-16 pt-10 px-6"
         style={{
+          /* Quest navy → teal / green — aligned with index.css tokens */
           background: isPerfect
-            ? 'linear-gradient(180deg, #14532d 0%, #16A34A 55%, #22C55E 100%)'
-            : 'linear-gradient(180deg, #1d4ed8 0%, #2563EB 55%, #3B82F6 100%)',
+            ? 'linear-gradient(180deg, var(--color-iq-navy) 0%, var(--color-primary-dark) 44%, var(--color-primary) 100%)'
+            : 'linear-gradient(180deg, var(--color-iq-navy-mid) 0%, var(--color-iq-teal-dark) 42%, var(--color-primary) 100%)',
           minHeight: 260,
         }}
       >

@@ -4,12 +4,15 @@ import {
   XP_UPDATED_EVENT,
   STREAK_UPDATED_EVENT,
   COMPLETED_LESSONS_EVENT,
+  LIVES_UPDATED_EVENT,
   STREAK_KEY,
   getCompletedLessons,
   getLevel,
   getLevelName,
   getXpForNextLevel,
   getXpInCurrentLevel,
+  getMascotEvolutionLevel,
+  getLives,
 } from '../lib/gamification'
 
 function readStats() {
@@ -25,7 +28,9 @@ function readStats() {
       levelName: getLevelName(safeXp),
       xpForNext: getXpForNextLevel(safeXp),
       xpInLevel: getXpInCurrentLevel(safeXp),
+      mascotEvolutionLevel: getMascotEvolutionLevel(safeXp),
       completedLessons: getCompletedLessons(),
+      lives: getLives(),
     }
   } catch {
     return {
@@ -35,7 +40,9 @@ function readStats() {
       levelName: 'Pemula',
       xpForNext: 50,
       xpInLevel: 0,
+      mascotEvolutionLevel: 1,
       completedLessons: new Set(),
+      lives: 3,
     }
   }
 }
@@ -44,7 +51,7 @@ function readStats() {
  * Reactive gamification stats.
  * Re-reads when XP or completed-lessons are updated.
  *
- * @returns {{ streak, xp, level, levelName, xpForNext, xpInLevel, completedLessons }}
+ * @returns {{ streak, xp, level, levelName, xpForNext, xpInLevel, mascotEvolutionLevel, completedLessons, lives }}
  */
 export function useGamificationStats() {
   const [stats, setStats] = useState(() => readStats())
@@ -56,10 +63,12 @@ export function useGamificationStats() {
     window.addEventListener(XP_UPDATED_EVENT, refresh)
     window.addEventListener(STREAK_UPDATED_EVENT, refresh)
     window.addEventListener(COMPLETED_LESSONS_EVENT, refresh)
+    window.addEventListener(LIVES_UPDATED_EVENT, refresh)
     return () => {
       window.removeEventListener(XP_UPDATED_EVENT, refresh)
       window.removeEventListener(STREAK_UPDATED_EVENT, refresh)
       window.removeEventListener(COMPLETED_LESSONS_EVENT, refresh)
+      window.removeEventListener(LIVES_UPDATED_EVENT, refresh)
     }
   }, [])
 

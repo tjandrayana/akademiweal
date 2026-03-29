@@ -10,3 +10,8 @@ import (
 func (s *Service) ListLessonsByLevel(ctx context.Context, level int) ([]repository.Lesson, error) {
 	return s.repo.GetLessonsByLevel(ctx, level)
 }
+
+// ListLessonsForLevels returns lessons keyed by level for batch home loading.
+func (s *Service) ListLessonsForLevels(ctx context.Context, levels []int) (map[int][]repository.Lesson, error) {
+	return s.repo.GetLessonsForLevels(ctx, levels)
+}

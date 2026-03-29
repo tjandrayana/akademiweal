@@ -32,6 +32,11 @@ function ctx() {
   return _ctx
 }
 
+/** Shared context for SFX + background music (single graph). */
+export function getSharedAudioContext() {
+  return ctx()
+}
+
 function tone(freq, startTime, duration, volume = 0.28, type = 'sine') {
   try {
     if (isMuted()) return

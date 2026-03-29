@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 305" width="260" height="305">
+  <!-- MANE — Regal Lion · Platinum Tier -->
+  <!-- Shadow -->
+  <ellipse cx="130" cy="298" rx="82" ry="9" fill="#6A3E90" opacity="0.22"/>
+  <!-- Ambient glow -->
+  <ellipse cx="130" cy="195" rx="85" ry="44" fill="#B8A8E8" opacity="0.08"/>
+
+  <!-- MANE (layered, deep purple) -->
+  <ellipse cx="130" cy="148" rx="106" ry="112" fill="#3A1A58"/>
+  <ellipse cx="130" cy="144" rx="98" ry="104" fill="#4A2468"/>
+  <ellipse cx="130" cy="140" rx="90" ry="96" fill="#5A2E78"/>
+  <ellipse cx="130" cy="136" rx="80" ry="86" fill="#6A3888"/>
+  <!-- Mane inner ring highlight -->
+  <ellipse cx="130" cy="142" rx="84" ry="90" fill="none" stroke="#7A4AA0" stroke-width="6" opacity="0.4"/>
+
+  <!-- Main lion head -->
+  <ellipse cx="130" cy="136" rx="72" ry="74" fill="#C8921A"/>
+
+  <!-- ROYAL CROWN -->
+  <!-- Crown base band -->
+  <rect x="78" y="54" width="104" height="28" rx="5" fill="#F5C518"/>
+  <!-- Crown points (5 points) -->
+  <polygon points="78,54 78,26 96,40 114,20 130,34 146,20 164,40 182,26 182,54" fill="#F5C518"/>
+  <!-- Crown gems -->
+  <circle cx="114" cy="30" r="7" fill="#E85030"/>
+  <circle cx="114" cy="30" r="5" fill="#FF6B50"/>
+  <circle cx="130" cy="24" r="7" fill="#6B4FF8"/>
+  <circle cx="130" cy="24" r="5" fill="#9B7FFF"/>
+  <circle cx="146" cy="30" r="7" fill="#00C896"/>
+  <circle cx="146" cy="30" r="5" fill="#00E5A8"/>
+  <!-- Crown gold band bottom -->
+  <rect x="78" y="78" width="104" height="6" rx="3" fill="#C8900A"/>
+  <!-- Crown highlight -->
+  <rect x="82" y="58" width="70" height="6" rx="3" fill="rgba(255,255,255,0.2)"/>
+
+  <!-- Regal eyes (golden, heavy-lidded) -->
+  <ellipse cx="100" cy="128" rx="20" ry="19" fill="white"/>
+  <ellipse cx="160" cy="128" rx="20" ry="19" fill="white"/>
+  <!-- Golden irises -->
+  <circle cx="103" cy="130" r="14" fill="#D4A010"/>
+  <circle cx="163" cy="130" r="14" fill="#D4A010"/>
+  <!-- Pupils -->
+  <circle cx="103" cy="131" r="8" fill="#060400"/>
+  <circle cx="163" cy="131" r="8" fill="#060400"/>
+  <!-- Catchlights -->
+  <circle cx="110" cy="122" r="6" fill="white"/>
+  <circle cx="170" cy="122" r="6" fill="white"/>
+  <circle cx="98" cy="134" r="3" fill="white" opacity="0.45"/>
+  <circle cx="158" cy="134" r="3" fill="white" opacity="0.45"/>
+  <!-- Heavy commanding brows -->
+  <path d="M80,112 Q100,104 120,110" stroke="#7A4A00" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M140,110 Q160,104 180,112" stroke="#7A4A00" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+  <!-- Broad flat lion nose -->
+  <rect x="112" y="148" width="36" height="20" rx="10" fill="#A87020"/>
+  <ellipse cx="118" cy="158" rx="7" ry="5" fill="#7A4A00"/>
+  <ellipse cx="142" cy="158" rx="7" ry="5" fill="#7A4A00"/>
+  <!-- Philtrum -->
+  <line x1="130" y1="168" x2="130" y2="176" stroke="#7A4A00" stroke-width="2" stroke-linecap="round"/>
+  <!-- Dignified mouth -->
+  <path d="M108,176 Q130,188 152,176" stroke="#7A4A00" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- Formal regal robe body -->
+  <path d="M20,298 Q20,252 52,236 Q130,218 208,236 Q240,252 240,298 Z" fill="#2A1A50"/>
+  <!-- Robe gold trim lines -->
+  <path d="M20,298 Q20,252 52,236" stroke="#F5C518" stroke-width="2.5" fill="none" opacity="0.5"/>
+  <path d="M240,298 Q240,252 208,236" stroke="#F5C518" stroke-width="2.5" fill="none" opacity="0.5"/>
+  <!-- Robe center front panel -->
+  <path d="M106,218 L130,226 L154,218 L158,210 Q130,202 102,210 Z" fill="#EAE8E0"/>
+  <path d="M130,226 L106,218" stroke="#D0CDC6" stroke-width="1" fill="none"/>
+  <path d="M130,226 L154,218" stroke="#D0CDC6" stroke-width="1" fill="none"/>
+
+  <!-- Distinguished medal / decoration -->
+  <rect x="122" y="224" width="16" height="26" rx="6" fill="#F5C518" opacity="0.85"/>
+  <circle cx="130" cy="260" r="18" fill="#9A7000"/>
+  <circle cx="130" cy="258" r="16" fill="#B88000"/>
+  <circle cx="130" cy="256" r="14" fill="#D4A000"/>
+  <circle cx="130" cy="254" r="12" fill="#F5C518"/>
+  <!-- Star on medal -->
+  <text x="130" y="260" text-anchor="middle" font-size="14" fill="#7A4A00" font-family="sans-serif" font-weight="900">★</text>
+
+  <!-- Honor sash (diagonal) -->
+  <path d="M60,232 L78,294" stroke="#F5C518" stroke-width="4" stroke-linecap="round" opacity="0.3"/>
+  <!-- Sash gem -->
+  <circle cx="66" cy="248" r="5" fill="#E85030" opacity="0.6"/>
+  <circle cx="72" cy="265" r="4" fill="#00C896" opacity="0.5"/>
+</svg>

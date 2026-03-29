@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>InvestQuest — Gameplay Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#06112A;--navy2:#0B1C44;
+  --gold:#F5C518;--gold2:#FFE97A;--gold3:#C8900A;
+  --teal:#00C896;--cream:#F0E6C8;
+}
+body{
+  background:#030810;
+  font-family:'Nunito',sans-serif;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  overflow-x:hidden;
+  padding:40px 20px 60px;
+}
+
+/* ── PAGE HEADER ── */
+.page-header{text-align:center;margin-bottom:40px}
+.page-eyebrow{font-size:11px;font-weight:800;letter-spacing:4px;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+.page-title{font-family:'Fredoka One',cursive;font-size:48px;
+  background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:2px}
+.page-sub{font-size:14px;color:#5A78A8;margin-top:8px}
+
+/* ── PHONE FRAME ── */
+.phone-outer{
+  width:390px;
+  background:#0A0F1E;
+  border-radius:50px;
+  border:3px solid #1A2848;
+  box-shadow:
+    0 0 0 1px rgba(245,197,24,0.12),
+    0 40px 120px rgba(0,0,0,0.8),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  position:relative;overflow:hidden;
+  padding:12px;
+}
+/* Phone notch */
+.phone-notch{
+  width:120px;height:34px;background:#0A0F1E;
+  border-radius:0 0 20px 20px;
+  margin:0 auto 0;position:relative;z-index:100;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.notch-cam{width:10px;height:10px;border-radius:50%;background:#1A2848;border:1px solid #2A3858}
+.notch-speaker{width:50px;height:5px;border-radius:3px;background:#1A2848}
+
+/* Status bar */
+.status-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:4px 22px 8px;font-size:12px;font-weight:800;color:#4A6A9A;
+  position:relative;z-index:100;
+}
+
+/* ── HUD (game header) ── */
+.game-hud{
+  background:linear-gradient(180deg,rgba(6,17,42,0.98) 0%,rgba(6,17,42,0.92) 100%);
+  padding:10px 18px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:relative;z-index:99;
+  border-bottom:1px solid rgba(245,197,24,0.1);
+}
+.hud-left{display:flex;align-items:center;gap:10px}
+.hud-avatar{width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,#C4813A,#8B5A1E);
+  border:2px solid var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;overflow:hidden}
+.hud-name{font-family:'Fredoka One',cursive;font-size:16px;color:var(--cream);line-height:1}
+.hud-level{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal)}
+.hud-right{display:flex;align-items:center;gap:8px}
+.hud-coin{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(245,197,24,0.1);border:1px solid rgba(245,197,24,0.25);
+  border-radius:100px;padding:5px 12px;
+  font-family:'Fredoka One',cursive;font-size:15px;color:var(--gold);
+}
+.hud-coin-icon{width:18px;height:18px;border-radius:50%;background:var(--gold3);
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#6A4000}
+.hud-lives{display:flex;gap:3px}
+.hud-heart{font-size:15px;line-height:1}
+
+/* ── SCROLLABLE MAP CONTAINER ── */
+.map-scroll{
+  height:660px;
+  overflow-y:scroll;
+  overflow-x:hidden;
+  position:relative;
+  scrollbar-width:none;
+}
+.map-scroll::-webkit-scrollbar{display:none}
+
+/* ── MAP CANVAS ── */
+.map-canvas{
+  width:366px;
+  position:relative;
+}
+
+/* ── ZONE SECTIONS ── */
+.zone{position:relative;width:100%;overflow:hidden}
+
+/* Zone 8 — Dragon's Vault (top / end) */
+.zone-8{
+  height:380px;
+  background:linear-gradient(180deg,#0A0508 0%,#180A10 40%,#2A0A15 100%);
+}
+/* Zone 7 — Crypto Peaks */
+.zone-7{
+  height:360px;
+  background:linear-gradient(180deg,#0A0820 0%,#0E0D28 40%,#160F30 100%);
+}
+/* Zone 6 — Dividend Valley */
+.zone-6{
+  height:360px;
+  background:linear-gradient(180deg,#060E14 0%,#081420 40%,#0A1C14 100%);
+}
+/* Zone 5 — ETF Empire */
+.zone-5{
+  height:360px;
+  background:linear-gradient(180deg,#0E1008 0%,#141408 40%,#1A1800 100%);
+}
+/* Zone 4 — Bond Bay */
+.zone-4{
+  height:360px;
+  background:linear-gradient(180deg,#060C18 0%,#060E20 40%,#06101C 100%);
+}
+/* Zone 3 — Stock Market Street */
+.zone-3{
+  height:360px;
+  background:linear-gradient(180deg,#080C18 0%,#0A1020 40%,#0C1428 100%);
+}
+/* Zone 2 — Dollar Dunes */
+.zone-2{
+  height:360px;
+  background:linear-gradient(180deg,#100C06 0%,#180E04 40%,#1E1408 100%);
+}
+/* Zone 1 — Penny Plains (start / bottom) */
+.zone-1{
+  height:400px;
+  background:linear-gradient(180deg,#060C10 0%,#081014 40%,#0A1808 100%);
+}
+
+/* Zone label banner */
+.zone-banner{
+  position:absolute;left:50%;transform:translateX(-50%);
+  top:16px;z-index:30;
+  display:flex;align-items:center;gap:8px;
+  padding:6px 20px;border-radius:100px;
+  border:1px solid;backdrop-filter:blur(4px);
+  font-family:'Fredoka One',cursive;font-size:13px;
+  white-space:nowrap;
+}
+
+/* ── PATH (SVG overlay) ── */
+.path-svg{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:5;
+  overflow:visible;
+}
+
+/* ── LEVEL NODES ── */
+.level-node{
+  position:absolute;z-index:20;
+  width:56px;height:56px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;
+  cursor:pointer;
+  transform:translate(-50%,-50%);
+  transition:transform .15s;
+  border:3px solid;
+}
+.level-node:hover{transform:translate(-50%,-50%) scale(1.12)}
+.level-node.completed{
+  background:linear-gradient(135deg,rgba(0,200,150,0.25),rgba(0,200,150,0.1));
+  border-color:var(--teal);
+  box-shadow:0 0 16px rgba(0,200,150,0.3);
+}
+.level-node.current{
+  border-color:var(--gold);
+  box-shadow:0 0 0 4px rgba(245,197,24,0.15), 0 0 24px rgba(245,197,24,0.4);
+  animation:pulse-gold 2s ease-in-out infinite;
+}
+.level-node.locked{
+  background:rgba(10,20,40,0.7);
+  border-color:rgba(255,255,255,0.08);
+  opacity:0.55;cursor:default;
+}
+.level-node.locked:hover{transform:translate(-50%,-50%)}
+.level-node.boss{
+  width:68px;height:68px;
+  border-width:3px;
+  border-color:#E85030;
+  box-shadow:0 0 20px rgba(232,80,48,0.4);
+}
+.level-node.boss.completed{border-color:var(--teal)}
+.node-num{font-family:'Fredoka One',cursive;font-size:16px;line-height:1}
+.node-stars{display:flex;gap:1px;margin-top:2px}
+.node-star{font-size:9px;line-height:1}
+.node-lock{font-size:16px;line-height:1}
+.node-boss-icon{font-size:20px;line-height:1}
+
+/* Current player marker (mini Penny above node) */
+.player-marker{
+  position:absolute;z-index:50;
+  transform:translate(-50%, -100%);
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  animation:float-player 2.8s ease-in-out infinite;
+  pointer-events:none;
+}
+.player-marker-pin{
+  width:0;height:0;
+  border-left:6px solid transparent;
+  border-right:6px solid transparent;
+  border-top:10px solid var(--gold);
+}
+
+/* Level popup tooltip */
+.level-popup{
+  display:none;
+  position:absolute;z-index:200;
+  background:rgba(6,17,42,0.97);
+  border:1px solid rgba(245,197,24,0.25);
+  border-radius:16px;
+  padding:14px 18px;
+  width:200px;
+  transform:translateX(-50%);
+  left:50%;
+  box-shadow:0 16px 48px rgba(0,0,0,0.6);
+  pointer-events:none;
+}
+.level-node:hover .level-popup{display:block}
+.popup-title{font-family:'Fredoka One',cursive;font-size:16px;color:var(--gold);margin-bottom:3px}
+.popup-sub{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#4A6A9A;margin-bottom:8px}
+.popup-desc{font-size:11px;color:#7A95BE;line-height:1.5;margin-bottom:8px}
+.popup-reward{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:var(--gold)}
+
+/* Zone scenery elements */
+.scenery{position:absolute;pointer-events:none;z-index:2}
+
+/* ── ANIMATIONS ── */
+@keyframes pulse-gold{
+  0%,100%{box-shadow:0 0 0 4px rgba(245,197,24,0.15),0 0 24px rgba(245,197,24,0.4)}
+  50%{box-shadow:0 0 0 8px rgba(245,197,24,0.08),0 0 40px rgba(245,197,24,0.6)}
+}
+@keyframes float-player{
+  0%,100%{transform:translate(-50%,-100%)}
+  50%{transform:translate(-50%,calc(-100% - 8px))}
+}
+@keyframes twinkle{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1.2)}}
+@keyframes drift{0%{transform:translateX(0) translateY(0)}50%{transform:translateX(6px) translateY(-4px)}100%{transform:translateX(0) translateY(0)}}
+@keyframes shimmer-path{to{stroke-dashoffset:-40}}
+@keyframes coin-spin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}
+@keyframes glow-pulse{0%,100%{opacity:0.4}50%{opacity:0.9}}
+
+/* Bottom nav */
+.game-nav{
+  background:rgba(6,17,42,0.98);
+  border-top:1px solid rgba(245,197,24,0.1);
+  padding:8px 0 10px;
+  display:flex;justify-content:space-around;align-items:center;
+}
+.nav-btn{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  color:#3A5A8A;cursor:pointer;padding:4px 12px;border-radius:12px;
+  transition:color .15s;
+}
+.nav-btn.active{color:var(--gold);background:rgba(245,197,24,0.08)}
+.nav-btn:hover{color:var(--cream)}
+.nav-icon{font-size:20px;line-height:1}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-eyebrow">InvestQuest · Asset 05</div>
+  <div class="page-title">🗺 Gameplay Map</div>
+  <p class="page-sub">8 Investment Worlds · 70+ Levels · 5 Mascot Tiers</p>
+</div>
+
+<!-- ═══════════ PHONE FRAME ═══════════ -->
+<div class="phone-outer">
+  <!-- Notch -->
+  <div class="phone-notch">
+    <div class="notch-cam"></div>
+    <div class="notch-speaker"></div>
+    <div class="notch-cam"></div>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>▲▲▲ 📶 🔋</span>
+  </div>
+
+  <!-- HUD -->
+  <div class="game-hud">
+    <div class="hud-left">
+      <div class="hud-avatar">
+        <!-- Mini Penny SVG -->
+        <svg viewBox="0 0 40 44" width="38" height="38">
+          <circle cx="20" cy="22" r="16" fill="#C4813A"/>
+          <path d="M14,13 Q11,8 12,5 Q13,3 14,9 Q11,11 14,13" fill="#EDD88A"/>
+          <path d="M26,13 Q29,8 28,5 Q27,3 26,9 Q29,11 26,13" fill="#EDD88A"/>
+          <ellipse cx="9" cy="22" r="5" fill="#C4813A"/>
+          <ellipse cx="9" cy="22" r="3" fill="#E09B5E"/>
+          <ellipse cx="31" cy="22" r="5" fill="#C4813A"/>
+          <ellipse cx="31" cy="22" r="3" fill="#E09B5E"/>
+          <ellipse cx="14" cy="18" rx="6" ry="7" fill="white"/>
+          <ellipse cx="26" cy="18" rx="6" ry="7" fill="white"/>
+          <circle cx="15" cy="19" r="4" fill="#2D1000"/>
+          <circle cx="27" cy="19" r="4" fill="#2D1000"/>
+          <circle cx="17" cy="16" r="2" fill="white"/>
+          <circle cx="29" cy="16" r="2" fill="white"/>
+          <ellipse cx="20" cy="25" rx="7" ry="5.5" fill="#E09B5E"/>
+          <ellipse cx="17" cy="26.5" rx="2.5" ry="1.8" fill="#7A3A10"/>
+          <ellipse cx="23" cy="26.5" rx="2.5" ry="1.8" fill="#7A3A10"/>
+          <path d="M13,31 Q20,36 27,31" stroke="#7A3A10" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <ellipse cx="9" cy="24" rx="4" ry="2.5" fill="#E85030" opacity="0.25"/>
+          <ellipse cx="31" cy="24" rx="4" ry="2.5" fill="#E85030" opacity="0.25"/>
+          <ellipse cx="20" cy="38" rx="11" ry="7" fill="#4A78C8"/>
+        </svg>
+      </div>
+      <div>
+        <div class="hud-name">Investor</div>
+        <div class="hud-level">⚡ Level 8 · Bronze</div>
+      </div>
+    </div>
+    <div class="hud-right">
+      <div class="hud-coin">
+        <div class="hud-coin-icon">$</div>
+        8,240
+      </div>
+      <div class="hud-lives">
+        <span class="hud-heart">❤</span>
+        <span class="hud-heart">❤</span>
+        <span class="hud-heart">❤</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCROLLABLE MAP ═══════════ -->
+  <div class="map-scroll" id="mapScroll">
+  <div class="map-canvas" id="mapCanvas">
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- ZONE 8 — DRAGON'S VAULT (Legend · Lv 71+)   -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div class="zone zone-8" id="zone8">
+      <!-- Background scenery -->
+      <svg class="scenery" style="width:100%;height:100%" viewBox="0 0 366 380">
+        <!-- Volcanic sky -->
+        <radialGradient id="vg1" cx="50%" cy="30%" r="50%">
+          <stop offset="0%" stop-color="#3A0A14" stop-opacity="0.8"/>
+          <stop offset="100%" stop-color="#0A0508" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="366" height="380" fill="url(#vg1)"/>
+        <!-- Lava glow from bottom -->
+        <ellipse cx="183" cy="380" rx="200" ry="80" fill="#C83010" opacity="0.2"/>
+        <!-- Dark rocky mountains -->
+        <polygon points="0,380 60,200 120,260 160,180 220,240 280,160 340,220 366,180 366,380" fill="#0E0208"/>
+        <polygon points="0,380 80,240 140,290 180,210 240,270 300,190 366,230 366,380" fill="#140410"/>
+        <!-- Stars (fiery) -->
+        <circle cx="30" cy="40" r="1.5" fill="#FF6040" opacity="0.6"/>
+        <circle cx="80" cy="20" r="1" fill="#FFB040" opacity="0.5"/>
+        <circle cx="150" cy="50" r="1.5" fill="#FF8040" opacity="0.4"/>
+        <circle cx="220" cy="30" r="1" fill="#FF6040" opacity="0.6"/>
+        <circle cx="300" cy="60" r="1.5" fill="#FFB040" opacity="0.5"/>
+        <circle cx="340" cy="25" r="1" fill="#FF8040" opacity="0.4"/>
+        <!-- Floating ember particles -->
+        <circle cx="50" cy="120" r="2" fill="#FF6020" opacity="0.5"/>
+        <circle cx="120" cy="90" r="1.5" fill="#FFB020" opacity="0.4"/>
+        <circle cx="200" cy="110" r="2" fill="#FF8020" opacity="0.6"/>
+        <circle cx="280" cy="80" r="1.5" fill="#FF6020" opacity="0.4"/>
+        <circle cx="330" cy="130" r="2" fill="#FFB020" opacity="0.5"/>
+        <!-- Dragon's vault gate -->
+        <rect x="141" y="60" width="84" height="90" rx="4" fill="#1A0810"/>
+        <rect x="141" y="60" width="84" height="90" rx="4" fill="none" stroke="#C83010" stroke-width="2" opacity="0.8"/>
+        <!-- Gate arch -->
+        <path d="M141,100 Q183,56 225,100" fill="#2A0A14"/>
+        <path d="M141,100 Q183,56 225,100" fill="none" stroke="#C83010" stroke-width="2" opacity="0.8"/>
+        <!-- Gate gems -->
+        <circle cx="183" cy="72" r="6" fill="#C83010" opacity="0.8"/>
+        <circle cx="183" cy="72" r="4" fill="#FF6040"/>
+        <!-- Door details -->
+        <line x1="183" y1="100" x2="183" y2="150" stroke="#C83010" stroke-width="1.5" opacity="0.5"/>
+        <rect x="155" y="110" width="25" height="30" rx="3" fill="#120608"/>
+        <rect x="186" y="110" width="25" height="30" rx="3" fill="#120608"/>
+        <!-- Towers flanking gate -->
+        <rect x="108" y="80" width="28" height="100" rx="3" fill="#0E0208"/>
+        <polygon points="108,80 122,55 136,80" fill="#1A0810"/>
+        <rect x="230" y="80" width="28" height="100" rx="3" fill="#0E0208"/>
+        <polygon points="230,80 244,55 258,80" fill="#1A0810"/>
+        <!-- Tower windows glow red -->
+        <rect x="115" y="100" width="10" height="12" rx="2" fill="#C83010" opacity="0.6"/>
+        <rect x="237" y="100" width="10" height="12" rx="2" fill="#C83010" opacity="0.6"/>
+        <!-- Lava cracks -->
+        <path d="M0,330 Q60,310 90,340 Q130,360 180,330 Q220,310 260,345 Q300,360 366,330" fill="none" stroke="#C83010" stroke-width="1" opacity="0.3"/>
+        <path d="M40,360 Q80,340 120,360 Q160,375 200,355 Q240,340 280,360 Q320,375 366,355" fill="none" stroke="#FF6020" stroke-width="0.8" opacity="0.25"/>
+        <!-- Zone banner -->
+        <text x="183" y="256" text-anchor="middle" font-size="11" font-family="'Fredoka One',cursive" fill="#FF6040" opacity="0.8" letter-spacing="1">DRAGON'S VAULT</text>
+      </svg>
+
+      <!-- Zone banner -->
+      <div class="zone-banner" style="color:#FF6040;border-color:rgba(200,48,16,0.4);background:rgba(20,4,8,0.85);top:240px">
+        🐉 Dragon's Vault <span style="font-size:10px;opacity:0.6;margin-left:4px">Lv 71+</span>
+      </div>
+
+      <!-- Level nodes -->
+      <div class="level-node locked boss" style="left:183px;top:320px" title="Boss 8">
+        <span class="node-boss-icon">🐉</span>
+        <span class="node-num" style="color:#FF6040;font-size:11px">BOSS</span>
+      </div>
+      <div class="level-node locked" style="left:100px;top:250px">
+        <span class="node-num" style="color:#4A5A7A">73</span>
+        <div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:260px;top:200px">
+        <span class="node-num" style="color:#4A5A7A">72</span>
+        <div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:150px;top:152px">
+        <span class="node-num" style="color:#4A5A7A">71</span>
+        <div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- ZONE 7 — CRYPTO PEAKS (Platinum · Lv 61-70) -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div class="zone zone-7" id="zone7">
+      <svg class="scenery" style="width:100%;height:100%" viewBox="0 0 366 360">
+        <!-- Night purple sky -->
+        <radialGradient id="cg1" cx="50%" cy="20%" r="60%">
+          <stop offset="0%" stop-color="#1A0840" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#0A0820" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="366" height="360" fill="url(#cg1)"/>
+        <!-- Mountain peaks (sharp crypto chart style) -->
+        <polygon points="0,360 40,180 80,280 120,140 160,240 200,100 240,200 280,130 320,220 366,120 366,360" fill="#0C0A22"/>
+        <polygon points="0,360 60,220 100,310 140,190 180,280 220,150 260,240 300,170 340,250 366,160 366,360" fill="#100E2A"/>
+        <!-- Stars / nebula -->
+        <circle cx="20" cy="30" r="1.5" fill="#B8A8E8" opacity="0.7"/>
+        <circle cx="60" cy="15" r="1" fill="#D4C8FF" opacity="0.5"/>
+        <circle cx="110" cy="45" r="2" fill="#B8A8E8" opacity="0.4"/>
+        <circle cx="180" cy="20" r="1.5" fill="#A090E0" opacity="0.6"/>
+        <circle cx="250" cy="40" r="1" fill="#D4C8FF" opacity="0.5"/>
+        <circle cx="310" cy="25" r="2" fill="#B8A8E8" opacity="0.4"/>
+        <circle cx="350" cy="55" r="1" fill="#A090E0" opacity="0.6"/>
+        <!-- Neon grid floor -->
+        <path d="M0,300 L366,300" stroke="#4A30A0" stroke-width="0.5" opacity="0.3"/>
+        <path d="M0,320 L366,320" stroke="#4A30A0" stroke-width="0.5" opacity="0.2"/>
+        <path d="M0,340 L366,340" stroke="#4A30A0" stroke-width="0.5" opacity="0.15"/>
+        <!-- Vertical grid lines -->
+        <path d="M60,280 L60,360" stroke="#4A30A0" stroke-width="0.5" opacity="0.2"/>
+        <path d="M120,280 L120,360" stroke="#4A30A0" stroke-width="0.5" opacity="0.2"/>
+        <path d="M183,280 L183,360" stroke="#6A50C0" stroke-width="0.8" opacity="0.25"/>
+        <path d="M246,280 L246,360" stroke="#4A30A0" stroke-width="0.5" opacity="0.2"/>
+        <path d="M306,280 L306,360" stroke="#4A30A0" stroke-width="0.5" opacity="0.2"/>
+        <!-- Crypto coin symbols floating -->
+        <circle cx="60" cy="120" r="20" fill="none" stroke="#F7931A" stroke-width="1.5" opacity="0.4"/>
+        <text x="60" y="125" text-anchor="middle" font-size="14" fill="#F7931A" opacity="0.5" font-family="sans-serif" font-weight="900">₿</text>
+        <circle cx="300" cy="150" r="18" fill="none" stroke="#627EEA" stroke-width="1.5" opacity="0.4"/>
+        <text x="300" y="155" text-anchor="middle" font-size="13" fill="#627EEA" opacity="0.5" font-family="sans-serif" font-weight="900">Ξ</text>
+        <!-- Neon chart line -->
+        <polyline points="0,280 40,240 80,260 120,210 160,230 200,180 240,200 280,160 320,175 366,145" fill="none" stroke="#B8A8E8" stroke-width="2" opacity="0.5"/>
+      </svg>
+
+      <div class="zone-banner" style="color:#B8A8E8;border-color:rgba(184,168,232,0.3);background:rgba(10,8,32,0.88);top:12px">
+        🏔 Crypto Peaks <span style="font-size:10px;opacity:0.6;margin-left:4px">Lv 61–70</span>
+      </div>
+
+      <div class="level-node locked boss" style="left:183px;top:330px;border-color:#B8A8E8;box-shadow:0 0 20px rgba(184,168,232,0.3)">
+        <span class="node-boss-icon">💎</span>
+        <span class="node-num" style="color:#B8A8E8;font-size:11px">BOSS</span>
+      </div>
+      <div class="level-node locked" style="left:280px;top:260px">
+        <span class="node-num" style="color:#4A5A7A">67</span>
+        <div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:100px;top:210px">
+        <span class="node-num" style="color:#4A5A7A">65</span>
+        <div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:240px;top:158px">
+        <span class="node-num" style="color:#4A5A7A">63</span>
+        <div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:120px;top:110px">
+        <span class="node-num" style="color:#4A5A7A">61</span>
+        <div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- ZONE 6 — DIVIDEND VALLEY (Gold · Lv 46-60)  -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div class="zone zone-6" id="zone6">
+      <svg class="scenery" style="width:100%;height:100%" viewBox="0 0 366 360">
+        <!-- Deep forest night -->
+        <radialGradient id="dvg" cx="50%" cy="0%" r="80%">
+          <stop offset="0%" stop-color="#0A2010" stop-opacity="0.8"/>
+          <stop offset="100%" stop-color="#061408" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="366" height="360" fill="url(#dvg)"/>
+        <!-- Rolling hills -->
+        <path d="M0,360 Q80,290 160,320 Q240,345 366,300 L366,360 Z" fill="#0A1A0A"/>
+        <path d="M0,360 Q90,310 180,340 Q270,365 366,330 L366,360 Z" fill="#0C200C"/>
+        <!-- Golden money trees -->
+        <!-- Tree 1 -->
+        <rect x="38" y="200" width="8" height="80" rx="3" fill="#5A3010"/>
+        <circle cx="42" cy="188" r="32" fill="#0A2808"/>
+        <circle cx="42" cy="182" r="28" fill="#0D3A0A"/>
+        <circle cx="28" cy="192" r="20" fill="#0A2808"/>
+        <circle cx="56" cy="192" r="22" fill="#0A3008"/>
+        <!-- Gold coin fruits on tree 1 -->
+        <circle cx="32" cy="176" r="6" fill="#C8900A"/>
+        <circle cx="32" cy="175" r="6" fill="#F5C518"/>
+        <text x="32" y="179" text-anchor="middle" font-size="7" fill="#8A6000" font-weight="900" font-family="sans-serif">$</text>
+        <circle cx="50" cy="170" r="5" fill="#C8900A"/>
+        <circle cx="50" cy="169" r="5" fill="#F5C518"/>
+        <circle cx="42" cy="185" r="5" fill="#C8900A"/>
+        <circle cx="42" cy="184" r="5" fill="#F5C518"/>
+        <circle cx="22" cy="185" r="4" fill="#C8900A"/>
+        <circle cx="22" cy="184" r="4" fill="#F5C518"/>
+        <!-- Tree 2 -->
+        <rect x="310" y="180" width="8" height="100" rx="3" fill="#5A3010"/>
+        <circle cx="314" cy="166" r="36" fill="#0A2808"/>
+        <circle cx="314" cy="158" r="30" fill="#0D3A0A"/>
+        <circle cx="298" cy="168" r="22" fill="#0A2808"/>
+        <circle cx="330" cy="172" r="24" fill="#0A3008"/>
+        <!-- Gold coin fruits on tree 2 -->
+        <circle cx="300" cy="152" r="6" fill="#C8900A"/>
+        <circle cx="300" cy="151" r="6" fill="#F5C518"/>
+        <text x="300" y="155" text-anchor="middle" font-size="7" fill="#8A6000" font-weight="900" font-family="sans-serif">$</text>
+        <circle cx="320" cy="148" r="5" fill="#C8900A"/>
+        <circle cx="320" cy="147" r="5" fill="#F5C518"/>
+        <circle cx="330" cy="162" r="5" fill="#C8900A"/>
+        <circle cx="330" cy="161" r="5" fill="#F5C518"/>
+        <!-- Fireflies / dividend droplets -->
+        <circle cx="100" cy="160" r="3" fill="#F5C518" opacity="0.6"/>
+        <circle cx="160" cy="130" r="2" fill="#F5C518" opacity="0.4"/>
+        <circle cx="240" cy="150" r="3" fill="#00C896" opacity="0.5"/>
+        <circle cx="280" cy="120" r="2" fill="#F5C518" opacity="0.6"/>
+        <!-- Stars -->
+        <circle cx="70" cy="30" r="1.5" fill="#F5C518" opacity="0.6"/>
+        <circle cx="150" cy="15" r="1" fill="#FFE97A" opacity="0.5"/>
+        <circle cx="230" cy="40" r="1.5" fill="#F5C518" opacity="0.4"/>
+        <circle cx="320" cy="20" r="1" fill="#FFE97A" opacity="0.6"/>
+        <!-- Gentle chart arch in sky -->
+        <polyline points="40,80 80,60 120,70 160,50 200,58 240,42 280,50 320,38 366,45" fill="none" stroke="#00C896" stroke-width="1.5" opacity="0.3"/>
+      </svg>
+
+      <div class="zone-banner" style="color:#FFE97A;border-color:rgba(245,197,24,0.3);background:rgba(6,14,8,0.88);top:12px">
+        🌿 Dividend Valley <span style="font-size:10px;opacity:0.6;margin-left:4px">Lv 46–60</span>
+      </div>
+
+      <div class="level-node locked boss" style="left:183px;top:328px;border-color:#F5C518;box-shadow:0 0 20px rgba(245,197,24,0.35)">
+        <span class="node-boss-icon">🌳</span>
+        <span class="node-num" style="color:#F5C518;font-size:11px">BOSS</span>
+      </div>
+      <div class="level-node locked" style="left:270px;top:258px">
+        <span class="node-num" style="color:#4A5A7A">57</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:110px;top:206px">
+        <span class="node-num" style="color:#4A5A7A">54</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:260px;top:152px">
+        <span class="node-num" style="color:#4A5A7A">51</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:140px;top:100px">
+        <span class="node-num" style="color:#4A5A7A">46</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- ZONE 5 — ETF EMPIRE (Lv 36-45)              -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div class="zone zone-5" id="zone5">
+      <svg class="scenery" style="width:100%;height:100%" viewBox="0 0 366 360">
+        <!-- Desert golden sky -->
+        <radialGradient id="etfg" cx="50%" cy="0%" r="70%">
+          <stop offset="0%" stop-color="#201800" stop-opacity="0.8"/>
+          <stop offset="100%" stop-color="#0E1000" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="366" height="360" fill="url(#etfg)"/>
+        <!-- Columned temple ruins -->
+        <!-- Main temple -->
+        <rect x="110" y="120" width="146" height="90" rx="3" fill="#1A1600"/>
+        <rect x="102" y="110" width="162" height="16" rx="3" fill="#221C00"/>
+        <rect x="94" y="100" width="178" height="14" rx="2" fill="#2A2200"/>
+        <!-- Temple columns -->
+        <rect x="118" y="126" width="14" height="84" rx="2" fill="#221C00"/>
+        <rect x="142" y="126" width="14" height="84" rx="2" fill="#221C00"/>
+        <rect x="166" y="126" width="14" height="84" rx="2" fill="#221C00"/>
+        <rect x="190" y="126" width="14" height="84" rx="2" fill="#221C00"/>
+        <rect x="214" y="126" width="14" height="84" rx="2" fill="#221C00"/>
+        <rect x="238" y="126" width="14" height="84" rx="2" fill="#221C00"/>
+        <!-- Temple steps -->
+        <rect x="102" y="210" width="162" height="8" rx="2" fill="#1E1A00"/>
+        <rect x="94" y="218" width="178" height="8" rx="2" fill="#1A1600"/>
+        <rect x="86" y="226" width="194" height="8" rx="2" fill="#161200"/>
+        <!-- Temple triangular pediment / ETF pie chart symbol -->
+        <polygon points="183,64 270,100 96,100" fill="#2A2200"/>
+        <!-- PIE chart decoration on temple -->
+        <circle cx="183" cy="82" r="14" fill="#1A1600"/>
+        <path d="M183,82 L183,68 A14,14 0 0,1 196,90 Z" fill="#F5C518" opacity="0.8"/>
+        <path d="M183,82 L196,90 A14,14 0 0,1 170,95 Z" fill="#00C896" opacity="0.7"/>
+        <path d="M183,82 L170,95 A14,14 0 0,1 169,68 Z" fill="#6B4FF8" opacity="0.7"/>
+        <path d="M183,82 L169,68 A14,14 0 0,1 183,68 Z" fill="#E85030" opacity="0.7"/>
+        <!-- Desert ground -->
+        <path d="M0,360 Q60,330 130,350 Q200,365 280,340 Q320,328 366,345 L366,360 Z" fill="#141000"/>
+        <path d="M0,360 Q80,340 160,355 Q240,368 340,348 L366,360 Z" fill="#0E0C00"/>
+        <!-- Sand dunes hint -->
+        <ellipse cx="60" cy="355" rx="50" ry="15" fill="#181400" opacity="0.6"/>
+        <ellipse cx="300" cy="350" rx="60" ry="18" fill="#181400" opacity="0.5"/>
+        <!-- Stars -->
+        <circle cx="40" cy="30" r="1.5" fill="#FFE060" opacity="0.5"/>
+        <circle cx="100" cy="18" r="1" fill="#FFD700" opacity="0.4"/>
+        <circle cx="280" cy="42" r="1.5" fill="#FFE060" opacity="0.5"/>
+        <circle cx="340" cy="22" r="1" fill="#FFD700" opacity="0.4"/>
+      </svg>
+
+      <div class="zone-banner" style="color:#FFD700;border-color:rgba(200,160,0,0.3);background:rgba(14,12,0,0.88);top:12px">
+        🏛 ETF Empire <span style="font-size:10px;opacity:0.6;margin-left:4px">Lv 36–45</span>
+      </div>
+
+      <div class="level-node locked boss" style="left:183px;top:330px;border-color:#FFD700;box-shadow:0 0 20px rgba(200,160,0,0.3)">
+        <span class="node-boss-icon">🏛</span>
+        <span class="node-num" style="color:#FFD700;font-size:11px">BOSS</span>
+      </div>
+      <div class="level-node locked" style="left:110px;top:260px">
+        <span class="node-num" style="color:#4A5A7A">43</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:264px;top="206px">
+        <span class="node-num" style="color:#4A5A7A">40</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:130px;top:152px">
+        <span class="node-num" style="color:#4A5A7A">38</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:240px;top:104px">
+        <span class="node-num" style="color:#4A5A7A">36</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- ZONE 4 — BOND BAY (Lv 26-35)                -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div class="zone zone-4" id="zone4">
+      <svg class="scenery" style="width:100%;height:100%" viewBox="0 0 366 360">
+        <!-- Ocean night sky -->
+        <radialGradient id="bbg" cx="50%" cy="0%" r="70%">
+          <stop offset="0%" stop-color="#001428" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#060C18" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="366" height="360" fill="url(#bbg)"/>
+        <!-- Moon reflection -->
+        <ellipse cx="183" cy="300" rx="30" ry="8" fill="#3A5A8A" opacity="0.3"/>
+        <!-- Moon -->
+        <circle cx="280" cy="55" r="26" fill="#0C1E38"/>
+        <circle cx="280" cy="55" r="22" fill="#142440"/>
+        <circle cx="280" cy="55" r="16" fill="#1C2E50"/>
+        <!-- Moon craters -->
+        <circle cx="270" cy="48" r="4" fill="#0E1C36" opacity="0.7"/>
+        <circle cx="284" cy="60" r="3" fill="#0E1C36" opacity="0.6"/>
+        <!-- Ocean waves -->
+        <path d="M0,320 Q40,308 80,318 Q120,328 160,315 Q200,303 240,318 Q280,330 320,318 Q340,313 366,320 L366,360 L0,360 Z" fill="#061020"/>
+        <path d="M0,338 Q50,326 100,338 Q150,348 200,335 Q250,323 300,338 Q330,346 366,336 L366,360 L0,360 Z" fill="#080E1C"/>
+        <path d="M0,350 Q60,342 120,352 Q180,360 240,350 Q300,342 366,350 L366,360 L0,360 Z" fill="#060C18"/>
+        <!-- Wave highlights -->
+        <path d="M0,318 Q40,308 80,318 Q120,328 160,315" fill="none" stroke="#1A3A6A" stroke-width="1.5" opacity="0.5"/>
+        <path d="M200,318 Q240,308 280,320 Q320,328 366,318" fill="none" stroke="#1A3A6A" stroke-width="1.5" opacity="0.5"/>
+        <!-- Bond certificate floating element -->
+        <rect x="80" y="130" width="60" height="44" rx="6" fill="#0C1A30"/>
+        <rect x="80" y="130" width="60" height="44" rx="6" fill="none" stroke="#3A5A8A" stroke-width="1.5" opacity="0.7"/>
+        <text x="110" y="148" text-anchor="middle" font-size="8" fill="#6A8ABE" font-family="'Fredoka One',cursive">BOND</text>
+        <text x="110" y="162" text-anchor="middle" font-size="7" fill="#4A6A9A" font-family="'Courier New',monospace">5.2% APY</text>
+        <!-- Another bond -->
+        <rect x="220" y="150" width="60" height="44" rx="6" fill="#0C1A30"/>
+        <rect x="220" y="150" width="60" height="44" rx="6" fill="none" stroke="#3A5A8A" stroke-width="1.5" opacity="0.7"/>
+        <text x="250" y="168" text-anchor="middle" font-size="8" fill="#6A8ABE" font-family="'Fredoka One',cursive">BOND</text>
+        <text x="250" y="182" text-anchor="middle" font-size="7" fill="#4A6A9A" font-family="'Courier New',monospace">3.8% APY</text>
+        <!-- Stars over ocean -->
+        <circle cx="30" cy="25" r="1.5" fill="#6A8ABE" opacity="0.6"/>
+        <circle cx="100" cy="14" r="1" fill="#8AAAE0" opacity="0.5"/>
+        <circle cx="160" cy="38" r="1.5" fill="#6A8ABE" opacity="0.4"/>
+        <circle cx="220" cy="20" r="1" fill="#8AAAE0" opacity="0.6"/>
+        <circle cx="340" cy="44" r="1.5" fill="#6A8ABE" opacity="0.5"/>
+      </svg>
+
+      <div class="zone-banner" style="color:#6AAAE0;border-color:rgba(58,90,138,0.4);background:rgba(6,10,24,0.9);top:12px">
+        🌊 Bond Bay <span style="font-size:10px;opacity:0.6;margin-left:4px">Lv 26–35</span>
+      </div>
+
+      <div class="level-node locked boss" style="left:183px;top:328px;border-color:#6AAAE0;box-shadow:0 0 18px rgba(58,90,138,0.4)">
+        <span class="node-boss-icon">🚢</span>
+        <span class="node-num" style="color:#6AAAE0;font-size:11px">BOSS</span>
+      </div>
+      <div class="level-node locked" style="left:270px;top:258px">
+        <span class="node-num" style="color:#4A5A7A">33</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:105px;top:208px">
+        <span class="node-num" style="color:#4A5A7A">30</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:255px;top:158px">
+        <span class="node-num" style="color:#4A5A7A">28</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:130px;top:108px">
+        <span class="node-num" style="color:#4A5A7A">26</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- ZONE 3 — STOCK MARKET STREET (Lv 16-25)     -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div class="zone zone-3" id="zone3">
+      <svg class="scenery" style="width:100%;height:100%" viewBox="0 0 366 360">
+        <!-- City night sky -->
+        <radialGradient id="smg" cx="50%" cy="0%" r="60%">
+          <stop offset="0%" stop-color="#0A1030" stop-opacity="0.8"/>
+          <stop offset="100%" stop-color="#080C1E" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="366" height="360" fill="url(#smg)"/>
+        <!-- City silhouette skyline (back layer) -->
+        <rect x="0" y="220" width="40" height="140" fill="#060C1A"/>
+        <rect x="30" y="190" width="30" height="170" fill="#080E1E"/>
+        <rect x="55" y="240" width="25" height="120" fill="#060C1A"/>
+        <rect x="75" y="200" width="35" height="160" fill="#080E20"/>
+        <!-- Tall center buildings -->
+        <rect x="130" y="140" width="50" height="220" fill="#0A1224"/>
+        <rect x="175" y="120" width="45" height="240" fill="#0C1428"/>
+        <rect x="215" y="155" width="40" height="205" fill="#0A1022"/>
+        <!-- Right buildings -->
+        <rect x="250" y="200" width="30" height="160" fill="#080E1E"/>
+        <rect x="275" y="175" width="35" height="185" fill="#0A1020"/>
+        <rect x="305" y="210" width="30" height="150" fill="#080C1C"/>
+        <rect x="330" y="185" width="36" height="175" fill="#0A1020"/>
+        <!-- Building windows (lit up) -->
+        <!-- Left buildings -->
+        <rect x="6" y="232" width="10" height="8" rx="1" fill="#F5C518" opacity="0.4"/>
+        <rect x="20" y="232" width="8" height="8" rx="1" fill="#2A4A9A" opacity="0.6"/>
+        <rect x="6" y="248" width="10" height="8" rx="1" fill="#2A4A9A" opacity="0.5"/>
+        <rect x="20" y="248" width="8" height="8" rx="1" fill="#F5C518" opacity="0.5"/>
+        <rect x="35" y="202" width="10" height="8" rx="1" fill="#F5C518" opacity="0.5"/>
+        <rect x="35" y="218" width="10" height="8" rx="1" fill="#2A4A9A" opacity="0.4"/>
+        <!-- Center tall building windows -->
+        <rect x="136" y="152" width="12" height="9" rx="1" fill="#F5C518" opacity="0.4"/>
+        <rect x="154" y="152" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+        <rect x="136" y="168" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.4"/>
+        <rect x="154" y="168" width="12" height="9" rx="1" fill="#F5C518" opacity="0.5"/>
+        <rect x="136" y="184" width="12" height="9" rx="1" fill="#F5C518" opacity="0.6"/>
+        <rect x="154" y="184" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.3"/>
+        <!-- Tallest building - stock ticker display -->
+        <rect x="178" y="130" width="40" height="28" rx="3" fill="#040810"/>
+        <text x="198" y="146" text-anchor="middle" font-size="7" fill="#00C896" font-family="'Courier New',monospace" font-weight="bold">SPY +1.8%</text>
+        <rect x="178" y="162" width="12" height="9" rx="1" fill="#F5C518" opacity="0.5"/>
+        <rect x="195" y="162" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.6"/>
+        <rect x="178" y="176" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.4"/>
+        <rect x="195" y="176" width="12" height="9" rx="1" fill="#F5C518" opacity="0.5"/>
+        <rect x="178" y="190" width="12" height="9" rx="1" fill="#F5C518" opacity="0.6"/>
+        <rect x="195" y="190" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.3"/>
+        <!-- Right buildings windows -->
+        <rect x="256" y="210" width="10" height="8" rx="1" fill="#F5C518" opacity="0.5"/>
+        <rect x="256" y="225" width="10" height="8" rx="1" fill="#2A4A9A" opacity="0.4"/>
+        <rect x="281" y="186" width="10" height="8" rx="1" fill="#F5C518" opacity="0.4"/>
+        <rect x="281" y="202" width="10" height="8" rx="1" fill="#2A4A9A" opacity="0.5"/>
+        <rect x="336" y="195" width="10" height="8" rx="1" fill="#F5C518" opacity="0.5"/>
+        <rect x="336" y="212" width="10" height="8" rx="1" fill="#2A4A9A" opacity="0.4"/>
+        <!-- Street / road -->
+        <rect x="0" y="340" width="366" height="20" fill="#080C1A"/>
+        <!-- Road dashes -->
+        <line x1="0" y1="350" x2="40" y2="350" stroke="rgba(245,197,24,0.15)" stroke-width="2"/>
+        <line x1="60" y1="350" x2="100" y2="350" stroke="rgba(245,197,24,0.15)" stroke-width="2"/>
+        <line x1="120" y1="350" x2="160" y2="350" stroke="rgba(245,197,24,0.15)" stroke-width="2"/>
+        <line x1="180" y1="350" x2="220" y2="350" stroke="rgba(245,197,24,0.15)" stroke-width="2"/>
+        <line x1="240" y1="350" x2="280" y2="350" stroke="rgba(245,197,24,0.15)" stroke-width="2"/>
+        <line x1="300" y1="350" x2="340" y2="350" stroke="rgba(245,197,24,0.15)" stroke-width="2"/>
+        <!-- Stars -->
+        <circle cx="40" cy="30" r="1.5" fill="#6A8ABE" opacity="0.5"/>
+        <circle cx="90" cy="18" r="1" fill="#8AAAE0" opacity="0.4"/>
+        <circle cx="350" cy="35" r="1.5" fill="#6A8ABE" opacity="0.5"/>
+      </svg>
+
+      <div class="zone-banner" style="color:#6A8ABE;border-color:rgba(42,74,154,0.35);background:rgba(8,10,20,0.9);top:12px">
+        🏙 Stock Market Street <span style="font-size:10px;opacity:0.6;margin-left:4px">Lv 16–25</span>
+      </div>
+
+      <div class="level-node locked boss" style="left:183px;top:330px;border-color:#E85030;box-shadow:0 0 18px rgba(232,80,48,0.3)">
+        <span class="node-boss-icon">📊</span>
+        <span class="node-num" style="color:#E85030;font-size:11px">BOSS</span>
+      </div>
+      <div class="level-node locked" style="left:270px;top:260px">
+        <span class="node-num" style="color:#4A5A7A">23</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:105px;top:212px">
+        <span class="node-num" style="color:#4A5A7A">21</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:260px;top:158px">
+        <span class="node-num" style="color:#4A5A7A">18</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+      <div class="level-node locked" style="left:115px;top:106px">
+        <span class="node-num" style="color:#4A5A7A">16</span><div class="node-stars"><span class="node-lock">🔒</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- ZONE 2 — DOLLAR DUNES (Lv 11-15)            -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div class="zone zone-2" id="zone2">
+      <svg class="scenery" style="width:100%;height:100%" viewBox="0 0 366 360">
+        <!-- Warm desert night sky -->
+        <radialGradient id="ddg" cx="50%" cy="0%" r="70%">
+          <stop offset="0%" stop-color="#1A0A00" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#100C06" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="366" height="360" fill="url(#ddg)"/>
+        <!-- Sandy dunes -->
+        <path d="M0,360 Q60,300 120,330 Q180,355 240,310 Q300,275 366,320 L366,360 Z" fill="#120A00"/>
+        <path d="M0,360 Q80,320 160,345 Q240,368 320,335 Q340,325 366,340 L366,360 Z" fill="#0E0800"/>
+        <!-- Cactus with coins! -->
+        <!-- Cactus 1 -->
+        <rect x="50" y="200" width="14" height="120" rx="5" fill="#0A2808"/>
+        <rect x="22" y="220" width="36" height="12" rx="5" fill="#0A2808"/>
+        <rect x="58" y="240" width="30" height="12" rx="5" fill="#0A2808"/>
+        <!-- Coin on cactus 1 -->
+        <circle cx="22" cy="218" r="9" fill="#C8900A"/>
+        <circle cx="22" cy="216" r="9" fill="#F5C518"/>
+        <text x="22" y="220" text-anchor="middle" font-size="10" fill="#8A6000" font-weight="900" font-family="sans-serif">$</text>
+        <circle cx="86" cy="238" r="8" fill="#C8900A"/>
+        <circle cx="86" cy="236" r="8" fill="#F5C518"/>
+        <text x="86" y="240" text-anchor="middle" font-size="9" fill="#8A6000" font-weight="900" font-family="sans-serif">$</text>
+        <!-- Cactus 2 -->
+        <rect x="290" y="210" width="14" height="110" rx="5" fill="#0A2808"/>
+        <rect x="264" y="228" width="36" height="12" rx="5" fill="#0A2808"/>
+        <rect x="298" y="248" width="28" height="12" rx="5" fill="#0A2808"/>
+        <!-- Coin on cactus 2 -->
+        <circle cx="264" cy="226" r="9" fill="#C8900A"/>
+        <circle cx="264" cy="224" r="9" fill="#F5C518"/>
+        <text x="264" y="228" text-anchor="middle" font-size="10" fill="#8A6000" font-weight="900" font-family="sans-serif">$</text>
+        <!-- Stars (warm orange tint) -->
+        <circle cx="40" cy="30" r="1.5" fill="#F5C518" opacity="0.5"/>
+        <circle cx="120" cy="18" r="1" fill="#FFB040" opacity="0.4"/>
+        <circle cx="200" cy="40" r="1.5" fill="#F5C518" opacity="0.4"/>
+        <circle cx="280" cy="25" r="1" fill="#FFB040" opacity="0.5"/>
+        <circle cx="340" cy="50" r="1.5" fill="#F5C518" opacity="0.4"/>
+        <!-- Savings piggy bank monument -->
+        <ellipse cx="183" cy="195" rx="34" ry="28" fill="#1A0C00"/>
+        <circle cx="196" cy="185" r="8" fill="#1A0C00"/><!-- snout -->
+        <circle cx="180" cy="182" r="5" fill="#120800"/>
+        <circle cx="186" cy="182" r="5" fill="#120800"/>
+        <rect x="178" y="168" width="10" height="6" rx="2" fill="#140A00"/><!-- coin slot -->
+        <line x1="168" y1="218" x2="162" y2="230" stroke="#1A0C00" stroke-width="5" stroke-linecap="round"/>
+        <line x1="178" y1="220" x2="175" y2="232" stroke="#1A0C00" stroke-width="5" stroke-linecap="round"/>
+        <line x1="188" y1="222" x2="191" y2="232" stroke="#1A0C00" stroke-width="5" stroke-linecap="round"/>
+        <line x1="198" y1="220" x2="204" y2="232" stroke="#1A0C00" stroke-width="5" stroke-linecap="round"/>
+        <text x="183" y="200" text-anchor="middle" font-size="16" font-family="sans-serif">🐷</text>
+        <!-- savings sign -->
+        <rect x="148" y="238" width="70" height="16" rx="4" fill="#0E0800"/>
+        <text x="183" y="249" text-anchor="middle" font-size="8" fill="#C8900A" font-family="'Fredoka One',cursive">SAVINGS BANK</text>
+      </svg>
+
+      <div class="zone-banner" style="color:#E8A060;border-color:rgba(200,130,10,0.35);background:rgba(14,8,0,0.9);top:12px">
+        🏜 Dollar Dunes <span style="font-size:10px;opacity:0.6;margin-left:4px">Lv 11–15</span>
+      </div>
+
+      <!-- Completed nodes (levels 11-15) -->
+      <div class="level-node completed" style="left:183px;top:328px"
+           onclick="showPopup(this,'Level 15','Boss Battle','Defeat the Tax Monster to advance!','300 XP + 💎 Gem',1)">
+        <span class="node-num" style="color:#00C896">15</span>
+        <div class="node-stars">
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+        </div>
+      </div>
+      <div class="level-node completed" style="left:270px;top:260px"
+           onclick="showPopup(this,'Level 13','Risk & Return','Understand risk-reward tradeoffs','150 XP + 🪙',0)">
+        <span class="node-num" style="color:#00C896">13</span>
+        <div class="node-stars">
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#4A5A7A">★</span>
+        </div>
+      </div>
+      <div class="level-node completed" style="left:105px;top:210px"
+           onclick="showPopup(this,'Level 11','Savings Power','Master compound interest','120 XP + 🪙',0)">
+        <span class="node-num" style="color:#00C896">11</span>
+        <div class="node-stars">
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- ZONE 1 — PENNY PLAINS (Start · Lv 1-10)     -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div class="zone zone-1" id="zone1">
+      <svg class="scenery" style="width:100%;height:100%" viewBox="0 0 366 400">
+        <!-- Soft green-teal night -->
+        <radialGradient id="ppg" cx="50%" cy="0%" r="80%">
+          <stop offset="0%" stop-color="#041C10" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#061408" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="366" height="400" fill="url(#ppg)"/>
+        <!-- Rolling green hills -->
+        <path d="M0,400 Q60,340 140,370 Q220,395 300,360 Q330,348 366,370 L366,400 Z" fill="#061A06"/>
+        <path d="M0,400 Q80,360 180,382 Q280,400 366,378 L366,400 Z" fill="#041208"/>
+        <!-- Distant hills lighter -->
+        <path d="M0,380 Q100,340 200,360 Q300,378 366,355 L366,400 Z" fill="#081808" opacity="0.7"/>
+        <!-- Tiny flowers/grass tufts -->
+        <line x1="80" y1="368" x2="80" y2="355" stroke="#0A2808" stroke-width="2.5"/>
+        <circle cx="80" cy="353" r="4" fill="#0E3A0A"/>
+        <line x1="120" y1="375" x2="120" y2="363" stroke="#0A2808" stroke-width="2.5"/>
+        <circle cx="120" cy="361" r="4" fill="#0E3A0A"/>
+        <line x1="240" y1="370" x2="240" y2="358" stroke="#0A2808" stroke-width="2.5"/>
+        <circle cx="240" cy="356" r="4" fill="#0E3A0A"/>
+        <line x1="290" y1="364" x2="290" y2="352" stroke="#0A2808" stroke-width="2.5"/>
+        <circle cx="290" cy="350" r="4" fill="#0E3A0A"/>
+        <!-- Gold coin scattered on ground -->
+        <circle cx="40" cy="362" r="7" fill="#C8900A"/>
+        <circle cx="40" cy="360" r="7" fill="#F5C518"/>
+        <text x="40" y="364" text-anchor="middle" font-size="8" fill="#8A6000" font-weight="900" font-family="sans-serif">$</text>
+        <circle cx="330" cy="358" r="6" fill="#C8900A"/>
+        <circle cx="330" cy="356" r="6" fill="#F5C518"/>
+        <text x="330" y="360" text-anchor="middle" font-size="7" fill="#8A6000" font-weight="900" font-family="sans-serif">$</text>
+        <!-- Start signpost -->
+        <rect x="164" y="290" width="7" height="55" rx="2" fill="#3A2010"/>
+        <rect x="142" y="278" width="60" height="20" rx="4" fill="#1A3070"/>
+        <rect x="142" y="278" width="60" height="20" rx="4" fill="none" stroke="#F5C518" stroke-width="1.5" opacity="0.8"/>
+        <text x="172" y="291" text-anchor="middle" font-size="9" fill="#F5C518" font-family="'Fredoka One',cursive">START!</text>
+        <!-- Arrow on sign -->
+        <polygon points="202,288 216,286 210,292" fill="#F5C518" opacity="0.8"/>
+        <!-- Stars (gentle, teal tint) -->
+        <circle cx="30" cy="30" r="1.5" fill="#00E5A8" opacity="0.5"/>
+        <circle cx="90" cy="16" r="1" fill="#00C896" opacity="0.4"/>
+        <circle cx="160" cy="44" r="1.5" fill="#00E5A8" opacity="0.4"/>
+        <circle cx="240" cy="22" r="1" fill="#00C896" opacity="0.5"/>
+        <circle cx="320" cy="38" r="1.5" fill="#00E5A8" opacity="0.4"/>
+        <circle cx="355" cy="15" r="1" fill="#00C896" opacity="0.4"/>
+        <!-- Gentle upward chart in sky -->
+        <polyline points="20,100 60,80 100,88 140,65 180,72 220,55 260,62 300,48 340,55 366,44" fill="none" stroke="rgba(0,200,150,0.18)" stroke-width="2"/>
+      </svg>
+
+      <div class="zone-banner" style="color:#00E5A8;border-color:rgba(0,200,150,0.3);background:rgba(4,12,8,0.9);top:12px">
+        🌱 Penny Plains <span style="font-size:10px;opacity:0.6;margin-left:4px">Lv 1–10</span>
+      </div>
+
+      <!-- COMPLETED LEVELS (1-7) -->
+      <div class="level-node completed" style="left:270px;top:330px"
+           onclick="showPopup(this,'Level 10','Boss Battle','Defeat the Market Crash Bear!','250 XP + 🏆 Trophy',1)">
+        <span class="node-num" style="color:#00C896">10</span>
+        <div class="node-stars">
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#4A5A7A">★</span>
+        </div>
+      </div>
+      <div class="level-node completed" style="left:105px;top:278px"
+           onclick="showPopup(this,'Level 9','Portfolio Mix','Balance your first portfolio','100 XP + 🪙',0)">
+        <span class="node-num" style="color:#00C896">9</span>
+        <div class="node-stars">
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+        </div>
+      </div>
+
+      <!-- CURRENT LEVEL (8) — with player marker -->
+      <div style="position:absolute;left:262px;top:225px;transform:translate(-50%,-50%);z-index:50">
+        <!-- Floating Penny above current node -->
+        <div class="player-marker">
+          <svg viewBox="0 0 60 68" width="46">
+            <path d="M22,20 Q18,13 20,9 Q21,7 22,13 Q18,16 22,20" fill="#EDD88A"/>
+            <path d="M38,20 Q42,13 40,9 Q39,7 38,13 Q42,16 38,20" fill="#EDD88A"/>
+            <circle cx="12" cy="30" r="7" fill="#C4813A"/>
+            <circle cx="12" cy="30" r="4" fill="#E09B5E"/>
+            <circle cx="48" cy="30" r="7" fill="#C4813A"/>
+            <circle cx="48" cy="30" r="4" fill="#E09B5E"/>
+            <circle cx="30" cy="30" r="22" fill="#C4813A"/>
+            <ellipse cx="22" cy="26" rx="8" ry="9" fill="white"/>
+            <ellipse cx="38" cy="26" rx="8" ry="9" fill="white"/>
+            <circle cx="23" cy="28" r="5.5" fill="#2D1000"/>
+            <circle cx="39" cy="28" r="5.5" fill="#2D1000"/>
+            <circle cx="26" cy="24" r="3" fill="white"/>
+            <circle cx="42" cy="24" r="3" fill="white"/>
+            <ellipse cx="30" cy="36" rx="9" ry="7" fill="#E09B5E"/>
+            <ellipse cx="27" cy="38" rx="3" ry="2.5" fill="#7A3A10"/>
+            <ellipse cx="33" cy="38" rx="3" ry="2.5" fill="#7A3A10"/>
+            <path d="M21,45 Q30,52 39,45" stroke="#7A3A10" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <ellipse cx="30" cy="58" rx="16" ry="10" fill="#4A78C8"/>
+            <!-- Cap -->
+            <rect x="19" y="10" width="22" height="8" rx="3" fill="#1A2856"/>
+            <rect x="14" y="17" width="32" height="5" rx="2" fill="#1A2856"/>
+            <rect x="19" y="17" width="22" height="2" fill="#F5C518"/>
+          </svg>
+          <div class="player-marker-pin"></div>
+        </div>
+      </div>
+
+      <!-- Current level node -->
+      <div class="level-node current" style="left:262px;top:225px;background:linear-gradient(135deg,rgba(245,197,24,0.2),rgba(245,197,24,0.05))"
+           onclick="showPopup(this,'Level 8','Buy Low Sell High','Learn market timing basics','80 XP + 🪙',0)">
+        <span class="node-num" style="color:#F5C518">8</span>
+        <div class="node-stars">
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+        </div>
+      </div>
+
+      <!-- Completed levels below current -->
+      <div class="level-node completed" style="left:108px;top:178px"
+           onclick="showPopup(this,'Level 7','Diversification','Don\'t put all eggs in one basket','75 XP + 🪙',0)">
+        <span class="node-num" style="color:#00C896">7</span>
+        <div class="node-stars">
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+        </div>
+      </div>
+      <div class="level-node completed" style="left:258px;top:130px"
+           onclick="showPopup(this,'Level 5','Stock Basics','Buy your first virtual share','60 XP + 🪙',0)">
+        <span class="node-num" style="color:#00C896">5</span>
+        <div class="node-stars">
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#4A5A7A">★</span>
+        </div>
+      </div>
+      <div class="level-node completed" style="left:115px;top:82px"
+           onclick="showPopup(this,'Level 3','Money Basics','What is investing?','40 XP + 🪙',0)">
+        <span class="node-num" style="color:#00C896">3</span>
+        <div class="node-stars">
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+        </div>
+      </div>
+      <div class="level-node completed" style="left:255px;top:50px"
+           onclick="showPopup(this,'Level 1','First Steps','Welcome to InvestQuest!','20 XP + 🥉',0)">
+        <span class="node-num" style="color:#00C896">1</span>
+        <div class="node-stars">
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+          <span class="node-star" style="color:#F5C518">★</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ PATH SVG OVERLAY (winding road) ══════════ -->
+    <!-- This SVG spans the entire map height and draws the connecting path -->
+    <svg id="pathOverlay" style="position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:10;overflow:visible" height="3400">
+      <defs>
+        <marker id="arrowM" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="rgba(245,197,24,0.5)" stroke-width="2"/>
+        </marker>
+      </defs>
+      <!-- Zone 1 path (Penny Plains) — bottom section -->
+      <!-- Lv 1 (255,50) → Lv 3 (115,82+2920=3002) ... wait, I need to calculate absolute positions -->
+      <!-- Zone 1 starts at: zone8(380)+zone7(360)+zone6(360)+zone5(360)+zone4(360)+zone3(360)+zone2(360) = 2940px from top -->
+      <!-- Zone 1 top = 2940, height 400. So zone1 nodes absolute y = 2940 + node_y -->
+      <!-- Lv1: x=255, abs_y=2940+50=2990 | Lv3: x=115, abs_y=2940+82=3022 -->
+      <!-- Lv5: x=258, abs_y=2940+130=3070 | Lv7: x=108, abs_y=2940+178=3118 -->
+      <!-- Lv8: x=262, abs_y=2940+225=3165 | Lv9: x=105, abs_y=2940+278=3218 -->
+      <!-- Lv10: x=270, abs_y=2940+330=3270 -->
+
+      <!-- Zone 2 (Dollar Dunes) top = 2940-360=2580 -->
+      <!-- Lv11: x=105, abs=2580+210=2790 | Lv13: x=270, abs=2580+260=2840 -->
+      <!-- Lv15(boss): x=183, abs=2580+328=2908 -->
+
+      <!-- Zone 3 (Stock Market Street) top = 2580-360=2220 -->
+      <!-- Lv16: x=115, abs=2220+106=2326 | Lv18: x=260, abs=2220+158=2378 -->
+      <!-- Lv21: x=105, abs=2220+212=2432 | Lv23: x=270, abs=2220+260=2480 -->
+      <!-- Boss: x=183, abs=2220+330=2550 -->
+
+      <!-- Zone 4 (Bond Bay) top=1860 -->
+      <!-- Lv26: x=130, abs=1860+108=1968 | Lv28: x=255, abs=1860+158=2018 -->
+      <!-- Lv30: x=105, abs=1860+208=2068 | Lv33: x=270, abs=1860+258=2118 -->
+      <!-- Boss: x=183, abs=1860+328=2188 -->
+
+      <!-- Zone 5 (ETF Empire) top=1500 -->
+      <!-- Lv36: x=240, abs=1500+104=1604 | Lv38: x=130, abs=1500+152=1652 -->
+      <!-- Lv40: x=264, abs=1500+206=1706 | Lv43: x=110, abs=1500+260=1760 -->
+      <!-- Boss: x=183, abs=1500+330=1830 -->
+
+      <!-- Zone 6 (Dividend Valley) top=1140 -->
+      <!-- Lv46: x=140, abs=1140+100=1240 | Lv51: x=260, abs=1140+152=1292 -->
+      <!-- Lv54: x=110, abs=1140+206=1346 | Lv57: x=270, abs=1140+258=1398 -->
+      <!-- Boss: x=183, abs=1140+328=1468 -->
+
+      <!-- Zone 7 (Crypto Peaks) top=780 -->
+      <!-- Lv61: x=120, abs=780+110=890 | Lv63: x=240, abs=780+158=938 -->
+      <!-- Lv65: x=100, abs=780+210=990 | Lv67: x=280, abs=780+260=1040 -->
+      <!-- Boss: x=183, abs=780+330=1110 -->
+
+      <!-- Zone 8 (Dragon's Vault) top=380 (zone8 height=380) wait zone8=380px -->
+      <!-- Lv71: x=150, abs=380+152=532 | Lv72: x=260, abs=380+200=580 -->
+      <!-- Lv73: x=100, abs=380+250=630 | BossD: x=183, abs=380+320=700 -->
+
+      <!-- MAIN PATH — thick dotted gold/teal winding road -->
+
+      <!-- Zone 1 internal path -->
+      <path d="M255,2990 Q183,3006 115,3022 Q183,3046 258,3070 Q183,3094 108,3118 Q183,3142 262,3165 Q183,3192 105,3218 Q183,3244 270,3270" 
+        fill="none" stroke="rgba(245,197,24,0.25)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M255,2990 Q183,3006 115,3022 Q183,3046 258,3070 Q183,3094 108,3118 Q183,3142 262,3165 Q183,3192 105,3218 Q183,3244 270,3270" 
+        fill="none" stroke="rgba(245,197,24,0.55)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+        stroke-dasharray="12 8"/>
+
+      <!-- Zone 1 to 2 connector (lv10 to lv11) -->
+      <path d="M270,3270 Q183,3300 183,3340 Q183,3370 183,3400 Q183,3410 105,2790" 
+        fill="none" stroke="rgba(200,144,10,0.3)" stroke-width="8" stroke-linecap="round"/>
+      <path d="M270,3270 Q183,3300 183,3340" 
+        fill="none" stroke="rgba(200,144,10,0.5)" stroke-width="3" stroke-dasharray="12 8" stroke-linecap="round"/>
+
+      <!-- Zone 2 internal path (completed — teal) -->
+      <path d="M105,2790 Q183,2815 270,2840 Q183,2874 183,2908" 
+        fill="none" stroke="rgba(0,200,150,0.3)" stroke-width="8" stroke-linecap="round"/>
+      <path d="M105,2790 Q183,2815 270,2840 Q183,2874 183,2908" 
+        fill="none" stroke="rgba(0,200,150,0.6)" stroke-width="3" stroke-linecap="round" stroke-dasharray="12 8"/>
+
+      <!-- Zone 2 to 3 connector -->
+      <path d="M183,2908 Q183,2950 183,2980 Q183,3000 183,3020" 
+        fill="none" stroke="rgba(100,120,180,0.2)" stroke-width="8" stroke-linecap="round"/>
+
+      <!-- Zone 3 internal (locked — dim) -->
+      <path d="M115,2326 Q183,2352 260,2378 Q183,2405 105,2432 Q183,2456 270,2480 Q183,2515 183,2550" 
+        fill="none" stroke="rgba(80,100,160,0.2)" stroke-width="8" stroke-linecap="round"/>
+      <path d="M115,2326 Q183,2352 260,2378 Q183,2405 105,2432 Q183,2456 270,2480 Q183,2515 183,2550" 
+        fill="none" stroke="rgba(80,100,160,0.3)" stroke-width="2.5" stroke-dasharray="10 10" stroke-linecap="round"/>
+
+      <!-- Zone 4 internal (locked) -->
+      <path d="M130,1968 Q183,1993 255,2018 Q183,2043 105,2068 Q183,2093 270,2118 Q183,2153 183,2188" 
+        fill="none" stroke="rgba(60,90,140,0.2)" stroke-width="8" stroke-linecap="round"/>
+      <path d="M130,1968 Q183,1993 255,2018 Q183,2043 105,2068 Q183,2093 270,2118 Q183,2153 183,2188" 
+        fill="none" stroke="rgba(60,90,140,0.25)" stroke-width="2" stroke-dasharray="10 10" stroke-linecap="round"/>
+
+      <!-- Zone 5 internal (locked) -->
+      <path d="M240,1604 Q183,1628 130,1652 Q183,1679 264,1706 Q183,1733 110,1760 Q183,1795 183,1830" 
+        fill="none" stroke="rgba(60,60,30,0.25)" stroke-width="8" stroke-linecap="round"/>
+      <path d="M240,1604 Q183,1628 130,1652 Q183,1679 264,1706 Q183,1733 110,1760 Q183,1795 183,1830" 
+        fill="none" stroke="rgba(60,60,30,0.3)" stroke-width="2" stroke-dasharray="10 10" stroke-linecap="round"/>
+
+      <!-- Zone 6 internal (locked) -->
+      <path d="M140,1240 Q183,1266 260,1292 Q183,1319 110,1346 Q183,1372 270,1398 Q183,1433 183,1468" 
+        fill="none" stroke="rgba(0,80,40,0.2)" stroke-width="8" stroke-linecap="round"/>
+      <path d="M140,1240 Q183,1266 260,1292 Q183,1319 110,1346 Q183,1372 270,1398 Q183,1433 183,1468" 
+        fill="none" stroke="rgba(0,80,40,0.25)" stroke-width="2" stroke-dasharray="10 10" stroke-linecap="round"/>
+
+      <!-- Zone 7 internal (locked) -->
+      <path d="M120,890 Q183,914 240,938 Q183,964 100,990 Q183,1015 280,1040 Q183,1075 183,1110" 
+        fill="none" stroke="rgba(80,60,160,0.2)" stroke-width="8" stroke-linecap="round"/>
+      <path d="M120,890 Q183,914 240,938 Q183,964 100,990 Q183,1015 280,1040 Q183,1075 183,1110" 
+        fill="none" stroke="rgba(80,60,160,0.25)" stroke-width="2" stroke-dasharray="10 10" stroke-linecap="round"/>
+
+      <!-- Zone 8 internal (locked — dark red) -->
+      <path d="M150,532 Q183,556 260,580 Q183,605 100,630 Q183,665 183,700" 
+        fill="none" stroke="rgba(120,20,20,0.2)" stroke-width="8" stroke-linecap="round"/>
+      <path d="M150,532 Q183,556 260,580 Q183,605 100,630 Q183,665 183,700" 
+        fill="none" stroke="rgba(120,20,20,0.25)" stroke-width="2" stroke-dasharray="10 10" stroke-linecap="round"/>
+
+      <!-- Zone connector bridges (between zones) -->
+      <path d="M183,1830 Q183,1860 183,1900 Q183,1940 130,1968" fill="none" stroke="rgba(60,60,30,0.2)" stroke-width="5" stroke-dasharray="8 8"/>
+      <path d="M183,1468 Q183,1500 183,1540 Q183,1570 240,1604" fill="none" stroke="rgba(0,80,40,0.18)" stroke-width="5" stroke-dasharray="8 8"/>
+      <path d="M183,1110 Q183,1140 183,1180 Q183,1210 140,1240" fill="none" stroke="rgba(80,60,160,0.18)" stroke-width="5" stroke-dasharray="8 8"/>
+      <path d="M183,700 Q183,740 183,780 Q183,830 120,890" fill="none" stroke="rgba(120,20,20,0.15)" stroke-width="5" stroke-dasharray="8 8"/>
+      <path d="M183,2188 Q183,2220 183,2260 Q183,2300 115,2326" fill="none" stroke="rgba(60,90,140,0.18)" stroke-width="5" stroke-dasharray="8 8"/>
+      <path d="M183,2550 Q183,2580 183,2620 Q183,2660 130,2790" fill="none" stroke="rgba(100,120,180,0.15)" stroke-width="5" stroke-dasharray="8 8"/>
+    </svg>
+
+  </div><!-- end map-canvas -->
+  </div><!-- end map-scroll -->
+
+  <!-- Level popup overlay -->
+  <div id="popup" style="display:none;position:absolute;bottom:80px;left:50%;transform:translateX(-50%);
+    width:340px;z-index:999;
+    background:rgba(6,17,42,0.98);border:1px solid rgba(245,197,24,0.3);border-radius:20px;
+    padding:20px 22px;box-shadow:0 -20px 60px rgba(0,0,0,0.7)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+      <div>
+        <div id="popupTitle" style="font-family:'Fredoka One',cursive;font-size:22px;color:#F5C518"></div>
+        <div id="popupSub" style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#4A6A9A;margin-top:2px"></div>
+      </div>
+      <button onclick="document.getElementById('popup').style.display='none'" 
+        style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#6A85B2;
+        border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div id="popupDesc" style="font-size:13px;color:#7A95BE;line-height:1.6;margin-bottom:14px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div id="popupReward" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:#F5C518"></div>
+      <button id="popupBtn" style="font-family:'Fredoka One',cursive;font-size:15px;
+        padding:9px 24px;border-radius:100px;border:none;cursor:pointer;
+        background:linear-gradient(135deg,#C8900A,#F5C518);color:#3A1A00">
+        Play!
+      </button>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="game-nav">
+    <div class="nav-btn active">
+      <div class="nav-icon">🗺</div>
+      Map
+    </div>
+    <div class="nav-btn">
+      <div class="nav-icon">📊</div>
+      Portfolio
+    </div>
+    <div class="nav-btn">
+      <div class="nav-icon">🐂</div>
+      Mascot
+    </div>
+    <div class="nav-btn">
+      <div class="nav-icon">🏆</div>
+      Ranks
+    </div>
+    <div class="nav-btn">
+      <div class="nav-icon">👤</div>
+      Profile
+    </div>
+  </div>
+
+</div><!-- end phone-outer -->
+
+<!-- ═══════ ZONE LEGEND (outside phone) ═══════ -->
+<div style="max-width:820px;width:100%;margin-top:52px">
+  <div style="text-align:center;margin-bottom:28px">
+    <div style="font-size:11px;font-weight:800;letter-spacing:4px;text-transform:uppercase;color:var(--teal);margin-bottom:8px">World Map · Zone Guide</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:28px;color:var(--cream)">8 Investment Worlds</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
+    <div style="background:#0B1C44;border-radius:16px;border:1px solid rgba(0,229,168,0.2);padding:16px 18px">
+      <div style="font-size:22px;margin-bottom:6px">🌱</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#00E5A8">Penny Plains</div>
+      <div style="font-size:10px;font-weight:800;color:#2A5A3A;letter-spacing:1.5px;margin-top:2px;text-transform:uppercase">Level 1–10</div>
+      <div style="font-size:11px;color:#4A7A5A;margin-top:6px;line-height:1.5">Intro to investing, stocks, and savings basics.</div>
+    </div>
+    <div style="background:#0B1C44;border-radius:16px;border:1px solid rgba(200,144,10,0.2);padding:16px 18px">
+      <div style="font-size:22px;margin-bottom:6px">🏜</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#E8A060">Dollar Dunes</div>
+      <div style="font-size:10px;font-weight:800;color:#5A4020;letter-spacing:1.5px;margin-top:2px;text-transform:uppercase">Level 11–15</div>
+      <div style="font-size:11px;color:#5A4A3A;margin-top:6px;line-height:1.5">Risk & return, savings accounts, compound interest.</div>
+    </div>
+    <div style="background:#0B1C44;border-radius:16px;border:1px solid rgba(42,74,154,0.3);padding:16px 18px">
+      <div style="font-size:22px;margin-bottom:6px">🏙</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#6A8ABE">Stock Market St.</div>
+      <div style="font-size:10px;font-weight:800;color:#2A3A6A;letter-spacing:1.5px;margin-top:2px;text-transform:uppercase">Level 16–25</div>
+      <div style="font-size:11px;color:#3A4A7A;margin-top:6px;line-height:1.5">Equities, P/E ratios, market orders, IPOs.</div>
+    </div>
+    <div style="background:#0B1C44;border-radius:16px;border:1px solid rgba(58,90,138,0.25);padding:16px 18px">
+      <div style="font-size:22px;margin-bottom:6px">🌊</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#6AAAE0">Bond Bay</div>
+      <div style="font-size:10px;font-weight:800;color:#1A3A5A;letter-spacing:1.5px;margin-top:2px;text-transform:uppercase">Level 26–35</div>
+      <div style="font-size:11px;color:#2A4A6A;margin-top:6px;line-height:1.5">Fixed income, government bonds, yield curves.</div>
+    </div>
+    <div style="background:#0B1C44;border-radius:16px;border:1px solid rgba(160,130,0,0.25);padding:16px 18px">
+      <div style="font-size:22px;margin-bottom:6px">🏛</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#C8A820">ETF Empire</div>
+      <div style="font-size:10px;font-weight:800;color:#3A2800;letter-spacing:1.5px;margin-top:2px;text-transform:uppercase">Level 36–45</div>
+      <div style="font-size:11px;color:#4A3810;margin-top:6px;line-height:1.5">Index funds, ETFs, passive vs active investing.</div>
+    </div>
+    <div style="background:#0B1C44;border-radius:16px;border:1px solid rgba(245,197,24,0.2);padding:16px 18px">
+      <div style="font-size:22px;margin-bottom:6px">🌿</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#FFE97A">Dividend Valley</div>
+      <div style="font-size:10px;font-weight:800;color:#4A3800;letter-spacing:1.5px;margin-top:2px;text-transform:uppercase">Level 46–60</div>
+      <div style="font-size:11px;color:#5A4A10;margin-top:6px;line-height:1.5">Dividend stocks, REIT, income investing strategy.</div>
+    </div>
+    <div style="background:#0B1C44;border-radius:16px;border:1px solid rgba(184,168,232,0.2);padding:16px 18px">
+      <div style="font-size:22px;margin-bottom:6px">🏔</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#B8A8E8">Crypto Peaks</div>
+      <div style="font-size:10px;font-weight:800;color:#3A2860;letter-spacing:1.5px;margin-top:2px;text-transform:uppercase">Level 61–70</div>
+      <div style="font-size:11px;color:#4A3870;margin-top:6px;line-height:1.5">Blockchain, crypto assets, DeFi, risk management.</div>
+    </div>
+    <div style="background:#0B1C44;border-radius:16px;border:1px solid rgba(200,48,16,0.25);padding:16px 18px">
+      <div style="font-size:22px;margin-bottom:6px">🐉</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#FF6040">Dragon's Vault</div>
+      <div style="font-size:10px;font-weight:800;color:#4A1010;letter-spacing:1.5px;margin-top:2px;text-transform:uppercase">Level 71+</div>
+      <div style="font-size:11px;color:#5A2010;margin-top:6px;line-height:1.5">Advanced strategies, options, hedge funds, legacy wealth.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Auto-scroll to current level (Zone 1, ~75% from bottom)
+window.addEventListener('load', () => {
+  const s = document.getElementById('mapScroll');
+  const c = document.getElementById('mapCanvas');
+  // Scroll to show Zone 1 (bottom zone) — current level is there
+  setTimeout(() => {
+    s.scrollTop = c.scrollHeight - s.clientHeight - 80;
+  }, 300);
+});
+
+function showPopup(node, title, sub, desc, reward, isBoss) {
+  const p = document.getElementById('popup');
+  document.getElementById('popupTitle').textContent = title;
+  document.getElementById('popupSub').textContent = sub;
+  document.getElementById('popupDesc').textContent = desc;
+  document.getElementById('popupReward').innerHTML = '🎁 Reward: ' + reward;
+  const btn = document.getElementById('popupBtn');
+  if (isBoss) {
+    btn.style.background = 'linear-gradient(135deg,#A83010,#E85030)';
+    btn.style.color = '#FFF0E0';
+    btn.textContent = 'Fight!';
+  } else {
+    btn.style.background = 'linear-gradient(135deg,#C8900A,#F5C518)';
+    btn.style.color = '#3A1A00';
+    btn.textContent = 'Play!';
+  }
+  p.style.display = 'block';
+  btn.onclick = () => { p.style.display = 'none'; };
+}
+
+// Close popup on map scroll
+document.getElementById('mapScroll').addEventListener('scroll', () => {
+  document.getElementById('popup').style.display = 'none';
+});
+
+// Nav buttons
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>InvestQuest — Design Assets</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#06112A;color:#F0E6C8;font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ── PAGE HEADER ── */
+.masthead{
+  text-align:center;padding:56px 24px 36px;
+  background:linear-gradient(180deg,#0B1C44 0%,#06112A 100%);
+  border-bottom:1px solid rgba(245,197,24,0.12);
+  position:relative;overflow:hidden;
+}
+.masthead::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 80% at 50% -20%, rgba(245,197,24,0.08) 0%, transparent 70%);
+}
+.app-logo{
+  font-family:'Fredoka One',cursive;font-size:52px;
+  background:linear-gradient(135deg,#F5C518 0%,#FFE97A 45%,#E8A800 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;letter-spacing:3px;line-height:1;
+}
+.app-sub{font-size:15px;color:#7B95C8;margin-top:10px;letter-spacing:1.5px;text-transform:uppercase}
+.version-tag{
+  display:inline-block;margin-top:16px;
+  background:rgba(0,200,150,0.12);border:1px solid rgba(0,200,150,0.3);
+  color:#00C896;font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  padding:4px 14px;border-radius:100px;font-weight:800;
+}
+
+/* ── LAYOUT ── */
+.section{max-width:1180px;margin:0 auto;padding:56px 28px}
+.section-badge{
+  font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;
+  color:#00C896;margin-bottom:10px;
+}
+.section-title{
+  font-family:'Fredoka One',cursive;font-size:32px;color:#F0E6C8;
+  margin-bottom:8px;
+}
+.section-desc{font-size:15px;color:#6A85B2;margin-bottom:40px;max-width:520px}
+.rule{border:none;border-top:1px solid rgba(255,255,255,0.06);margin:0}
+
+/* ── MASCOT STAGE ── */
+.mascot-stage{
+  display:flex;align-items:center;justify-content:center;gap:56px;flex-wrap:wrap;
+  background:#0B1C44;border-radius:28px;
+  border:1px solid rgba(245,197,24,0.15);
+  padding:56px 48px;position:relative;overflow:hidden;
+}
+.mascot-stage::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 80% at 40% 50%, rgba(196,129,58,0.08) 0%, transparent 65%);
+  pointer-events:none;
+}
+.mascot-stage::after{
+  content:'';position:absolute;
+  width:360px;height:360px;border-radius:50%;
+  border:1px solid rgba(245,197,24,0.06);
+  top:50%;left:40%;transform:translate(-50%,-50%);pointer-events:none;
+}
+.mascot-svg-wrap{position:relative;z-index:2;flex-shrink:0}
+.mascot-info{max-width:280px;position:relative;z-index:2}
+.char-name{font-family:'Fredoka One',cursive;font-size:58px;color:#F5C518;line-height:1;margin-bottom:4px}
+.char-subtitle{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#8899BB;margin-bottom:18px;font-weight:800}
+.char-desc{font-size:14px;color:#A0BEE8;line-height:1.7;margin-bottom:28px}
+.stat-row{margin-bottom:14px}
+.stat-label{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#6A85B2;margin-bottom:5px}
+.stat-bar{height:8px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden}
+.stat-fill{height:100%;border-radius:100px;transition:width 1s ease}
+.fill-gold{background:linear-gradient(90deg,#D4A010,#F5C518,#FFE97A)}
+.fill-teal{background:linear-gradient(90deg,#00A87A,#00C896)}
+.fill-blue{background:linear-gradient(90deg,#1A5FA8,#3A90E8)}
+.trait-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.chip{
+  font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  padding:5px 12px;border-radius:100px;border:1px solid;
+}
+.chip-gold{color:#F5C518;border-color:rgba(245,197,24,0.35);background:rgba(245,197,24,0.08)}
+.chip-teal{color:#00C896;border-color:rgba(0,200,150,0.35);background:rgba(0,200,150,0.08)}
+.chip-blue{color:#6BB4FF;border-color:rgba(107,180,255,0.35);background:rgba(107,180,255,0.08)}
+
+/* ── ICON GRID ── */
+.icon-row{display:flex;gap:24px;align-items:flex-end;flex-wrap:wrap}
+.icon-card{
+  background:#0B1C44;border-radius:20px;
+  border:1px solid rgba(255,255,255,0.07);
+  padding:28px 24px;text-align:center;
+}
+.icon-label{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#4A6A9A;margin-top:16px}
+.icon-size{font-size:12px;color:#3A5A8A;margin-top:4px}
+
+/* ── GAME BG SECTION ── */
+.game-bg-wrap{
+  border-radius:24px;overflow:hidden;
+  border:1px solid rgba(245,197,24,0.1);
+  position:relative;
+}
+.game-overlay-ui{
+  position:absolute;top:0;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:20px 24px;pointer-events:none;
+}
+.hud-pill{
+  background:rgba(6,17,42,0.82);backdrop-filter:blur(8px);
+  border:1px solid rgba(245,197,24,0.2);border-radius:100px;
+  font-family:'Fredoka One',cursive;font-size:15px;
+  color:#F5C518;padding:7px 18px;display:flex;align-items:center;gap:8px;
+}
+.hud-lives{
+  background:rgba(6,17,42,0.82);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,71,87,0.3);border-radius:100px;
+  font-size:13px;color:#FF6B7A;padding:7px 16px;font-weight:800;
+  display:flex;align-items:center;gap:6px;
+}
+
+/* ── PALETTE ── */
+.palette-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
+.swatch-wrap{text-align:center}
+.swatch{width:56px;height:56px;border-radius:14px;border:1px solid rgba(255,255,255,0.1)}
+.swatch-name{font-size:10px;color:#4A6A9A;margin-top:7px;font-weight:800;letter-spacing:1px}
+.swatch-hex{font-size:9px;color:#3A5A7A}
+
+/* ── FLOATING DECORATIONS ── */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:0.6}50%{opacity:1}}
+.float-a{animation:float 3.2s ease-in-out infinite}
+.float-b{animation:float 4.1s ease-in-out infinite 0.6s}
+.float-c{animation:float 3.7s ease-in-out infinite 1.2s}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ MASTHEAD ═══════════════════════════════ -->
+<header class="masthead">
+  <div class="app-logo">⚡ InvestQuest</div>
+  <div class="app-sub">Mobile App Design System — Mascot · Icon · Game Background</div>
+  <div class="version-tag">Brand v1.0 · 2026</div>
+</header>
+
+<!-- ═══════════════════════════════ MASCOT ════════════════════════════════ -->
+<div class="section">
+  <div class="section-badge">Asset 01 — Character Design</div>
+  <div class="section-title">Meet Rico — Your Investment Buddy</div>
+  <div class="section-desc">Friendly bull mascot designed to teach financial literacy through gamified adventures. Confident, warm, and always ready to invest.</div>
+
+  <div class="mascot-stage">
+
+    <!-- FLOATING DECORATIONS BEHIND -->
+    <svg style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1" viewBox="0 0 900 520" preserveAspectRatio="xMidYMid slice">
+      <!-- Stars scattered -->
+      <circle cx="60" cy="60" r="1.5" fill="#F5C518" opacity="0.5" class="float-c"/>
+      <circle cx="130" cy="130" r="1" fill="#F5C518" opacity="0.4"/>
+      <circle cx="820" cy="80" r="2" fill="#00C896" opacity="0.5" class="float-a"/>
+      <circle cx="780" cy="200" r="1.5" fill="#F5C518" opacity="0.4" class="float-b"/>
+      <circle cx="840" cy="380" r="1" fill="#6BB4FF" opacity="0.5"/>
+      <circle cx="50" cy="400" r="1.5" fill="#00C896" opacity="0.4" class="float-c"/>
+      <circle cx="100" cy="470" r="1" fill="#F5C518" opacity="0.3"/>
+      <!-- Large faint rings -->
+      <circle cx="450" cy="260" r="200" fill="none" stroke="rgba(245,197,24,0.04)" stroke-width="1"/>
+      <circle cx="450" cy="260" r="280" fill="none" stroke="rgba(245,197,24,0.03)" stroke-width="1"/>
+      <!-- Mini coins -->
+      <g class="float-a" style="transform-origin:80px 80px">
+        <circle cx="80" cy="80" r="14" fill="rgba(245,197,24,0.12)" stroke="rgba(245,197,24,0.25)" stroke-width="1"/>
+        <text x="80" y="86" text-anchor="middle" font-size="10" fill="#F5C518" opacity="0.5" font-weight="900">$</text>
+      </g>
+      <g class="float-b" style="transform-origin:820px 320px">
+        <circle cx="820" cy="320" r="18" fill="rgba(245,197,24,0.1)" stroke="rgba(245,197,24,0.2)" stroke-width="1"/>
+        <text x="820" y="327" text-anchor="middle" font-size="13" fill="#F5C518" opacity="0.45" font-weight="900">$</text>
+      </g>
+      <g class="float-c" style="transform-origin:840px 460px">
+        <circle cx="840" cy="460" r="10" fill="rgba(245,197,24,0.1)" stroke="rgba(245,197,24,0.2)" stroke-width="1"/>
+      </g>
+      <!-- Small chart line hint -->
+      <polyline points="60,420 90,400 120,410 160,370 200,350" fill="none" stroke="rgba(0,200,150,0.2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <!-- RICO THE BULL — MASCOT SVG -->
+    <div class="mascot-svg-wrap float-a">
+      <svg viewBox="0 0 360 475" width="300" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- AMBIENT GLOW BEHIND MASCOT -->
+        <ellipse cx="170" cy="220" rx="130" ry="160" fill="#C4813A" opacity="0.06"/>
+
+        <!-- ── HORNS (behind head) ── -->
+        <path d="M125,82 Q100,44 116,18 Q124,6 128,34 Q108,46 128,84" fill="#EDD88A"/>
+        <path d="M215,82 Q240,44 224,18 Q216,6 212,34 Q232,46 212,84" fill="#EDD88A"/>
+        <!-- Horn shadow -->
+        <path d="M125,82 Q100,44 116,18 Q124,6 128,34 Q108,46 128,84" fill="none" stroke="#C8B860" stroke-width="0.8"/>
+        <path d="M215,82 Q240,44 224,18 Q216,6 212,34 Q232,46 212,84" fill="none" stroke="#C8B860" stroke-width="0.8"/>
+
+        <!-- ── EARS (behind head) ── -->
+        <circle cx="72" cy="158" r="27" fill="#C4813A"/>
+        <circle cx="72" cy="158" r="17" fill="#E09B5E"/>
+        <circle cx="72" cy="158" r="10" fill="#D48C50"/>
+        <circle cx="268" cy="158" r="27" fill="#C4813A"/>
+        <circle cx="268" cy="158" r="17" fill="#E09B5E"/>
+        <circle cx="268" cy="158" r="10" fill="#D48C50"/>
+
+        <!-- ── MAIN HEAD ── -->
+        <circle cx="170" cy="160" r="92" fill="#C4813A"/>
+        <!-- Subtle fur texture shadow -->
+        <ellipse cx="170" cy="230" rx="72" ry="20" fill="#8B5A1E" opacity="0.22"/>
+
+        <!-- ── GRADUATION CAP ── -->
+        <!-- Crown -->
+        <rect x="118" y="52" width="104" height="32" rx="7" fill="#1A2856"/>
+        <!-- Board brim -->
+        <rect x="78" y="82" width="184" height="18" rx="5" fill="#1A2856"/>
+        <!-- Gold band -->
+        <rect x="118" y="82" width="104" height="5" fill="#F5C518"/>
+        <!-- Cap highlight -->
+        <rect x="122" y="56" width="60" height="6" rx="3" fill="rgba(255,255,255,0.08)"/>
+        <!-- Tassel cord -->
+        <path d="M253,90 Q264,100 260,122" stroke="#F5C518" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <circle cx="259" cy="126" r="6.5" fill="#F5C518"/>
+        <line x1="259" y1="126" x2="253" y2="143" stroke="#F5C518" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="259" y1="126" x2="259" y2="145" stroke="#F5C518" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="259" y1="126" x2="265" y2="143" stroke="#F5C518" stroke-width="2.2" stroke-linecap="round"/>
+
+        <!-- ── EYES ── -->
+        <!-- Eye whites (sclera) -->
+        <ellipse cx="128" cy="148" rx="26" ry="28" fill="#FFFFFF"/>
+        <ellipse cx="212" cy="148" rx="26" ry="28" fill="#FFFFFF"/>
+        <!-- Irises (warm dark brown) -->
+        <circle cx="132" cy="152" r="18" fill="#3A1500"/>
+        <circle cx="216" cy="152" r="18" fill="#3A1500"/>
+        <!-- Pupils -->
+        <circle cx="134" cy="154" r="10" fill="#0C0400"/>
+        <circle cx="218" cy="154" r="10" fill="#0C0400"/>
+        <!-- Primary catchlights (big) -->
+        <circle cx="140" cy="145" r="6.5" fill="#FFFFFF"/>
+        <circle cx="224" cy="145" r="6.5" fill="#FFFFFF"/>
+        <!-- Secondary catchlights (small) -->
+        <circle cx="130" cy="158" r="3" fill="#FFFFFF" opacity="0.55"/>
+        <circle cx="214" cy="158" r="3" fill="#FFFFFF" opacity="0.55"/>
+        <!-- Iris gold rim -->
+        <circle cx="132" cy="152" r="18" fill="none" stroke="#C46000" stroke-width="1.5" opacity="0.45"/>
+        <circle cx="216" cy="152" r="18" fill="none" stroke="#C46000" stroke-width="1.5" opacity="0.45"/>
+        <!-- Eyelash hint (top of sclera) -->
+        <path d="M106,136 Q128,125 150,136" stroke="#5A2A00" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.7"/>
+        <path d="M190,136 Q212,125 234,136" stroke="#5A2A00" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.7"/>
+
+        <!-- ── SNOUT ── -->
+        <ellipse cx="170" cy="192" rx="40" ry="28" fill="#E09B5E"/>
+        <!-- Snout highlight -->
+        <ellipse cx="158" cy="184" rx="18" ry="9" fill="#EDB880" opacity="0.55"/>
+        <!-- Nostrils -->
+        <ellipse cx="156" cy="199" rx="9.5" ry="7" fill="#7A3A10"/>
+        <ellipse cx="184" cy="199" rx="9.5" ry="7" fill="#7A3A10"/>
+        <!-- Nostril sheen -->
+        <ellipse cx="154" cy="197" rx="4" ry="3" fill="#9A5020" opacity="0.5"/>
+        <ellipse cx="182" cy="197" rx="4" ry="3" fill="#9A5020" opacity="0.5"/>
+
+        <!-- ── SMILE ── -->
+        <path d="M142,214 Q170,236 198,214" stroke="#7A3A10" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+        <!-- ── BLUSH CHEEKS ── -->
+        <ellipse cx="104" cy="177" rx="20" ry="11" fill="#E85030" opacity="0.22"/>
+        <ellipse cx="236" cy="177" rx="20" ry="11" fill="#E85030" opacity="0.22"/>
+
+        <!-- ── BODY / SHIRT ── -->
+        <!-- Neck fur -->
+        <path d="M118,242 Q170,224 222,242 L218,270 Q170,256 122,270 Z" fill="#C4813A"/>
+        <!-- Main torso (blue shirt) -->
+        <ellipse cx="170" cy="336" rx="80" ry="88" fill="#1A5FA8"/>
+        <!-- Shirt belly highlight (pocket area) -->
+        <ellipse cx="170" cy="350" rx="46" ry="55" fill="#2272CC" opacity="0.45"/>
+        <!-- Shirt button line -->
+        <line x1="170" y1="268" x2="170" y2="340" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-dasharray="3 5"/>
+        <!-- Shirt buttons -->
+        <circle cx="170" cy="295" r="3.5" fill="rgba(255,255,255,0.2)"/>
+        <circle cx="170" cy="314" r="3.5" fill="rgba(255,255,255,0.2)"/>
+
+        <!-- ── SHIRT COLLAR ── -->
+        <path d="M132,242 L170,272 L208,242 L222,230 Q170,214 118,230 Z" fill="#F0EFEA"/>
+        <path d="M170,272 L132,242" stroke="#D0CEC8" stroke-width="1" fill="none"/>
+        <path d="M170,272 L208,242" stroke="#D0CEC8" stroke-width="1" fill="none"/>
+
+        <!-- ── TIE ── -->
+        <!-- Knot -->
+        <rect x="160" y="262" width="20" height="16" rx="4" fill="#C8940A"/>
+        <!-- Tie body -->
+        <path d="M162,278 L154,348 L170,364 L186,348 L178,278 Z" fill="#F5C518"/>
+        <!-- Tie stripe highlights -->
+        <path d="M164,284 L158,344" stroke="#FFE060" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.6"/>
+        <path d="M172,284 L178,344" stroke="#C89000" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.3"/>
+
+        <!-- ── LEFT ARM ── -->
+        <path d="M95,298 Q62,316 46,358" stroke="#C4813A" stroke-width="34" fill="none" stroke-linecap="round"/>
+        <path d="M95,298 Q62,316 46,358" stroke="#B07030" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.4"/>
+        <!-- Left paw -->
+        <circle cx="42" cy="364" r="22" fill="#C4813A"/>
+        <path d="M24,358 Q42,349 60,358" stroke="#8B5A1E" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+        <!-- ── RIGHT ARM ── -->
+        <path d="M245,298 Q276,314 290,350" stroke="#C4813A" stroke-width="34" fill="none" stroke-linecap="round"/>
+        <path d="M245,298 Q276,314 290,350" stroke="#B07030" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.4"/>
+        <!-- Right paw -->
+        <circle cx="294" cy="356" r="22" fill="#C4813A"/>
+        <path d="M277,350 Q294,341 311,350" stroke="#8B5A1E" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+        <!-- ── GOLD COIN (held right) ── -->
+        <!-- Coin glow/shadow -->
+        <ellipse cx="316" cy="318" rx="32" ry="8" fill="#D4980A" opacity="0.25"/>
+        <!-- Coin layers (depth) -->
+        <circle cx="316" cy="300" r="32" fill="#A87000"/>
+        <circle cx="316" cy="298" r="32" fill="#C8900A"/>
+        <circle cx="316" cy="296" r="32" fill="#E6A800"/>
+        <circle cx="316" cy="294" r="32" fill="#F5C518"/>
+        <!-- Coin face -->
+        <circle cx="316" cy="294" r="26" fill="#FFD700"/>
+        <!-- Coin rim detail -->
+        <circle cx="316" cy="294" r="29" fill="none" stroke="#D4A010" stroke-width="1.5"/>
+        <!-- Dollar sign -->
+        <text x="316" y="305" text-anchor="middle" dominant-baseline="auto" font-size="28" font-weight="900" fill="#8A6000" font-family="'Arial Black','Nunito',sans-serif">$</text>
+        <!-- Coin sparkles -->
+        <text x="286" y="272" font-size="14" fill="#F5C518" opacity="0.8" font-family="sans-serif">★</text>
+        <text x="338" y="267" font-size="10" fill="#FFE060" opacity="0.65" font-family="sans-serif">★</text>
+        <text x="344" y="292" font-size="7" fill="#F5C518" opacity="0.5" font-family="sans-serif">★</text>
+
+        <!-- ── LEGS ── -->
+        <rect x="126" y="414" width="36" height="26" rx="8" fill="#0F3A7A"/>
+        <rect x="198" y="414" width="36" height="26" rx="8" fill="#0F3A7A"/>
+
+        <!-- ── SHOES ── -->
+        <ellipse cx="144" cy="436" rx="30" ry="12" fill="#1A2856"/>
+        <ellipse cx="216" cy="436" rx="30" ry="12" fill="#1A2856"/>
+        <!-- Shoe shine -->
+        <ellipse cx="136" cy="431" rx="10" ry="5" fill="#2A3866" opacity="0.75"/>
+        <ellipse cx="208" cy="431" rx="10" ry="5" fill="#2A3866" opacity="0.75"/>
+
+      </svg>
+    </div>
+
+    <!-- CHARACTER SPECS -->
+    <div class="mascot-info">
+      <div class="char-name">RICO</div>
+      <div class="char-subtitle">The Investment Bull</div>
+      <div class="char-desc">Rico transforms the complex world of investing into exciting quests. As your guide through stock markets, bonds, and compound interest, he makes every lesson feel like leveling up.</div>
+
+      <div class="stat-row">
+        <div class="stat-label">Wisdom</div>
+        <div class="stat-bar"><div class="stat-fill fill-gold" style="width:88%"></div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-label">Friendliness</div>
+        <div class="stat-bar"><div class="stat-fill fill-teal" style="width:96%"></div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-label">Risk Tolerance</div>
+        <div class="stat-bar"><div class="stat-fill fill-blue" style="width:74%"></div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-label">Teaching Power</div>
+        <div class="stat-bar"><div class="stat-fill fill-gold" style="width:92%"></div></div>
+      </div>
+
+      <div class="trait-chips">
+        <span class="chip chip-gold">📈 Bull Market</span>
+        <span class="chip chip-teal">🎓 Scholar</span>
+        <span class="chip chip-blue">💡 Advisor</span>
+        <span class="chip chip-gold">⚡ Motivator</span>
+        <span class="chip chip-teal">🏆 Achiever</span>
+      </div>
+    </div>
+
+  </div><!-- end mascot-stage -->
+</div>
+<hr class="rule">
+
+<!-- ═══════════════════════════════ APP ICON ══════════════════════════════ -->
+<div class="section">
+  <div class="section-badge">Asset 02 — App Icon</div>
+  <div class="section-title">App Icon Variations</div>
+  <div class="section-desc">Adaptive icons for iOS and Android, optimized at every size from 1024px down to 64px.</div>
+
+  <div class="icon-row">
+
+    <!-- 1024px ICON -->
+    <div class="icon-card">
+      <svg viewBox="0 0 200 200" width="200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="iconBg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0F1E4A"/>
+            <stop offset="100%" stop-color="#060D24"/>
+          </linearGradient>
+          <linearGradient id="goldRing" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FFE97A"/>
+            <stop offset="50%" stop-color="#F5C518"/>
+            <stop offset="100%" stop-color="#C8900A"/>
+          </linearGradient>
+          <clipPath id="roundClip">
+            <rect width="200" height="200" rx="44"/>
+          </clipPath>
+        </defs>
+        <!-- Icon background -->
+        <rect width="200" height="200" rx="44" fill="url(#iconBg)"/>
+        <!-- Background glow -->
+        <ellipse cx="100" cy="110" rx="70" ry="65" fill="#C4813A" opacity="0.08"/>
+        <!-- Gold ring border -->
+        <rect width="200" height="200" rx="44" fill="none" stroke="url(#goldRing)" stroke-width="4"/>
+        <!-- Inner glow rim -->
+        <rect x="6" y="6" width="188" height="188" rx="40" fill="none" stroke="rgba(245,197,24,0.15)" stroke-width="1"/>
+
+        <!-- MINI HORNS (behind head) -->
+        <path d="M80,62 Q69,40 74,26 Q78,20 80,36 Q72,44 80,62" fill="#EDD88A"/>
+        <path d="M120,62 Q131,40 126,26 Q122,20 120,36 Q128,44 120,62" fill="#EDD88A"/>
+
+        <!-- MINI EARS -->
+        <circle cx="56" cy="100" r="18" fill="#C4813A"/>
+        <circle cx="56" cy="100" r="11" fill="#E09B5E"/>
+        <circle cx="144" cy="100" r="18" fill="#C4813A"/>
+        <circle cx="144" cy="100" r="11" fill="#E09B5E"/>
+
+        <!-- HEAD -->
+        <circle cx="100" cy="102" r="58" fill="#C4813A"/>
+        <ellipse cx="100" cy="148" rx="44" ry="13" fill="#8B5A1E" opacity="0.2"/>
+
+        <!-- CAP -->
+        <rect x="68" y="44" width="64" height="20" rx="5" fill="#1A2856"/>
+        <rect x="48" y="62" width="104" height="11" rx="3" fill="#1A2856"/>
+        <rect x="68" y="62" width="64" height="4" fill="#F5C518"/>
+        <!-- Tassel -->
+        <path d="M145,66 Q150,74 148,84" stroke="#F5C518" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <circle cx="148" cy="87" r="4" fill="#F5C518"/>
+        <line x1="148" y1="87" x2="145" y2="96" stroke="#F5C518" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="148" y1="87" x2="148" y2="97" stroke="#F5C518" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="148" y1="87" x2="151" y2="96" stroke="#F5C518" stroke-width="1.5" stroke-linecap="round"/>
+
+        <!-- EYES -->
+        <ellipse cx="82" cy="94" rx="16" ry="17" fill="white"/>
+        <ellipse cx="118" cy="94" rx="16" ry="17" fill="white"/>
+        <circle cx="84" cy="96" r="11" fill="#2D1000"/>
+        <circle cx="120" cy="96" r="11" fill="#2D1000"/>
+        <circle cx="85" cy="97" r="6" fill="#080200"/>
+        <circle cx="121" cy="97" r="6" fill="#080200"/>
+        <circle cx="89" cy="90" r="4.5" fill="white"/>
+        <circle cx="125" cy="90" r="4.5" fill="white"/>
+
+        <!-- SNOUT -->
+        <ellipse cx="100" cy="122" rx="25" ry="18" fill="#E09B5E"/>
+        <ellipse cx="91" cy="126" rx="6" ry="4.5" fill="#7A3A10"/>
+        <ellipse cx="109" cy="126" rx="6" ry="4.5" fill="#7A3A10"/>
+        <!-- Smile -->
+        <path d="M86,134 Q100,146 114,134" stroke="#7A3A10" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+        <!-- BLUSH -->
+        <ellipse cx="66" cy="113" rx="13" ry="7" fill="#E85030" opacity="0.22"/>
+        <ellipse cx="134" cy="113" rx="13" ry="7" fill="#E85030" opacity="0.22"/>
+
+        <!-- CHART ARROW (bottom of icon) -->
+        <polyline points="30,182 52,168 72,174 94,155 120,158 148,138 168,142" fill="none" stroke="#00C896" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <polygon points="168,134 174,148 160,144" fill="#00C896"/>
+      </svg>
+      <div class="icon-label">App Store</div>
+      <div class="icon-size">1024 × 1024 px</div>
+    </div>
+
+    <!-- 256px ICON -->
+    <div class="icon-card">
+      <svg viewBox="0 0 120 120" width="120" xmlns="http://www.w3.org/2000/svg">
+        <rect width="120" height="120" rx="28" fill="#0B1C44"/>
+        <rect width="120" height="120" rx="28" fill="none" stroke="#F5C518" stroke-width="2.5"/>
+        <!-- Horns -->
+        <path d="M50,38 Q42,24 46,16 Q48,12 49,22 Q44,28 50,38" fill="#EDD88A"/>
+        <path d="M70,38 Q78,24 74,16 Q72,12 71,22 Q76,28 70,38" fill="#EDD88A"/>
+        <!-- Ears -->
+        <circle cx="34" cy="62" r="11" fill="#C4813A"/>
+        <circle cx="34" cy="62" r="7" fill="#E09B5E"/>
+        <circle cx="86" cy="62" r="11" fill="#C4813A"/>
+        <circle cx="86" cy="62" r="7" fill="#E09B5E"/>
+        <!-- Head -->
+        <circle cx="60" cy="64" r="36" fill="#C4813A"/>
+        <!-- Cap -->
+        <rect x="40" y="28" width="40" height="13" rx="4" fill="#1A2856"/>
+        <rect x="28" y="39" width="64" height="8" rx="3" fill="#1A2856"/>
+        <rect x="40" y="39" width="40" height="3" fill="#F5C518"/>
+        <!-- Eyes -->
+        <ellipse cx="47" cy="58" rx="10" ry="11" fill="white"/>
+        <ellipse cx="73" cy="58" rx="10" ry="11" fill="white"/>
+        <circle cx="48" cy="59" r="7" fill="#2D1000"/>
+        <circle cx="74" cy="59" r="7" fill="#2D1000"/>
+        <circle cx="48" cy="60" r="4" fill="#080200"/>
+        <circle cx="74" cy="60" r="4" fill="#080200"/>
+        <circle cx="51" cy="55" r="3" fill="white"/>
+        <circle cx="77" cy="55" r="3" fill="white"/>
+        <!-- Snout -->
+        <ellipse cx="60" cy="76" rx="16" ry="11" fill="#E09B5E"/>
+        <ellipse cx="54" cy="79" rx="4" ry="3" fill="#7A3A10"/>
+        <ellipse cx="66" cy="79" rx="4" ry="3" fill="#7A3A10"/>
+        <path d="M50,85 Q60,93 70,85" stroke="#7A3A10" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Chart bottom -->
+        <polyline points="16,108 30,100 42,104 56,93 72,96 88,83 102,86" fill="none" stroke="#00C896" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="icon-label">Home Screen</div>
+      <div class="icon-size">256 × 256 px</div>
+    </div>
+
+    <!-- 64px ICON (small) -->
+    <div class="icon-card">
+      <svg viewBox="0 0 64 64" width="80" xmlns="http://www.w3.org/2000/svg">
+        <rect width="64" height="64" rx="14" fill="#0B1C44"/>
+        <rect width="64" height="64" rx="14" fill="none" stroke="#F5C518" stroke-width="1.5"/>
+        <!-- Simplified bull face -->
+        <circle cx="32" cy="34" r="19" fill="#C4813A"/>
+        <!-- Mini cap -->
+        <rect x="21" y="15" width="22" height="7" rx="2" fill="#1A2856"/>
+        <rect x="15" y="21" width="34" height="5" rx="2" fill="#1A2856"/>
+        <rect x="21" y="21" width="22" height="2" fill="#F5C518"/>
+        <!-- Eyes -->
+        <circle cx="25" cy="32" r="5" fill="white"/>
+        <circle cx="39" cy="32" r="5" fill="white"/>
+        <circle cx="26" cy="33" r="3" fill="#0C0400"/>
+        <circle cx="40" cy="33" r="3" fill="#0C0400"/>
+        <circle cx="27" cy="31" r="1.5" fill="white"/>
+        <circle cx="41" cy="31" r="1.5" fill="white"/>
+        <!-- Snout -->
+        <ellipse cx="32" cy="40" rx="9" ry="6" fill="#E09B5E"/>
+        <ellipse cx="28" cy="42" rx="2.5" ry="1.8" fill="#7A3A10"/>
+        <ellipse cx="36" cy="42" rx="2.5" ry="1.8" fill="#7A3A10"/>
+        <!-- Chart hint -->
+        <polyline points="8,58 16,53 24,56 32,49 40,51 52,44 58,46" fill="none" stroke="#00C896" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="icon-label">Notification</div>
+      <div class="icon-size">64 × 64 px</div>
+    </div>
+
+    <!-- DARK / LIGHT VARIANTS NOTE -->
+    <div class="icon-card" style="max-width:220px">
+      <div style="font-size:13px;color:#6A85B2;line-height:1.8;text-align:left">
+        <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#F0E6C8;margin-bottom:14px">Design System</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:10px;height:10px;border-radius:50%;background:#F5C518;flex-shrink:0"></div>
+          <span>Primary Gold <code style="color:#F5C518;font-size:11px">#F5C518</code></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:10px;height:10px;border-radius:50%;background:#00C896;flex-shrink:0"></div>
+          <span>Growth Teal <code style="color:#00C896;font-size:11px">#00C896</code></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:10px;height:10px;border-radius:50%;background:#1A5FA8;flex-shrink:0"></div>
+          <span>Trust Blue <code style="color:#6BB4FF;font-size:11px">#1A5FA8</code></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:10px;height:10px;border-radius:50%;background:#C4813A;flex-shrink:0"></div>
+          <span>Rico Brown <code style="color:#E09B5E;font-size:11px">#C4813A</code></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:10px;height:10px;border-radius:50%;background:#0B1C44;border:1px solid rgba(255,255,255,0.2);flex-shrink:0"></div>
+          <span>Deep Navy <code style="color:#8899BB;font-size:11px">#0B1C44</code></span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end icon-row -->
+</div>
+<hr class="rule">
+
+<!-- ═══════════════════════════════ GAME BACKGROUND ═══════════════════════════════ -->
+<div class="section">
+  <div class="section-badge">Asset 03 — Game Background</div>
+  <div class="section-title">Game World — "Bull Street"</div>
+  <div class="section-desc">The main playfield background featuring a financial district at night, with gamified UI elements and interactive investment opportunities.</div>
+
+  <div class="game-bg-wrap">
+    <!-- HUD OVERLAY -->
+    <div class="game-overlay-ui">
+      <div class="hud-pill">⚡ Level 3 &nbsp;·&nbsp; <span style="color:#00C896">+2,480 XP</span></div>
+      <div style="display:flex;gap:10px">
+        <div class="hud-pill" style="font-size:13px;font-family:'Nunito',sans-serif;font-weight:800">
+          <svg width="14" height="14" viewBox="0 0 14 14" style="flex-shrink:0"><circle cx="7" cy="7" r="7" fill="#F5C518"/><text x="7" y="10.5" text-anchor="middle" font-size="8" font-weight="900" fill="#8A6000" font-family="sans-serif">$</text></svg>
+          12,500
+        </div>
+        <div class="hud-lives">❤ ❤ ❤</div>
+      </div>
+    </div>
+
+    <!-- GAME BACKGROUND SVG -->
+    <svg viewBox="0 0 900 520" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block">
+      <defs>
+        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#020810"/>
+          <stop offset="55%" stop-color="#060E28"/>
+          <stop offset="100%" stop-color="#0A1840"/>
+        </linearGradient>
+        <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0A1840"/>
+          <stop offset="100%" stop-color="#050C20"/>
+        </linearGradient>
+        <linearGradient id="buildingGlow" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1A3070"/>
+          <stop offset="100%" stop-color="#0D1E4A"/>
+        </linearGradient>
+        <linearGradient id="chartGlow" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#00C896" stop-opacity="0"/>
+          <stop offset="40%" stop-color="#00C896"/>
+          <stop offset="100%" stop-color="#00E5A8"/>
+        </linearGradient>
+        <filter id="glow1">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- SKY -->
+      <rect width="900" height="520" fill="url(#skyGrad)"/>
+
+      <!-- MOON / LARGE ORB -->
+      <circle cx="760" cy="80" r="45" fill="#0F1E4A"/>
+      <circle cx="760" cy="80" r="38" fill="#1A2E5A"/>
+      <circle cx="760" cy="80" r="32" fill="#243568"/>
+      <!-- Moon glow rings -->
+      <circle cx="760" cy="80" r="52" fill="none" stroke="rgba(100,140,255,0.12)" stroke-width="1"/>
+      <circle cx="760" cy="80" r="62" fill="none" stroke="rgba(100,140,255,0.07)" stroke-width="1"/>
+
+      <!-- STARS -->
+      <circle cx="40" cy="30" r="1.5" fill="#F5C518" opacity="0.7"/>
+      <circle cx="85" cy="18" r="1" fill="white" opacity="0.5"/>
+      <circle cx="160" cy="40" r="1.5" fill="white" opacity="0.4"/>
+      <circle cx="200" cy="15" r="1" fill="#F5C518" opacity="0.6"/>
+      <circle cx="280" cy="28" r="1" fill="white" opacity="0.4"/>
+      <circle cx="340" cy="12" r="1.5" fill="white" opacity="0.5"/>
+      <circle cx="420" cy="35" r="1" fill="#F5C518" opacity="0.4"/>
+      <circle cx="500" cy="22" r="1.5" fill="white" opacity="0.4"/>
+      <circle cx="560" cy="44" r="1" fill="#00C896" opacity="0.6"/>
+      <circle cx="620" cy="18" r="1" fill="white" opacity="0.3"/>
+      <circle cx="680" cy="30" r="1.5" fill="#F5C518" opacity="0.5"/>
+      <circle cx="820" cy="40" r="1" fill="white" opacity="0.4"/>
+      <circle cx="870" cy="22" r="1.5" fill="white" opacity="0.3"/>
+
+      <!-- DISTANT CITY GLOW (horizon) -->
+      <ellipse cx="450" cy="340" rx="420" ry="60" fill="#1A2E60" opacity="0.4"/>
+      <ellipse cx="160" cy="340" rx="120" ry="30" fill="#1A3A7A" opacity="0.3"/>
+      <ellipse cx="720" cy="340" rx="140" ry="25" fill="#1A2E60" opacity="0.25"/>
+
+      <!-- ── BUILDINGS (back layer — tall, thin) ── -->
+      <!-- Far left building -->
+      <rect x="-10" y="160" width="55" height="200" rx="3" fill="#0A1430"/>
+      <rect x="-10" y="150" width="55" height="15" rx="2" fill="#0C1838"/>
+      <!-- Windows -->
+      <rect x="2" y="170" width="8" height="10" rx="1" fill="#2A4A9A" opacity="0.7"/>
+      <rect x="16" y="170" width="8" height="10" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="30" y="170" width="8" height="10" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="2" y="188" width="8" height="10" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="16" y="188" width="8" height="10" rx="1" fill="#2A4A9A" opacity="0.4"/>
+      <rect x="30" y="188" width="8" height="10" rx="1" fill="#F5C518" opacity="0.6"/>
+      <rect x="2" y="206" width="8" height="10" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="16" y="206" width="8" height="10" rx="1" fill="#2A4A9A" opacity="0.3"/>
+      <rect x="30" y="206" width="8" height="10" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="2" y="224" width="8" height="10" rx="1" fill="#F5C518" opacity="0.6"/>
+      <rect x="30" y="224" width="8" height="10" rx="1" fill="#2A4A9A" opacity="0.5"/>
+
+      <!-- Medium building left -->
+      <rect x="46" y="200" width="80" height="160" rx="3" fill="#0D1840"/>
+      <rect x="46" y="190" width="80" height="14" rx="2" fill="#0F1C48"/>
+      <!-- Ticker display on building -->
+      <rect x="52" y="205" width="68" height="20" rx="2" fill="#0A1428"/>
+      <text x="56" y="219" font-size="9" fill="#00C896" font-family="'Courier New',monospace" font-weight="bold">AAPL ↑2.4%</text>
+      <!-- Windows -->
+      <rect x="52" y="232" width="10" height="12" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="68" y="232" width="10" height="12" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="84" y="232" width="10" height="12" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="100" y="232" width="10" height="12" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="52" y="252" width="10" height="12" rx="1" fill="#2A4A9A" opacity="0.4"/>
+      <rect x="68" y="252" width="10" height="12" rx="1" fill="#F5C518" opacity="0.7"/>
+      <rect x="84" y="252" width="10" height="12" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="100" y="252" width="10" height="12" rx="1" fill="#F5C518" opacity="0.3"/>
+      <rect x="52" y="272" width="10" height="12" rx="1" fill="#F5C518" opacity="0.6"/>
+      <rect x="84" y="272" width="10" height="12" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="52" y="292" width="10" height="12" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="68" y="292" width="10" height="12" rx="1" fill="#2A4A9A" opacity="0.4"/>
+      <rect x="84" y="292" width="10" height="12" rx="1" fill="#F5C518" opacity="0.7"/>
+      <rect x="100" y="292" width="10" height="12" rx="1" fill="#2A4A9A" opacity="0.3"/>
+
+      <!-- TALL CENTER SKYSCRAPER -->
+      <rect x="240" y="80" width="100" height="280" rx="4" fill="url(#buildingGlow)"/>
+      <rect x="240" y="70" width="100" height="14" rx="3" fill="#1E347A"/>
+      <!-- Antenna -->
+      <rect x="286" y="42" width="8" height="30" rx="2" fill="#1A2856"/>
+      <circle cx="290" cy="40" r="5" fill="#FF4757" opacity="0.8"/>
+      <circle cx="290" cy="40" r="3" fill="#FF6B7A"/>
+      <!-- Large screen on skyscraper -->
+      <rect x="252" y="90" width="76" height="48" rx="3" fill="#08112A"/>
+      <rect x="254" y="92" width="72" height="44" rx="2" fill="#060D1E"/>
+      <!-- Chart on screen -->
+      <polyline points="258,128 270,118 282,121 296,108 310,112 320,100 324,103" fill="none" stroke="#00C896" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="258" y="103" font-size="8" fill="#F5C518" font-family="'Courier New',monospace" font-weight="bold">NASDAQ +1.8%</text>
+      <!-- Skyscraper windows grid -->
+      <rect x="248" y="150" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="264" y="150" width="11" height="9" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="280" y="150" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.7"/>
+      <rect x="296" y="150" width="11" height="9" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="312" y="150" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="248" y="166" width="11" height="9" rx="1" fill="#F5C518" opacity="0.6"/>
+      <rect x="264" y="166" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.4"/>
+      <rect x="280" y="166" width="11" height="9" rx="1" fill="#F5C518" opacity="0.7"/>
+      <rect x="296" y="166" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="312" y="166" width="11" height="9" rx="1" fill="#F5C518" opacity="0.3"/>
+      <rect x="248" y="182" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="264" y="182" width="11" height="9" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="280" y="182" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="296" y="182" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.4"/>
+      <rect x="312" y="182" width="11" height="9" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="248" y="198" width="11" height="9" rx="1" fill="#F5C518" opacity="0.6"/>
+      <rect x="264" y="198" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="280" y="198" width="11" height="9" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="296" y="198" width="11" height="9" rx="1" fill="#F5C518" opacity="0.7"/>
+      <rect x="312" y="198" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.3"/>
+      <rect x="248" y="214" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="264" y="214" width="11" height="9" rx="1" fill="#F5C518" opacity="0.3"/>
+      <rect x="280" y="214" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="296" y="214" width="11" height="9" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="312" y="214" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="248" y="230" width="11" height="9" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="264" y="230" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.4"/>
+      <rect x="296" y="230" width="11" height="9" rx="1" fill="#F5C518" opacity="0.6"/>
+      <rect x="312" y="230" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.4"/>
+      <rect x="248" y="246" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="264" y="246" width="11" height="9" rx="1" fill="#F5C518" opacity="0.6"/>
+      <rect x="280" y="246" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.3"/>
+      <rect x="296" y="246" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="312" y="246" width="11" height="9" rx="1" fill="#F5C518" opacity="0.4"/>
+
+      <!-- WIDE BUILDING RIGHT OF CENTER -->
+      <rect x="350" y="160" width="130" height="200" rx="3" fill="#0C1838"/>
+      <rect x="350" y="148" width="130" height="16" rx="3" fill="#101E48"/>
+      <!-- BULL STREET sign -->
+      <rect x="362" y="162" width="106" height="22" rx="3" fill="#0A1228"/>
+      <text x="415" y="177" text-anchor="middle" font-size="10" fill="#F5C518" font-family="'Fredoka One',cursive" letter-spacing="1">BULL STREET</text>
+      <!-- Windows -->
+      <rect x="358" y="192" width="12" height="9" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="376" y="192" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="394" y="192" width="12" height="9" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="412" y="192" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="430" y="192" width="12" height="9" rx="1" fill="#F5C518" opacity="0.7"/>
+      <rect x="448" y="192" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.4"/>
+      <rect x="358" y="208" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="376" y="208" width="12" height="9" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="394" y="208" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.3"/>
+      <rect x="412" y="208" width="12" height="9" rx="1" fill="#F5C518" opacity="0.6"/>
+      <rect x="430" y="208" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="448" y="208" width="12" height="9" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="358" y="224" width="12" height="9" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="394" y="224" width="12" height="9" rx="1" fill="#F5C518" opacity="0.6"/>
+      <rect x="430" y="224" width="12" height="9" rx="1" fill="#F5C518" opacity="0.3"/>
+      <rect x="448" y="224" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="358" y="240" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="376" y="240" width="12" height="9" rx="1" fill="#F5C518" opacity="0.7"/>
+      <rect x="394" y="240" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.4"/>
+      <rect x="412" y="240" width="12" height="9" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="430" y="240" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="448" y="240" width="12" height="9" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="358" y="256" width="12" height="9" rx="1" fill="#F5C518" opacity="0.6"/>
+      <rect x="376" y="256" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.4"/>
+      <rect x="394" y="256" width="12" height="9" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="430" y="256" width="12" height="9" rx="1" fill="#F5C518" opacity="0.6"/>
+      <rect x="448" y="256" width="12" height="9" rx="1" fill="#2A4A9A" opacity="0.3"/>
+
+      <!-- RIGHT SIDE BUILDINGS -->
+      <rect x="570" y="120" width="90" height="240" rx="3" fill="#0D1840"/>
+      <rect x="570" y="108" width="90" height="16" rx="3" fill="#101E4A"/>
+      <!-- Windows -->
+      <rect x="578" y="130" width="11" height="9" rx="1" fill="#F5C518" opacity="0.6"/>
+      <rect x="595" y="130" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="612" y="130" width="11" height="9" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="629" y="130" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="578" y="146" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="595" y="146" width="11" height="9" rx="1" fill="#F5C518" opacity="0.7"/>
+      <rect x="612" y="146" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.4"/>
+      <rect x="629" y="146" width="11" height="9" rx="1" fill="#F5C518" opacity="0.3"/>
+      <rect x="578" y="162" width="11" height="9" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="595" y="162" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="629" y="162" width="11" height="9" rx="1" fill="#F5C518" opacity="0.6"/>
+      <rect x="578" y="178" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.4"/>
+      <rect x="595" y="178" width="11" height="9" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="612" y="178" width="11" height="9" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="629" y="178" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="578" y="194" width="11" height="9" rx="1" fill="#F5C518" opacity="0.7"/>
+      <rect x="595" y="194" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.3"/>
+      <rect x="629" y="194" width="11" height="9" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="578" y="210" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="595" y="210" width="11" height="9" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="612" y="210" width="11" height="9" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="629" y="210" width="11" height="9" rx="1" fill="#F5C518" opacity="0.3"/>
+
+      <rect x="672" y="180" width="74" height="180" rx="3" fill="#0A1630"/>
+      <rect x="746" y="200" width="60" height="160" rx="3" fill="#0C1838"/>
+      <rect x="820" y="170" width="90" height="190" rx="3" fill="#0A1430"/>
+      <!-- Far right windows (abbreviated) -->
+      <rect x="678" y="192" width="9" height="7" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="693" y="192" width="9" height="7" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="708" y="192" width="9" height="7" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="678" y="206" width="9" height="7" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="708" y="206" width="9" height="7" rx="1" fill="#F5C518" opacity="0.6"/>
+      <rect x="828" y="184" width="9" height="7" rx="1" fill="#F5C518" opacity="0.5"/>
+      <rect x="844" y="184" width="9" height="7" rx="1" fill="#2A4A9A" opacity="0.6"/>
+      <rect x="860" y="184" width="9" height="7" rx="1" fill="#F5C518" opacity="0.4"/>
+      <rect x="876" y="184" width="9" height="7" rx="1" fill="#2A4A9A" opacity="0.5"/>
+      <rect x="828" y="198" width="9" height="7" rx="1" fill="#2A4A9A" opacity="0.4"/>
+      <rect x="860" y="198" width="9" height="7" rx="1" fill="#F5C518" opacity="0.6"/>
+
+      <!-- ── GROUND / ROAD ── -->
+      <rect x="0" y="360" width="900" height="160" fill="url(#groundGrad)"/>
+      <!-- Road surface -->
+      <rect x="0" y="360" width="900" height="8" fill="#0E1E48"/>
+      <!-- Road markings -->
+      <line x1="0" y1="400" x2="900" y2="400" stroke="rgba(245,197,24,0.15)" stroke-width="2" stroke-dasharray="40 20"/>
+      <!-- Sidewalk -->
+      <rect x="0" y="360" width="900" height="30" fill="#0A1840" opacity="0.6"/>
+      <rect x="0" y="358" width="900" height="5" fill="#1A3070" opacity="0.5"/>
+
+      <!-- ── PLATFORMS (game elements) ── -->
+      <!-- Platform 1 (left) -->
+      <rect x="20" y="310" width="120" height="18" rx="9" fill="#1A3A8A"/>
+      <rect x="20" y="310" width="120" height="8" rx="9" fill="#2A4AAA" opacity="0.8"/>
+      <rect x="26" y="314" width="108" height="4" rx="2" fill="rgba(245,197,24,0.2)"/>
+      <!-- Platform 2 (center low) -->
+      <rect x="360" y="335" width="160" height="18" rx="9" fill="#1A3A8A"/>
+      <rect x="360" y="335" width="160" height="8" rx="9" fill="#2A4AAA" opacity="0.8"/>
+      <rect x="366" y="339" width="148" height="4" rx="2" fill="rgba(245,197,24,0.2)"/>
+      <!-- Platform 3 (right) -->
+      <rect x="700" y="305" width="140" height="18" rx="9" fill="#1A3A8A"/>
+      <rect x="700" y="305" width="140" height="8" rx="9" fill="#2A4AAA" opacity="0.8"/>
+      <rect x="706" y="309" width="128" height="4" rx="2" fill="rgba(245,197,24,0.2)"/>
+
+      <!-- ── RICO MINI (on left platform) ── -->
+      <!-- Mini horn -->
+      <path d="M56,288 Q51,279 54,272 Q55,269 56,277 Q52,281 56,288" fill="#EDD88A"/>
+      <path d="M68,288 Q73,279 70,272 Q69,269 68,277 Q72,281 68,288" fill="#EDD88A"/>
+      <!-- Mini head -->
+      <circle cx="62" cy="295" r="22" fill="#C4813A"/>
+      <!-- Mini cap -->
+      <rect x="50" y="273" width="24" height="7" rx="2" fill="#1A2856"/>
+      <rect x="46" y="279" width="32" height="5" rx="2" fill="#1A2856"/>
+      <rect x="50" y="279" width="24" height="2" fill="#F5C518"/>
+      <!-- Mini eyes -->
+      <ellipse cx="55" cy="293" rx="5.5" ry="6" fill="white"/>
+      <ellipse cx="69" cy="293" rx="5.5" ry="6" fill="white"/>
+      <circle cx="56" cy="294" r="3.5" fill="#2D1000"/>
+      <circle cx="70" cy="294" r="3.5" fill="#2D1000"/>
+      <circle cx="57" cy="292" r="1.5" fill="white"/>
+      <circle cx="71" cy="292" r="1.5" fill="white"/>
+      <!-- Mini snout -->
+      <ellipse cx="62" cy="303" rx="9" ry="6.5" fill="#E09B5E"/>
+      <!-- Mini body -->
+      <ellipse cx="62" cy="320" rx="17" ry="16" fill="#1A5FA8"/>
+      <!-- Mini tie -->
+      <path d="M59,310 L62,308 L65,310 L63,322 L62,325 L61,322 Z" fill="#F5C518"/>
+
+      <!-- ── FLOATING GAME COLLECTIBLES ── -->
+      <!-- Floating coin 1 -->
+      <g class="float-a" style="transform-origin:160px 260px">
+        <circle cx="160" cy="260" r="18" fill="#C8900A"/>
+        <circle cx="160" cy="258" r="18" fill="#F5C518"/>
+        <circle cx="160" cy="258" r="14" fill="#FFD700"/>
+        <text x="160" y="264" text-anchor="middle" font-size="13" font-weight="900" fill="#8A6000" font-family="sans-serif">$</text>
+      </g>
+
+      <!-- Floating coin 2 -->
+      <g class="float-b" style="transform-origin:500px 240px">
+        <circle cx="500" cy="240" r="15" fill="#C8900A"/>
+        <circle cx="500" cy="238" r="15" fill="#F5C518"/>
+        <circle cx="500" cy="238" r="11" fill="#FFD700"/>
+        <text x="500" y="243" text-anchor="middle" font-size="11" font-weight="900" fill="#8A6000" font-family="sans-serif">$</text>
+      </g>
+
+      <!-- Floating coin 3 -->
+      <g class="float-c" style="transform-origin:800px 250px">
+        <circle cx="800" cy="250" r="16" fill="#C8900A"/>
+        <circle cx="800" cy="248" r="16" fill="#F5C518"/>
+        <circle cx="800" cy="248" r="12" fill="#FFD700"/>
+        <text x="800" y="254" text-anchor="middle" font-size="12" font-weight="900" fill="#8A6000" font-family="sans-serif">$</text>
+      </g>
+
+      <!-- XP GEM (green) -->
+      <g class="float-a" style="transform-origin:650px 280px">
+        <polygon points="650,265 660,272 660,285 650,292 640,285 640,272" fill="#005A40"/>
+        <polygon points="650,265 660,272 660,285 650,292 640,285 640,272" fill="none" stroke="#00C896" stroke-width="1.5"/>
+        <polygon points="650,268 657,273 657,283 650,288 643,283 643,273" fill="#00C896" opacity="0.7"/>
+        <polygon points="650,272 655,275 655,282 650,285 645,282 645,275" fill="#00E5A8" opacity="0.5"/>
+      </g>
+
+      <!-- STOCK CHART (floating, upward trend) -->
+      <!-- Chart glow line -->
+      <polyline points="130,290 175,268 210,276 260,248 310,255 365,222 410,230 460,196 510,205 565,175 610,182 660,154 710,160 760,138 810,145 860,120" 
+        fill="none" stroke="rgba(0,200,150,0.15)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Main chart line -->
+      <polyline points="130,290 175,268 210,276 260,248 310,255 365,222 410,230 460,196 510,205 565,175 610,182 660,154 710,160 760,138 810,145 860,120" 
+        fill="none" stroke="url(#chartGlow)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Chart arrow head -->
+      <polygon points="856,112 868,124 844,126" fill="#00C896"/>
+
+      <!-- QUESTION BLOCK (investment lesson item) -->
+      <g class="float-b" style="transform-origin:440px 265px">
+        <rect x="422" y="248" width="36" height="36" rx="8" fill="#C8900A"/>
+        <rect x="422" y="248" width="36" height="36" rx="8" fill="none" stroke="#F5C518" stroke-width="2"/>
+        <rect x="424" y="250" width="32" height="14" rx="4" fill="#F5C518" opacity="0.3"/>
+        <text x="440" y="272" text-anchor="middle" font-size="20" font-weight="900" fill="#FFE060" font-family="'Fredoka One',sans-serif">?</text>
+      </g>
+
+      <!-- LEVEL UP BADGE (floating) -->
+      <g class="float-c" style="transform-origin:210px 210px">
+        <rect x="180" y="196" width="60" height="28" rx="14" fill="#0A1840"/>
+        <rect x="180" y="196" width="60" height="28" rx="14" fill="none" stroke="rgba(0,200,150,0.6)" stroke-width="1.5"/>
+        <text x="210" y="214" text-anchor="middle" font-size="11" font-weight="800" fill="#00C896" font-family="'Nunito',sans-serif" letter-spacing="0.5">LEVEL UP!</text>
+      </g>
+
+      <!-- XP BAR (foreground UI element, bottom) -->
+      <rect x="20" y="455" width="300" height="10" rx="5" fill="#0A1840"/>
+      <rect x="20" y="455" width="220" height="10" rx="5" fill="#00C896" opacity="0.8"/>
+      <rect x="20" y="455" width="220" height="4" rx="5" fill="#00E5A8" opacity="0.5"/>
+      <text x="340" y="464" font-size="10" fill="#8899BB" font-family="'Nunito',sans-serif" font-weight="800">XP 2,480 / 3,000</text>
+
+      <!-- TICKER TAPE (bottom scrolling) -->
+      <rect x="0" y="478" width="900" height="26" fill="#060E28"/>
+      <rect x="0" y="478" width="900" height="2" fill="#F5C518" opacity="0.3"/>
+      <text x="20" y="495" font-size="10" fill="#00C896" font-family="'Courier New',monospace" font-weight="bold">AAPL +2.4%</text>
+      <text x="120" y="495" font-size="10" fill="#F5C518" font-family="'Courier New',monospace">GOOG +0.8%</text>
+      <text x="220" y="495" font-size="10" fill="#FF6B7A" font-family="'Courier New',monospace">TSLA -1.2%</text>
+      <text x="320" y="495" font-size="10" fill="#00C896" font-family="'Courier New',monospace">MSFT +1.6%</text>
+      <text x="420" y="495" font-size="10" fill="#F5C518" font-family="'Courier New',monospace">AMZN +3.1%</text>
+      <text x="520" y="495" font-size="10" fill="#00C896" font-family="'Courier New',monospace">NVDA +4.5%</text>
+      <text x="620" y="495" font-size="10" fill="#FF6B7A" font-family="'Courier New',monospace">META -0.5%</text>
+      <text x="720" y="495" font-size="10" fill="#F5C518" font-family="'Courier New',monospace">BRK  +0.3%</text>
+      <text x="820" y="495" font-size="10" fill="#00C896" font-family="'Courier New',monospace">SPY  +1.8%</text>
+
+    </svg>
+  </div><!-- end game-bg-wrap -->
+</div>
+<hr class="rule">
+
+<!-- ═══════════════════════════════ STYLE GUIDE ═══════════════════════════════ -->
+<div class="section" style="padding-bottom:72px">
+  <div class="section-badge">Asset 04 — Style Guide</div>
+  <div class="section-title">Color & Type Palette</div>
+
+  <div class="palette-row">
+    <div class="swatch-wrap"><div class="swatch" style="background:#F5C518"></div><div class="swatch-name">GOLD</div><div class="swatch-hex">#F5C518</div></div>
+    <div class="swatch-wrap"><div class="swatch" style="background:#00C896"></div><div class="swatch-name">TEAL</div><div class="swatch-hex">#00C896</div></div>
+    <div class="swatch-wrap"><div class="swatch" style="background:#1A5FA8"></div><div class="swatch-name">BLUE</div><div class="swatch-hex">#1A5FA8</div></div>
+    <div class="swatch-wrap"><div class="swatch" style="background:#FF4757"></div><div class="swatch-name">RED</div><div class="swatch-hex">#FF4757</div></div>
+    <div class="swatch-wrap"><div class="swatch" style="background:#C4813A"></div><div class="swatch-name">BROWN</div><div class="swatch-hex">#C4813A</div></div>
+    <div class="swatch-wrap"><div class="swatch" style="background:#0B1C44"></div><div class="swatch-name">NAVY</div><div class="swatch-hex">#0B1C44</div></div>
+    <div class="swatch-wrap"><div class="swatch" style="background:#06112A"></div><div class="swatch-name">DARK</div><div class="swatch-hex">#06112A</div></div>
+    <div class="swatch-wrap"><div class="swatch" style="background:#F0E6C8"></div><div class="swatch-name">CREAM</div><div class="swatch-hex">#F0E6C8</div></div>
+  </div>
+
+  <div style="margin-top:40px;display:flex;gap:32px;flex-wrap:wrap">
+    <div>
+      <div class="section-badge" style="margin-bottom:12px">Display Font</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:36px;color:#F5C518;line-height:1">Fredoka One</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#8899BB;margin-top:4px">ABCDEFGHIJKLMNOPQRSTUVWXYZ</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#6A85B2;margin-top:2px">abcdefghijklmnopqrstuvwxyz 0123456789</div>
+      <div style="margin-top:10px;font-size:12px;color:#4A6A9A">Used for: Logo, Headings, HUD Elements, Buttons</div>
+    </div>
+    <div>
+      <div class="section-badge" style="margin-bottom:12px">Body Font</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:28px;color:#F0E6C8;font-weight:800;line-height:1">Nunito</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:16px;color:#8899BB;margin-top:4px;font-weight:600">ABCDEFGHIJKLMNOPQRSTUVWXYZ</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:14px;color:#6A85B2;margin-top:2px">abcdefghijklmnopqrstuvwxyz 0123456789</div>
+      <div style="margin-top:10px;font-size:12px;color:#4A6A9A">Used for: Body, Labels, Stats, Descriptions, HUD</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE FOOTER -->
+<div style="text-align:center;padding:28px;border-top:1px solid rgba(255,255,255,0.05);font-size:12px;color:#2A3A5A;font-weight:800;letter-spacing:2px;text-transform:uppercase">
+  InvestQuest · Brand Design System · 2026 · Rico &amp; Co.
+</div>
+
+</body>
+</html>
