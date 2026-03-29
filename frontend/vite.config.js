@@ -5,20 +5,23 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const apiHost = (env.VITE_API_HOST || 'localhost').trim()
-  const apiPort = (env.VITE_API_PORT || '9001').trim()
-  // Full URL for dev proxy (https://api.example.com). When set, host/port below are ignored for the proxy.
-  const proxyTarget = (env.VITE_API_PROXY_TARGET || '').trim()
-  const target = proxyTarget || `http://${apiHost}:${apiPort}`
+  const apiUrl = (env.VITE_API_URL || '').trim()
+
+  /**
+   * Dev server only: `/api/*` → backend. Uses `VITE_API_URL` when it’s a full URL
+   * (same value as production; typically http://localhost:9001 locally, https://… on CI
+   * if you ever run `vite dev` with that env). Otherwise default local backend.
+   */
+  const devProxyTarget = /^https?:\/\//i.test(apiUrl) ? apiUrl : 'http://localhost:9001'
 
   return {
     plugins: [react(), tailwindcss()],
     server: {
       proxy: {
         '/api': {
-          target,
+          target: devProxyTarget,
           changeOrigin: true,
-          secure: target.startsWith('https:'),
+          secure: devProxyTarget.startsWith('https:'),
           rewrite: (path) => path.replace(/^\/api/, ''),
         },
       },
