@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -64,7 +65,7 @@ func getEnvDuration(key string, defaultVal time.Duration) time.Duration {
 //
 // Primary: DB_HOST, DB_HOSTADDR (optional), DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_SSLMODE
 // (password may contain & * ( etc.; encoded in dsn via url.UserPassword).
-// DB_PREFER_IPV4: when not "false", DNS prefers A (IPv4) records for remote hosts.
+// DB_PREFER_IPV4: optional; set to true/1 when a remote host (e.g. Supabase) needs IPv4-only DNS/dial.
 // Pooling: DB_MAX_OPEN_CONNS, DB_MAX_IDLE_CONNS, DB_CONN_MAX_LIFETIME, DB_CONN_MAX_IDLE_TIME
 //
 // DATABASE_URL is used only when DB_HOST is not set in the environment (e.g. some deploy pipelines).
@@ -102,8 +103,12 @@ func (c Config) dsn() string {
 	return u.String()
 }
 
+// preferIPv4FromEnv is opt-in only. The old default (treat “unset” as true) added hostaddr= for
+// localhost and triggered FATAL: unrecognized configuration parameter "hostaddr" (SQLSTATE 42704)
+// on some local Postgres builds. Remote IPv6 issues: set DB_PREFER_IPV4=true.
 func preferIPv4FromEnv() bool {
-	return strings.ToLower(strings.TrimSpace(os.Getenv("DB_PREFER_IPV4"))) != "false"
+	v := strings.ToLower(strings.TrimSpace(os.Getenv("DB_PREFER_IPV4")))
+	return v == "true" || v == "1" || v == "yes"
 }
 
 // lookupIPv4Strings returns hostnames or IPv4 literals suitable for tcp4 dialing — never IPv6 (tcp4 cannot dial v6).
@@ -115,7 +120,7 @@ func lookupIPv4Strings(ctx context.Context, host string) ([]string, error) {
 		if ip.To4() != nil {
 			return []string{ip.String()}, nil
 		}
-		return nil, fmt.Errorf("host is an IPv6 literal %q; set DB_PREFER_IPV4=false or use DB_HOSTADDR with an IPv4 address", host)
+		return nil, fmt.Errorf("host is an IPv6 literal %q; omit DB_PREFER_IPV4 or use DB_HOSTADDR with an IPv4 address", host)
 	}
 	var sys net.Resolver
 	ips, err := sys.LookupIP(ctx, "ip4", host)
@@ -184,6 +189,10 @@ func augmentDSNWithIPv4Hostaddr(dsn string) string {
 	if host == "" || net.ParseIP(host) != nil {
 		return dsn
 	}
+	h := strings.ToLower(host)
+	if h == "localhost" || h == "127.0.0.1" || h == "::1" {
+		return dsn
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	ips, err := lookupIPv4Strings(ctx, host)
@@ -200,6 +209,17 @@ func applyPoolConfig(pcfg *pgxpool.Config, cfg Config) {
 	pcfg.MinIdleConns = int32(cfg.MaxIdleConns)
 	pcfg.MaxConnLifetime = cfg.ConnMaxLifetime
 	pcfg.MaxConnIdleTime = cfg.ConnMaxIdleTime
+}
+
+// applyPgxQueryExecMode defaults to the simple query protocol so pgx does not register server-side
+// named prepared statements (stmtcache_*). Those conflict with PgBouncer transaction pooling,
+// RDS Proxy, and similar proxies, producing SQLSTATE 42P05 ("prepared statement … already exists").
+// Set DB_PGX_USE_PREPARED_STATEMENTS=1 to restore pgx's default extended protocol + statement cache.
+func applyPgxQueryExecMode(pcfg *pgxpool.Config) {
+	if strings.TrimSpace(os.Getenv("DB_PGX_USE_PREPARED_STATEMENTS")) == "1" {
+		return
+	}
+	pcfg.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeSimpleProtocol
 }
 
 // applyForceIPv4DialAndLookup forces TCP over IPv4 (critical for Supabase when IPv6 is unroutable) and prefers A-record DNS.
@@ -286,6 +306,7 @@ func openPostgresDSN(dsn string, poolCfg Config) (*DB, error) {
 	}
 	applyForceIPv4DialAndLookup(pcfg)
 	applyPoolConfig(pcfg, poolCfg)
+	applyPgxQueryExecMode(pcfg)
 
 	ctx := context.Background()
 	pool, err := pgxpool.NewWithConfig(ctx, pcfg)
