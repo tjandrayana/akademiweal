@@ -1,12 +1,12 @@
 /**
- * Maps AkademiWeal lesson completion to InvestQuest map step (1 … N lessons).
+ * Maps AkademiWeal lesson completion to linear map step (1 … N lessons).
  */
 
 export function flattenLessonsInOrder(lessonsByLevel, levelOrder) {
   return levelOrder.flatMap((lv) => lessonsByLevel[lv] || [])
 }
 
-export function computeInvestQuestMapProgress(lessonsByLevel, completedLessonIds, levelOrder) {
+export function computeLessonPathProgress(lessonsByLevel, completedLessonIds, levelOrder) {
   const flat = flattenLessonsInOrder(lessonsByLevel, levelOrder)
   const total = flat.length
   if (total === 0) {
@@ -42,3 +42,34 @@ export function lessonForMapLevel(mapLevel, lessonsByLevel, levelOrder) {
   }
   return { lesson, pathLevel }
 }
+
+/**
+ * Global path index (1 … N) for a lesson id, or null if not in the flattened curriculum.
+ * @param {number} lessonId
+ * @param {Record<number, unknown[]>} lessonsByLevel
+ * @param {number[]} levelOrder
+ * @returns {number | null}
+ */
+export function lessonGlobalStep(lessonId, lessonsByLevel, levelOrder) {
+  const flat = flattenLessonsInOrder(lessonsByLevel, levelOrder)
+  const idx = flat.findIndex((l) => l.id === Number(lessonId))
+  return idx >= 0 ? idx + 1 : null
+}
+
+/**
+ * Same linear gating as `resolveMapNodeStatus` / map `node.level` vs `computeLessonPathProgress`.
+ * @param {number} step1Based 1 … N in `flattenLessonsInOrder` order
+ * @param {{ currentMapLevel: number, allComplete?: boolean }} progress
+ * @returns {'completed' | 'current' | 'locked'}
+ */
+export function lessonStepOnPathStatus(step1Based, progress) {
+  if (progress.allComplete) {
+    return 'completed'
+  }
+  const L = step1Based
+  const c = progress.currentMapLevel
+  if (L < c) return 'completed'
+  if (L === c) return 'current'
+  return 'locked'
+}
+

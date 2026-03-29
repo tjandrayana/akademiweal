@@ -16,9 +16,14 @@ const genericLocked = {
 /**
  * @param {{ currentMapLevel: number, completedLevels: Set<number>, allComplete?: boolean }} progress
  * @param {{ level: number }} node
+ * @param {{ guestMaxPathStep?: number | null }} [options] when set, guests cannot play nodes beyond this global step
  * @returns {MapNodeStatus}
  */
-export function resolveMapNodeStatus(node, progress) {
+export function resolveMapNodeStatus(node, progress, options = {}) {
+  const cap = options.guestMaxPathStep
+  if (cap != null && Number.isFinite(cap) && node.level > cap) {
+    return 'locked'
+  }
   if (progress.allComplete) {
     return 'completed'
   }

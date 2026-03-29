@@ -25,9 +25,10 @@ func (r *Repository) InsertEvent(ctx context.Context, userID *int64, eventName s
 	} else {
 		uid = nil
 	}
+	// Pass JSON as string: pgx encodes []byte as bytea; ::jsonb then fails with SQLSTATE 22P02.
 	_, err = r.db.Pool.Exec(ctx,
 		`INSERT INTO events (user_id, event_name, metadata) VALUES ($1, $2, $3::jsonb)`,
-		uid, eventName, raw,
+		uid, eventName, string(raw),
 	)
 	if err != nil {
 		return fmt.Errorf("repository: insert event: %w", err)

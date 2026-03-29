@@ -1,4 +1,4 @@
-/* InvestQuest profile — tokens from @theme (index.css) */
+/* AkademiWeal profile / map UI — tokens from @theme (index.css) */
 
 .profile-iq {
   --iq-navy: var(--color-iq-navy);
@@ -32,6 +32,66 @@
   padding: 4px 12px;
   border-radius: 100px;
   font-weight: 800;
+}
+
+/* ═══ Home-map atmosphere: full-color purple shell + scroll (Profile + Pelajaran) ═══ */
+.akademiweal-page-shell {
+  position: relative;
+  background-color: #0f0a1e;
+  background-image:
+    radial-gradient(ellipse 110% 75% at 50% -18%, rgba(106, 74, 154, 0.5) 0%, transparent 54%),
+    radial-gradient(ellipse 75% 55% at 100% 28%, rgba(0, 200, 150, 0.1) 0%, transparent 44%),
+    radial-gradient(ellipse 60% 50% at 0% 65%, rgba(255, 184, 48, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse 90% 40% at 50% 100%, rgba(88, 204, 2, 0.04) 0%, transparent 55%),
+    linear-gradient(168deg, #140d28 0%, #0f0a1e 32%, #0a0618 100%);
+}
+
+/* Sticky header tint to match map HUD (use with AppHeader className) */
+.akademiweal-header {
+  background: color-mix(in srgb, #0f0a1e 92%, #1a1030) !important;
+  border-bottom-color: rgba(255, 184, 48, 0.14) !important;
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
+}
+
+.akademiweal-page-scroll {
+  position: relative;
+  flex: 1;
+  padding: 16px;
+  padding-bottom: 24px;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 10, 30, 0.2) 0%,
+    rgba(18, 11, 36, 0.65) 72px,
+    rgba(12, 8, 24, 0.88) 100%
+  );
+}
+
+.akademiweal-glass-card {
+  border-radius: 20px;
+  border: 1px solid rgba(255, 184, 48, 0.16);
+  background: rgba(26, 18, 52, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.akademiweal-page-shell .profile-iq-stage-wrap {
+  background: transparent;
+}
+.akademiweal-page-shell .profile-iq-timeline-wrap {
+  background: transparent;
+}
+.akademiweal-page-shell .profile-iq-stage {
+  box-shadow:
+    0 12px 48px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 184, 48, 0.14);
+}
+.akademiweal-page-shell .profile-iq-detail {
+  background: rgba(22, 14, 42, 0.82);
+  border-color: rgba(255, 184, 48, 0.14);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
 /* Mascot stage */
@@ -374,4 +434,156 @@ button.profile-iq-evo-node:focus-visible {
   background: rgba(6, 17, 42, 0.72);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
+}
+
+/* ── Pelajaran (curriculum) — shares profile-iq tokens ── */
+
+/* Gold chrome under Pelajaran header — echoes Home map HUD; pick intensity in Pelajaran.jsx */
+.pelajaran-iq-header-hud--subtle {
+  border-bottom-width: 1px !important;
+  border-bottom-color: rgba(255, 184, 48, 0.11) !important;
+  box-shadow:
+    0 1px 12px rgba(0, 0, 0, 0.18),
+    inset 0 -1px 0 0 rgba(255, 184, 48, 0.06),
+    0 2px 12px rgba(245, 197, 24, 0.03);
+}
+
+.pelajaran-iq-header-hud--balanced {
+  border-bottom-width: 2px !important;
+  border-bottom-color: rgba(255, 184, 48, 0.2) !important;
+  box-shadow:
+    0 1px 12px rgba(0, 0, 0, 0.22),
+    inset 0 -1px 0 0 rgba(255, 184, 48, 0.12),
+    0 6px 22px rgba(245, 197, 24, 0.08);
+}
+
+.pelajaran-iq-header-hud--strong {
+  border-bottom-width: 2px !important;
+  border-bottom-color: rgba(255, 184, 48, 0.45) !important;
+  box-shadow:
+    0 1px 14px rgba(0, 0, 0, 0.26),
+    inset 0 -2px 0 0 rgba(255, 184, 48, 0.24),
+    0 8px 36px rgba(245, 197, 24, 0.18),
+    0 0 28px rgba(255, 184, 48, 0.1);
+}
+
+.pelajaran-iq-continue-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  text-align: center;
+}
+
+.pelajaran-iq-continue-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-iq-teal);
+  background: color-mix(in srgb, var(--color-iq-teal) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-iq-teal) 32%, transparent);
+  padding: 5px 12px;
+  border-radius: 100px;
+}
+
+.pelajaran-iq-continue-title {
+  margin: 12px 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--color-iq-cream);
+}
+
+.pelajaran-iq-continue-zone {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-iq-slate);
+}
+
+.pelajaran-iq-cta {
+  margin-top: 18px;
+  width: 100%;
+  max-width: 280px;
+  padding: 14px 20px;
+  border-radius: 14px;
+  border: none;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  color: var(--color-iq-navy);
+  background: linear-gradient(135deg, var(--color-iq-gold-soft), var(--color-iq-gold-bright) 45%, #e8a800);
+  box-shadow: 0 6px 22px rgba(245, 197, 24, 0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.pelajaran-iq-cta:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 8px 26px rgba(245, 197, 24, 0.35);
+}
+.pelajaran-iq-cta:active {
+  transform: scale(0.98);
+}
+
+.pelajaran-iq-progress-card {
+  border-radius: 20px;
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 184, 48, 0.16);
+  background: rgba(26, 18, 52, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.pelajaran-iq-zone {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 184, 48, 0.14);
+  background: rgba(22, 14, 42, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.pelajaran-iq-zone[open] {
+  border-color: color-mix(in srgb, var(--color-iq-teal) 45%, rgba(255, 184, 48, 0.2));
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.45),
+    0 0 0 1px color-mix(in srgb, var(--color-iq-teal) 22%, transparent);
+}
+
+.pelajaran-iq-zone-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  -webkit-tap-highlight-color: transparent;
+}
+.pelajaran-iq-zone-summary::-webkit-details-marker {
+  display: none;
+}
+.pelajaran-iq-zone-summary:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.pelajaran-iq-lesson-current {
+  background: linear-gradient(
+    105deg,
+    color-mix(in srgb, var(--color-iq-teal) 22%, rgba(15, 10, 30, 0.8)),
+    color-mix(in srgb, var(--color-iq-teal) 8%, rgba(15, 10, 30, 0.5))
+  ) !important;
+  border: 1px solid color-mix(in srgb, var(--color-iq-teal) 35%, transparent) !important;
+}
+
+.pelajaran-iq-link {
+  font-size: 12px;
+  font-weight: 800;
+  color: #7ae8c8;
+  text-decoration: none;
+  border-bottom: 2px solid rgba(0, 200, 150, 0.35);
+  padding-bottom: 1px;
+}
+.pelajaran-iq-link:hover {
+  color: #9af5d8;
 }

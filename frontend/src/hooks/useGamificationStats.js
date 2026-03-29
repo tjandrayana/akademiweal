@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
 import {
-  XP_KEY,
   XP_UPDATED_EVENT,
   STREAK_UPDATED_EVENT,
   COMPLETED_LESSONS_EVENT,
   LIVES_UPDATED_EVENT,
-  STREAK_KEY,
   getCompletedLessons,
   getLevel,
   getLevelName,
@@ -13,12 +11,14 @@ import {
   getXpInCurrentLevel,
   getMascotEvolutionLevel,
   getLives,
+  getTotalXp,
+  getStreakDays,
 } from '../lib/gamification'
 
 function readStats() {
   try {
-    const streak = parseInt(localStorage.getItem(STREAK_KEY) || '0', 10)
-    const xp = parseInt(localStorage.getItem(XP_KEY) || '0', 10)
+    const streak = getStreakDays()
+    const xp = getTotalXp()
     const safeStreak = Number.isFinite(streak) ? streak : 0
     const safeXp = Number.isFinite(xp) ? xp : 0
     return {

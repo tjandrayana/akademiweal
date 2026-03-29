@@ -23,13 +23,16 @@ func (h *Handler) Routes() http.Handler {
 	r := chi.NewRouter()
 
 	r.Get("/health", h.health)
+	r.Post("/register", h.register)
 	r.Post("/login", h.login)
 	r.Get("/lessons", h.listLessons)
 	r.Post("/events", h.createEvent)
+	r.Get("/leaderboard", h.leaderboard)
 
 	r.Group(func(r chi.Router) {
 		r.Use(h.signer.Middleware)
 		r.Get("/me", h.me)
+		r.Post("/me/sync", h.syncProgress)
 	})
 
 	return r

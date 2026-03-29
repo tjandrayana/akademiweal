@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchLessonsByLevel } from '../api/lessons'
+import { CURRICULUM_LEVELS } from '../lib/curriculum'
+import { GUEST_MAX_FREE_PATH_STEP, GUEST_UNLOCK_PATH, isLoggedIn } from '../lib/guestGate'
 import { XP_PER_CORRECT, XP_PER_LESSON_COMPLETE, markLessonComplete, deductLife } from '../lib/gamification'
 import { playCorrect, playWrong, playComplete, playTap, playSelect, playStepNext } from '../lib/sounds'
 import { EVENTS, trackEvent } from '../tracking/events'
@@ -65,6 +67,7 @@ function LessonHeader({ onExit, progressValue, sessionXp, xpGain, answered, resu
 
 export function Lesson() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const levelParam = searchParams.get('level')
   const lessonIdParam = searchParams.get('lessonId')
@@ -88,6 +91,7 @@ export function Lesson() {
   const [lessonStep, setLessonStep] = useState(0)
   const [wrongBeforeCorrect, setWrongBeforeCorrect] = useState(0)
   const [exitConfirmOpen, setExitConfirmOpen] = useState(false)
+  const [priorLevelLessonCount, setPriorLevelLessonCount] = useState(0)
   const lessonStartSentRef = useRef(null)
 
   const lesson = useMemo(
@@ -121,6 +125,29 @@ export function Lesson() {
     loadLessons(ac.signal)
     return () => ac.abort()
   }, [loadLessons])
+
+  useEffect(() => {
+    let cancelled = false
+    const ac = new AbortController()
+    ;(async () => {
+      let before = 0
+      for (const lv of CURRICULUM_LEVELS) {
+        if (lv >= level) break
+        try {
+          const data = await fetchLessonsByLevel(lv, { signal: ac.signal })
+          if (cancelled) return
+          before += Array.isArray(data) ? data.length : 0
+        } catch {
+          /* ignore */
+        }
+      }
+      if (!cancelled) setPriorLevelLessonCount(before)
+    })()
+    return () => {
+      cancelled = true
+      ac.abort()
+    }
+  }, [level])
 
   useEffect(() => {
     setSessionXp(0)
@@ -164,6 +191,23 @@ export function Lesson() {
     trackEvent(EVENTS.LESSON_START, { lesson_id: lesson.id, level })
   }, [loadState, lesson, level])
 
+  useEffect(() => {
+    if (loadState !== 'ready' || !lessons?.length || !lesson) return
+    if (isLoggedIn()) return
+    const pathStep = priorLevelLessonCount + activeIndex + 1
+    if (pathStep > GUEST_MAX_FREE_PATH_STEP) {
+      navigate(GUEST_UNLOCK_PATH, { replace: true, state: { reason: 'guest_limit', from: location } })
+    }
+  }, [
+    loadState,
+    lessons,
+    lesson,
+    priorLevelLessonCount,
+    activeIndex,
+    navigate,
+    location,
+  ])
+
   const totalInLevel = lessons?.length ?? 0
   const progressValue = useMemo(() => {
     if (totalInLevel <= 0) return 0
@@ -188,6 +232,11 @@ export function Lesson() {
       markLessonComplete(lesson.id, starsForCurrentLesson())
     }
     if (hasNextLesson) {
+      const nextStep = priorLevelLessonCount + activeIndex + 2
+      if (!isLoggedIn() && nextStep > GUEST_MAX_FREE_PATH_STEP) {
+        navigate(GUEST_UNLOCK_PATH, { replace: true, state: { reason: 'guest_limit', from: location } })
+        return
+      }
       setActiveIndex((i) => i + 1)
       setSelected(null)
       setResult(null)

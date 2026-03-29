@@ -1,15 +1,12 @@
+import { storageKey } from './progressScope'
+
 /* ── XP ── */
-export const XP_KEY = 'akademiweal_xp'
-export const DAILY_XP_KEY = 'akademiweal_daily_xp'
 
 export const XP_UPDATED_EVENT = 'akademiweal-xp-updated'
 export const STREAK_UPDATED_EVENT = 'akademiweal-streak-updated'
 export const XP_PER_CORRECT = 2
 /** Bonus XP when finishing the last lesson of a level (session complete). */
 export const XP_PER_LESSON_COMPLETE = 10
-
-export const STREAK_KEY = 'akademiweal_streak_days'
-const LAST_ACTIVITY_KEY = 'akademiweal_last_activity_date'
 
 function notifyXpUpdated() {
   try {
@@ -51,8 +48,10 @@ function calendarDaysBetween(a, b) {
 export function recordDailyStreak() {
   try {
     const today = localDateString(new Date())
-    const last = localStorage.getItem(LAST_ACTIVITY_KEY)
-    let streak = parseInt(localStorage.getItem(STREAK_KEY) || '0', 10)
+    const lastKey = storageKey('last_activity_date')
+    const streakKey = storageKey('streak_days')
+    const last = localStorage.getItem(lastKey)
+    let streak = parseInt(localStorage.getItem(streakKey) || '0', 10)
     if (!Number.isFinite(streak) || streak < 0) {
       streak = 0
     }
@@ -77,12 +76,53 @@ export function recordDailyStreak() {
       }
     }
 
-    localStorage.setItem(STREAK_KEY, String(streak))
-    localStorage.setItem(LAST_ACTIVITY_KEY, today)
+    localStorage.setItem(streakKey, String(streak))
+    localStorage.setItem(lastKey, today)
     notifyStreakUpdated()
     return streak
   } catch {
     return 0
+  }
+}
+
+/** Current streak days for the logged-in user (local). */
+export function getStreakDays() {
+  try {
+    const n = parseInt(localStorage.getItem(storageKey('streak_days')) || '0', 10)
+    return Number.isFinite(n) && n >= 0 ? n : 0
+  } catch {
+    return 0
+  }
+}
+
+/** Current persisted total XP (local, per user). */
+export function getTotalXp() {
+  try {
+    const n = parseInt(localStorage.getItem(storageKey('xp')) || '0', 10)
+    return Number.isFinite(n) ? Math.max(0, n) : 0
+  } catch {
+    return 0
+  }
+}
+
+/**
+ * Adopt the higher of local and server totals (offline-safe). Fires XP_UPDATED_EVENT when local changes.
+ * @param {number} serverXp
+ * @returns {number} resulting total
+ */
+export function mergeServerXp(serverXp) {
+  const s = Math.max(0, Math.floor(Number(serverXp) || 0))
+  const xpKey = storageKey('xp')
+  try {
+    const cur = getTotalXp()
+    const next = Math.max(cur, s)
+    if (next !== cur) {
+      localStorage.setItem(xpKey, String(next))
+      notifyXpUpdated()
+    }
+    return next
+  } catch {
+    return getTotalXp()
   }
 }
 
@@ -91,10 +131,11 @@ export function addXp(amount) {
   if (!Number.isFinite(amount) || amount <= 0) {
     return
   }
+  const xpKey = storageKey('xp')
   try {
-    const cur = parseInt(localStorage.getItem(XP_KEY) || '0', 10)
+    const cur = parseInt(localStorage.getItem(xpKey) || '0', 10)
     const next = (Number.isFinite(cur) ? cur : 0) + Math.floor(amount)
-    localStorage.setItem(XP_KEY, String(next))
+    localStorage.setItem(xpKey, String(next))
     recordDailyXp(Math.floor(amount))
     notifyXpUpdated()
   } catch {
@@ -106,14 +147,20 @@ export function addXp(amount) {
 function recordDailyXp(amount) {
   try {
     const today = localDateString(new Date())
-    const raw = localStorage.getItem(DAILY_XP_KEY)
+    const dailyKey = storageKey('daily_xp')
+    const raw = localStorage.getItem(dailyKey)
     let map = {}
-    try { if (raw) map = JSON.parse(raw) } catch { map = {} }
+    try {
+      if (raw) map = JSON.parse(raw)
+    } catch {
+      map = {}
+    }
     map[today] = (Number(map[today]) || 0) + amount
-    // Prune entries older than 30 days
     const cutoff = localDateString(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
-    Object.keys(map).forEach((k) => { if (k < cutoff) delete map[k] })
-    localStorage.setItem(DAILY_XP_KEY, JSON.stringify(map))
+    Object.keys(map).forEach((k) => {
+      if (k < cutoff) delete map[k]
+    })
+    localStorage.setItem(dailyKey, JSON.stringify(map))
   } catch {
     /* ignore */
   }
@@ -125,7 +172,7 @@ function recordDailyXp(amount) {
  */
 export function getWeeklyXp() {
   try {
-    const raw = localStorage.getItem(DAILY_XP_KEY)
+    const raw = localStorage.getItem(storageKey('daily_xp'))
     const map = raw ? JSON.parse(raw) : {}
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date()
@@ -181,7 +228,7 @@ export function getXpForNextLevel(xp) {
   if (level >= LEVEL_THRESHOLDS.length) {
     return null
   }
-  return LEVEL_THRESHOLDS[level] // next level index = current level (0-based)
+  return LEVEL_THRESHOLDS[level]
 }
 
 /** Returns XP accumulated since the start of the current level. */
@@ -201,9 +248,24 @@ export function getMascotEvolutionLevel(xp) {
   return Math.max(1, Math.min(120, 1 + Math.floor(safeXp / 6)))
 }
 
+/**
+ * Mascot shown on map/profile: never ahead of the learning path.
+ * Server XP can exceed path progress (e.g. after login); without this, Zona 1 still showed Toro (XP tier 11+).
+ * @param {number} xp
+ * @param {number} pathStep path `stepCurrent` (1 … N from lesson order), or 1 while loading
+ */
+export function getDisplayMascotEvolutionLevel(xp, pathStep) {
+  const fromXp = getMascotEvolutionLevel(xp)
+  const step = Number(pathStep)
+  if (!Number.isFinite(step)) {
+    return fromXp
+  }
+  const cap = Math.max(1, Math.min(120, Math.floor(step)))
+  return Math.min(fromXp, cap)
+}
+
 /* ── Lives ── */
 
-export const LIVES_KEY = 'akademiweal_lives'
 export const MAX_LIVES = 3
 export const LIVES_UPDATED_EVENT = 'akademiweal-lives-updated'
 
@@ -218,7 +280,7 @@ function notifyLivesUpdated() {
 /** Returns current lives (0–MAX_LIVES). Defaults to MAX_LIVES if never set. */
 export function getLives() {
   try {
-    const raw = localStorage.getItem(LIVES_KEY)
+    const raw = localStorage.getItem(storageKey('lives'))
     if (raw === null) return MAX_LIVES
     const n = parseInt(raw, 10)
     return Number.isFinite(n) ? Math.min(Math.max(n, 0), MAX_LIVES) : MAX_LIVES
@@ -232,7 +294,7 @@ export function deductLife() {
   try {
     const current = getLives()
     const next = Math.max(0, current - 1)
-    localStorage.setItem(LIVES_KEY, String(next))
+    localStorage.setItem(storageKey('lives'), String(next))
     notifyLivesUpdated()
     return next
   } catch {
@@ -243,7 +305,7 @@ export function deductLife() {
 /** Restores lives to MAX_LIVES. Call on lesson completion. */
 export function resetLives() {
   try {
-    localStorage.setItem(LIVES_KEY, String(MAX_LIVES))
+    localStorage.setItem(storageKey('lives'), String(MAX_LIVES))
     notifyLivesUpdated()
   } catch {
     /* ignore */
@@ -252,8 +314,6 @@ export function resetLives() {
 
 /* ── Completed lessons ── */
 
-export const COMPLETED_LESSONS_KEY = 'akademiweal_completed_lessons'
-export const LESSON_STARS_KEY = 'akademiweal_lesson_stars'
 export const COMPLETED_LESSONS_EVENT = 'akademiweal-completed-lessons-updated'
 
 function notifyCompletedLessonsUpdated() {
@@ -273,16 +333,15 @@ export function markLessonComplete(lessonId, stars) {
     return
   }
   try {
+    const completedKey = storageKey('completed_lessons')
+    const starsKey = storageKey('lesson_stars')
     const completed = getCompletedLessons()
     completed.add(Number(lessonId))
-    localStorage.setItem(
-      COMPLETED_LESSONS_KEY,
-      JSON.stringify(Array.from(completed)),
-    )
+    localStorage.setItem(completedKey, JSON.stringify(Array.from(completed)))
     if (stars != null && stars >= 1 && stars <= 3) {
       let map = {}
       try {
-        const raw = localStorage.getItem(LESSON_STARS_KEY)
+        const raw = localStorage.getItem(starsKey)
         if (raw) {
           const p = JSON.parse(raw)
           if (typeof p === 'object' && p !== null) {
@@ -293,7 +352,7 @@ export function markLessonComplete(lessonId, stars) {
         map = {}
       }
       map[String(lessonId)] = stars
-      localStorage.setItem(LESSON_STARS_KEY, JSON.stringify(map))
+      localStorage.setItem(starsKey, JSON.stringify(map))
     }
     notifyCompletedLessonsUpdated()
   } catch {
@@ -304,7 +363,7 @@ export function markLessonComplete(lessonId, stars) {
 /** @param {number} lessonId @returns {1|2|3} */
 export function getStarsForLesson(lessonId) {
   try {
-    const raw = localStorage.getItem(LESSON_STARS_KEY)
+    const raw = localStorage.getItem(storageKey('lesson_stars'))
     if (!raw) {
       return 3
     }
@@ -322,7 +381,7 @@ export function getStarsForLesson(lessonId) {
 /** Returns a Set<number> of completed lesson IDs from localStorage. */
 export function getCompletedLessons() {
   try {
-    const raw = localStorage.getItem(COMPLETED_LESSONS_KEY)
+    const raw = localStorage.getItem(storageKey('completed_lessons'))
     if (!raw) {
       return new Set()
     }

@@ -1,21 +1,19 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { getAuthToken } from '../api/client'
-import { loginWithEmail } from '../api/auth'
-import { GUEST_MAX_FREE_PATH_STEP } from '../lib/guestGate'
+import { registerWithEmail } from '../api/auth'
 import { navigateAfterAuth } from '../lib/progressScope'
 import { Button } from '../components/Button'
 import { TextField } from '../components/TextField'
 
-export function Login() {
+export function Register() {
   const navigate = useNavigate()
   const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-
-  const sessionExpired = location.state?.reason === 'session'
   const guestLimit = location.state?.reason === 'guest_limit'
 
   useEffect(() => {
@@ -33,15 +31,23 @@ export function Login() {
       return
     }
     if (!password) {
-      setError('Masukkan kata sandi')
+      setError('Buat kata sandi (minimal 8 karakter)')
+      return
+    }
+    if (password.length < 8) {
+      setError('Kata sandi minimal 8 karakter')
+      return
+    }
+    if (password !== confirm) {
+      setError('Konfirmasi kata sandi tidak cocok')
       return
     }
     setLoading(true)
     try {
-      await loginWithEmail(trimmedEmail, password)
+      await registerWithEmail(trimmedEmail, password)
       navigateAfterAuth(navigate, location)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login gagal. Coba lagi.')
+      setError(err instanceof Error ? err.message : 'Pendaftaran gagal. Coba lagi.')
     } finally {
       setLoading(false)
     }
@@ -49,35 +55,28 @@ export function Login() {
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center bg-[#F9FAFB] px-4 py-8">
-      {/* App logo */}
       <div className="mb-6 text-center">
         <p className="m-0 text-2xl font-extrabold text-primary">🎯 AkademiWeal</p>
-        <p className="m-0 mt-1 text-sm text-muted">Platform belajar investasi #1</p>
+        <p className="m-0 mt-1 text-sm text-muted">Buat akun untuk simpan progres & peringkat</p>
       </div>
 
-      {/* Login card */}
       <div className="w-full max-w-sm rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
         <header className="mb-5">
           <h1 className="m-0 text-xl font-extrabold leading-tight tracking-tight text-text">
-            Masuk ke akun
+            Daftar
           </h1>
-          <p className="m-0 mt-1 text-sm text-muted">Email dan kata sandi yang kamu pakai saat daftar</p>
+          <p className="m-0 mt-1 text-sm text-muted">Gunakan email aktif dan kata sandi yang kuat</p>
         </header>
 
-        {sessionExpired ? (
-          <p className="m-0 mb-4 text-sm font-semibold text-error" role="status">
-            Sesi berakhir. Silakan masuk kembali.
-          </p>
-        ) : null}
         {guestLimit ? (
           <p className="m-0 mb-4 text-sm font-semibold text-primary" role="status">
-            Progres percobaan ({GUEST_MAX_FREE_PATH_STEP} langkah) ikut ke akun setelah masuk.
+            Progres percobaanmu akan ikut tersimpan ke akun setelah daftar.
           </p>
         ) : null}
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
           <TextField
-            id="login-email"
+            id="register-email"
             name="email"
             type="email"
             label="Email"
@@ -89,15 +88,26 @@ export function Login() {
             inputMode="email"
           />
           <TextField
-            id="login-password"
+            id="register-password"
             name="password"
             type="password"
             label="Kata sandi"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
-            placeholder="••••••••"
-            autoComplete="current-password"
+            placeholder="Minimal 8 karakter"
+            autoComplete="new-password"
+          />
+          <TextField
+            id="register-password-confirm"
+            name="confirm"
+            type="password"
+            label="Konfirmasi kata sandi"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            disabled={loading}
+            placeholder="Ulangi kata sandi"
+            autoComplete="new-password"
           />
 
           {error ? (
@@ -112,25 +122,19 @@ export function Login() {
             className="w-full font-bold"
             disabled={loading}
           >
-            {loading ? 'Memproses…' : 'Masuk'}
+            {loading ? 'Memproses…' : 'Buat akun'}
           </Button>
         </form>
       </div>
 
       <p className="m-0 mt-5 text-center text-sm text-muted">
-        Belum punya akun?{' '}
+        Sudah punya akun?{' '}
         <Link
           className="font-bold text-primary no-underline hover:underline"
-          to="/register"
+          to="/login"
           state={location.state}
         >
-          Daftar
-        </Link>
-      </p>
-      <p className="m-0 mt-2 text-center text-sm text-muted">
-        Baru kenal app ini?{' '}
-        <Link className="font-bold text-primary no-underline hover:underline" to="/onboarding">
-          Mulai di sini
+          Masuk
         </Link>
       </p>
     </div>

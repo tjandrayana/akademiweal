@@ -76,6 +76,7 @@ export default function MapScreen({
   coinsDisplay = '0',
   lives = 3,
   mascotEvolutionLevel = 1,
+  guestMaxPathStep = null,
   stepCurrent,
   stepTotal,
   onPlayLevel,
@@ -151,7 +152,7 @@ export default function MapScreen({
               marginBottom: 10,
             }}
           >
-            InvestQuest · Peta Dunia
+            AkademiWeal · Peta Dunia
           </div>
           <div
             style={{
@@ -258,6 +259,7 @@ export default function MapScreen({
             nodes={zoneNodes}
             progress={progress}
             mascotEvolutionLevel={mascotEvolutionLevel}
+            guestMaxPathStep={guestMaxPathStep}
             onOpenNode={openNode}
             mapReady={mapReady}
           />

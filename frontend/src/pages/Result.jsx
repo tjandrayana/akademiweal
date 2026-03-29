@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { addXp, recordDailyStreak, resetLives } from '../lib/gamification'
+import { syncXpTotal } from '../api/progress'
+import { addXp, getTotalXp, recordDailyStreak, resetLives } from '../lib/gamification'
 import { Button } from '../components/Button'
 import { XPDisplay } from '../components/XPDisplay'
 import { useGamificationStats } from '../hooks/useGamificationStats'
@@ -57,6 +58,7 @@ export function Result() {
     recordDailyStreak()
     addXp(xp)
     resetLives()
+    syncXpTotal(getTotalXp()).catch(() => {})
     navigate('/home', { replace: true })
   }
 
