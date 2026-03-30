@@ -4,7 +4,7 @@
 
 TRUNCATE lessons RESTART IDENTITY CASCADE;
 
-INSERT INTO lessons (level, title, hook, body, question, options, answer)
+INSERT INTO lessons (level, title, hook, body, question, options, answer, explanation)
 SELECT
   ((n - 1) / 10) + 1 AS level,
   'Langkah ' || LPAD(n::text, 3, '0') || ' · Zona ' || (((n - 1) / 10) + 1),
@@ -45,5 +45,17 @@ SELECT
     WHEN 7 THEN 'Harga bisa berfluktuasi'
     WHEN 8 THEN 'Dana darurat dan utang terkendali'
     WHEN 9 THEN 'Mengurangi noise jangka pendek dan memberi waktu tumbuh'
+  END,
+  CASE ((n - 1) % 10)
+    WHEN 0 THEN 'Alat tukar mempermudah pertukaran barang dan jasa tanpa barter langsung.'
+    WHEN 1 THEN 'Inflasi membuat harga rata-rata naik, sehingga uang yang sama membeli lebih sedikit.'
+    WHEN 2 THEN 'Secara umum, potensi imbal hasil lebih tinggi datang bersama risiko yang juga lebih tinggi.'
+    WHEN 3 THEN 'Diversifikasi membantu menurunkan dampak ketika satu aset atau sektor berkinerja buruk.'
+    WHEN 4 THEN 'Deposito biasanya memiliki tenor; dana tidak sefleksibel tabungan biasa selama periode berjalan.'
+    WHEN 5 THEN 'Reksa dana dikelola manajer investasi berdasarkan mandat dan prospektus produk.'
+    WHEN 6 THEN 'Pemegang saham memiliki bagian kepemilikan perusahaan, termasuk hak ekonomi tertentu.'
+    WHEN 7 THEN 'Volatilitas berarti harga dapat naik dan turun dalam periode waktu yang relatif singkat.'
+    WHEN 8 THEN 'Fondasi finansial seperti dana darurat dan utang sehat biasanya didahulukan sebelum menambah risiko.'
+    WHEN 9 THEN 'Horizon panjang memberi waktu untuk compounding dan membantu meredam noise pasar jangka pendek.'
   END
 FROM generate_series(1, 80) AS n;

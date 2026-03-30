@@ -437,6 +437,7 @@ export function Lesson() {
             title={lesson.title}
             hook={lesson.hook}
             body={lesson.body}
+            explanation={lesson.explanation}
             level={level}
             mascotEvolutionLevel={displayMascotLevel}
             streak={streak}

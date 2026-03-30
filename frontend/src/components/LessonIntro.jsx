@@ -26,9 +26,9 @@ const ZONE_GROUND = {
  * Hook + micro content before quiz / interaction.
  * Two-zone layout: illustrated hero (top) + white content card (bottom).
  *
- * @param {{ title: string, hook: string, body: string, level?: number, mascotEvolutionLevel?: number, streak?: number, onContinue: () => void }} props
+ * @param {{ title: string, hook: string, body: string, explanation?: string, level?: number, mascotEvolutionLevel?: number, streak?: number, onContinue: () => void }} props
  */
-export function LessonIntro({ title, hook, body, level = 1, mascotEvolutionLevel = 1, streak = 0, onContinue }) {
+export function LessonIntro({ title, hook, body, explanation, level = 1, mascotEvolutionLevel = 1, streak = 0, onContinue }) {
   const safeLevel = Math.min(Math.max(1, level), 8)
   const [sky1, , sky3] = ZONE_SKY[safeLevel] || ZONE_SKY[1]
   const ground = ZONE_GROUND[safeLevel] || ZONE_GROUND[1]
@@ -201,6 +201,29 @@ export function LessonIntro({ title, hook, body, level = 1, mascotEvolutionLevel
               {body || 'Kuis singkat membantu memperkuat konsep sebelum kamu lanjut ke langkah berikutnya.'}
             </p>
           </div>
+
+          {/* Explanation card (optional from DB seed) */}
+          {typeof explanation === 'string' && explanation.trim().length > 0 && (
+            <div style={{
+              background: 'linear-gradient(135deg,#EEF9FF,#DFF2FF)',
+              border: '2px solid #9FD7F5',
+              borderRadius: 14, padding: '12px 14px',
+              marginBottom: 14, display: 'flex', gap: 10, alignItems: 'flex-start',
+            }}>
+              <span style={{ fontSize: 20, flexShrink: 0, marginTop: 1 }}>🧠</span>
+              <div>
+                <div style={{
+                  fontSize: 10, fontWeight: 900, letterSpacing: 1.5,
+                  textTransform: 'uppercase', color: '#2A6A8A', marginBottom: 4,
+                }}>
+                  Penjelasan
+                </div>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: '#215A72', lineHeight: 1.5 }}>
+                  {explanation.trim()}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Fun fact strip (blue) */}
           <div style={{
