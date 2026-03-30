@@ -1,7 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { syncXpTotal } from '../api/progress'
-import { addXp, getTotalXp, recordDailyStreak, resetLives } from '../lib/gamification'
+import { addXp, getTotalXp, getMascotEvolutionLevel, recordDailyStreak, resetLives } from '../lib/gamification'
+import { storageKey } from '../lib/progressScope'
+import MascotEvolution, { getMascotByLevel } from '../components/MascotEvolution'
 import { Button } from '../components/Button'
 import { XPDisplay } from '../components/XPDisplay'
 import { useGamificationStats } from '../hooks/useGamificationStats'
@@ -46,6 +48,8 @@ export function Result() {
   const stars = correct === total ? 3 : correct / total >= 0.5 ? 2 : 1
   const isPerfect = stars === 3
 
+  const [celebration, setCelebration] = useState(null)
+
   // For perfect score, layer an extra fanfare on top of playComplete() from Lesson
   useEffect(() => {
     if (!isPerfect) return
@@ -56,10 +60,21 @@ export function Result() {
   function handleContinue() {
     playNavigate()
     recordDailyStreak()
+    const prevTier = getMascotByLevel(getMascotEvolutionLevel(getTotalXp()))
     addXp(xp)
+    const newXp = getTotalXp()
+    const newTier = getMascotByLevel(getMascotEvolutionLevel(newXp))
     resetLives()
-    syncXpTotal(getTotalXp()).catch(() => {})
-    navigate('/home', { replace: true })
+    syncXpTotal(newXp).catch(() => {})
+
+    const celebKey = storageKey('last_celebrated_mascot_tier')
+    const lastCelebrated = (() => { try { return localStorage.getItem(celebKey) } catch { return null } })()
+    if (newTier.name !== prevTier.name && newTier.name !== lastCelebrated) {
+      try { localStorage.setItem(celebKey, newTier.name) } catch { /* ignore */ }
+      setCelebration(newTier)
+    } else {
+      navigate('/home', { replace: true })
+    }
   }
 
   return (

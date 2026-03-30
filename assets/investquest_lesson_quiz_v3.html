@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>InvestQuest — Lesson & Quiz v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#1A0A2E;
+  font-family:'Nunito',sans-serif;
+  display:flex;flex-direction:column;align-items:center;
+  padding:40px 20px 80px;
+  min-height:100vh;
+}
+
+/* ── PAGE HEADER ── */
+.pg-header{text-align:center;margin-bottom:36px}
+.pg-eyebrow{font-size:11px;font-weight:900;letter-spacing:4px;text-transform:uppercase;color:#FFB830;margin-bottom:10px}
+.pg-title{font-family:'Fredoka One',cursive;font-size:48px;background:linear-gradient(135deg,#FFE060,#FFB830,#FF8C00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;letter-spacing:2px;margin-bottom:8px}
+.pg-sub{font-size:14px;color:#8A6AB8;max-width:520px;margin:0 auto}
+
+/* ── SCREEN SWITCHER ── */
+.switcher{display:flex;gap:10px;margin-bottom:32px}
+.sw-btn{
+  font-family:'Fredoka One',cursive;font-size:15px;
+  padding:10px 28px;border-radius:100px;border:2px solid;cursor:pointer;
+  transition:all .2s;
+}
+.sw-btn.active{background:#FFB830;border-color:#CC8800;color:#3A1A00;box-shadow:0 4px 0 #AA6600}
+.sw-btn:not(.active){background:rgba(255,184,48,0.08);border-color:rgba(255,184,48,0.25);color:#8A6AB8}
+.sw-btn:not(.active):hover{border-color:rgba(255,184,48,0.5);color:#FFB830}
+
+/* ── TWO PHONES SIDE BY SIDE ── */
+.phones-row{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+.phone-wrap{display:flex;flex-direction:column;align-items:center;gap:14px}
+.phone-label{font-family:'Fredoka One',cursive;font-size:18px;color:#FFB830;letter-spacing:1px}
+.phone-sublabel{font-size:12px;color:#5A3A8A;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+
+/* ── PHONE FRAME ── */
+.phone{
+  width:370px;
+  border-radius:50px;
+  background:#FAFAF8;
+  border:4px solid #E8E0D8;
+  box-shadow:
+    0 0 0 1px rgba(255,184,48,0.15),
+    0 8px 0 #D8D0C8,
+    0 24px 60px rgba(0,0,0,0.5);
+  overflow:hidden;
+  position:relative;
+}
+.phone-notch{
+  width:120px;height:32px;background:#F0EDE8;
+  border-radius:0 0 20px 20px;margin:0 auto;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.notch-dot{width:9px;height:9px;border-radius:50%;background:#DDD8D0}
+.notch-bar{width:48px;height:4px;border-radius:2px;background:#DDD8D0}
+
+/* ── TOP BAR (progress) ── */
+.topbar{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px 8px;
+  background:#FAFAF8;
+}
+.close-btn{
+  width:34px;height:34px;border-radius:50%;
+  background:#F0EDE8;border:2px solid #E0D8D0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;color:#8A7A6A;cursor:pointer;flex-shrink:0;
+  font-weight:900;
+}
+.progress-track{
+  flex:1;height:14px;background:#F0EDE8;border-radius:100px;
+  overflow:hidden;border:2px solid #E0D8D0;
+}
+.progress-fill{
+  height:100%;border-radius:100px;
+  background:linear-gradient(90deg,#40C860,#60E880);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,0.4);
+  transition:width 0.6s ease;
+}
+.stars-badge{
+  display:flex;align-items:center;gap:4px;
+  background:#FFF8E0;border:2px solid #F5C518;border-radius:100px;
+  padding:5px 12px;flex-shrink:0;
+  box-shadow:0 3px 0 #C8A010;
+}
+.stars-badge span{font-family:'Fredoka One',cursive;font-size:15px;color:#9A6800}
+
+/* ── ZONE SCENE HEADER ── */
+.zone-scene{
+  position:relative;overflow:hidden;
+  border-bottom:3px solid rgba(0,0,0,0.06);
+}
+
+/* ── MASCOT BUBBLE LAYOUT (quiz) ── */
+.mascot-row{
+  position:absolute;bottom:0;left:0;right:0;
+  display:flex;align-items:flex-end;gap:0;
+  padding:0 16px;z-index:10;
+}
+.mascot-circle{
+  width:72px;height:72px;border-radius:50%;
+  background:white;border:3px solid rgba(0,0,0,0.08);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-bottom:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.12);
+  overflow:hidden;
+}
+.speech-bubble{
+  background:white;border-radius:18px 18px 18px 4px;
+  padding:14px 16px;margin-left:10px;margin-bottom:16px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.12);
+  flex:1;max-width:240px;
+  border:2px solid rgba(0,0,0,0.06);
+}
+.bubble-label{font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#8A9AB0;margin-bottom:4px}
+.bubble-question{font-size:15px;font-weight:900;color:#2A2020;line-height:1.4}
+
+/* ── WHITE CONTENT SHEET ── */
+.sheet{
+  background:white;
+  border-radius:28px 28px 0 0;
+  padding:20px 18px 24px;
+  position:relative;z-index:5;
+}
+.sheet-handle{
+  width:40px;height:4px;border-radius:2px;
+  background:#E8E0D8;margin:0 auto 16px;
+}
+
+/* ── LESSON SCREEN ── */
+/* Lesson tip card */
+.tip-card{
+  background:linear-gradient(135deg,#FFF8E8,#FFF0D0);
+  border:2px solid #F5C518;border-radius:16px;
+  padding:14px 16px;margin-bottom:14px;
+  display:flex;gap:12px;align-items:flex-start;
+  box-shadow:0 3px 0 rgba(245,197,24,0.2);
+}
+.tip-icon{font-size:24px;flex-shrink:0;margin-top:2px}
+.tip-text{font-size:13px;font-weight:800;color:#8A6000;line-height:1.5}
+
+/* Lesson content card */
+.content-card{
+  background:#FAFAF8;border:2px solid #F0EDE8;border-radius:16px;
+  padding:16px;margin-bottom:14px;
+}
+.content-text{font-size:13px;color:#4A3A2A;line-height:1.7;font-weight:600}
+
+/* Key concept pills */
+.concepts-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.concept-pill{
+  display:flex;align-items:center;gap:6px;
+  background:white;border:2px solid #F0EDE8;border-radius:12px;
+  padding:8px 12px;
+  box-shadow:0 2px 0 #E8E0D8;
+  transition:transform .15s;
+}
+.concept-pill:hover{transform:translateY(-2px)}
+.concept-emoji{font-size:18px}
+.concept-label{font-size:11px;font-weight:900;color:#4A3A2A;letter-spacing:0.5px}
+
+/* Fun fact strip */
+.fun-fact{
+  background:linear-gradient(135deg,#E8F8FF,#D0F0FF);
+  border:2px solid #80D0F0;border-radius:14px;
+  padding:12px 14px;margin-bottom:16px;
+  display:flex;gap:10px;align-items:center;
+}
+.fun-fact-icon{font-size:22px;flex-shrink:0}
+.fun-fact-text{font-size:12px;font-weight:700;color:#2A6A8A;line-height:1.5}
+
+/* Mascot center layout (lesson intro) */
+.lesson-mascot-center{
+  display:flex;flex-direction:column;align-items:center;
+  padding:20px 0 12px;
+}
+.lesson-mascot-bg{
+  width:90px;height:90px;border-radius:50%;
+  background:white;border:3px solid rgba(0,0,0,0.08);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 20px rgba(0,0,0,0.12);
+  margin-bottom:12px;
+  overflow:hidden;
+  animation:mascotBounce 2.5s ease-in-out infinite;
+}
+.lesson-zone-label{
+  font-family:'Fredoka One',cursive;font-size:22px;color:white;
+  text-shadow:0 2px 8px rgba(0,0,0,0.2);margin-bottom:6px;
+}
+.lesson-badge{
+  background:rgba(255,255,255,0.25);border:1.5px solid rgba(255,255,255,0.4);
+  border-radius:100px;padding:5px 14px;
+  font-size:11px;font-weight:900;color:white;letter-spacing:1px;
+  backdrop-filter:blur(4px);
+}
+
+/* ── QUIZ SCREEN ── */
+/* Answer options */
+.answers{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.answer-opt{
+  background:white;
+  border:2.5px solid #E8E0D8;border-radius:16px;
+  padding:0;cursor:pointer;
+  transition:transform .15s, box-shadow .15s, border-color .15s;
+  box-shadow:0 3px 0 #D8D0C8;
+  overflow:hidden;
+  display:flex;align-items:center;
+}
+.answer-opt:hover{transform:translateY(-2px);box-shadow:0 5px 0 #C8C0B8;border-color:#C0B8B0}
+.answer-opt.selected{border-color:#FFB830;box-shadow:0 3px 0 #CC8800;background:#FFF8E8}
+.answer-opt.correct{border-color:#40C860;box-shadow:0 3px 0 #288040;background:#F0FFF4;animation:correctPop 0.4s ease}
+.answer-opt.wrong{border-color:#FF5060;box-shadow:0 3px 0 #CC2030;background:#FFF0F0;animation:wrongShake 0.4s ease}
+
+.answer-letter{
+  width:44px;height:52px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fredoka One',cursive;font-size:18px;
+  flex-shrink:0;
+  border-right:2px solid #F0EDE8;
+}
+.answer-text{
+  padding:14px 14px;font-size:13px;font-weight:800;color:#2A2020;
+  line-height:1.4;flex:1;
+}
+.answer-result{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;margin-right:10px;flex-shrink:0;
+  background:transparent;
+  opacity:0;transition:opacity 0.2s;
+}
+.answer-opt.correct .answer-result{opacity:1;background:#E0FFF0}
+.answer-opt.wrong .answer-result{opacity:1;background:#FFE0E0}
+
+/* Answer letter colors per option */
+.answer-opt:nth-child(1) .answer-letter{background:#FFF0E8;color:#FF7030}
+.answer-opt:nth-child(2) .answer-letter{background:#E8F8FF;color:#2090D0}
+.answer-opt:nth-child(3) .answer-letter{background:#F0FFF0;color:#30A850}
+.answer-opt:nth-child(4) .answer-letter{background:#F8F0FF;color:#8040C0}
+
+/* Feedback banner */
+.feedback-banner{
+  border-radius:16px;padding:14px 16px;margin-bottom:14px;
+  display:flex;gap:12px;align-items:center;
+  display:none;
+}
+.feedback-banner.show{display:flex}
+.feedback-banner.correct-fb{background:#E8FFF0;border:2px solid #40C860}
+.feedback-banner.wrong-fb{background:#FFF0F0;border:2px solid #FF5060}
+.feedback-icon{font-size:28px;flex-shrink:0}
+.feedback-title{font-family:'Fredoka One',cursive;font-size:17px;margin-bottom:2px}
+.feedback-sub{font-size:12px;color:#6A5A4A;font-weight:700;line-height:1.4}
+.feedback-banner.correct-fb .feedback-title{color:#20A040}
+.feedback-banner.wrong-fb .feedback-title{color:#E03040}
+
+/* Streak badge */
+.streak-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,#FF8830,#FF6020);
+  border-radius:100px;padding:6px 14px;
+  font-family:'Fredoka One',cursive;font-size:14px;color:white;
+  box-shadow:0 3px 0 #CC4000;
+  margin-bottom:12px;
+}
+
+/* ── CTA BUTTONS ── */
+.cta-btn{
+  width:100%;padding:16px;border-radius:16px;border:none;cursor:pointer;
+  font-family:'Fredoka One',cursive;font-size:18px;
+  transition:transform .1s, box-shadow .1s;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  letter-spacing:0.5px;
+}
+.cta-btn:active{transform:translateY(2px)}
+.cta-green{
+  background:linear-gradient(180deg,#48D870,#28B050);
+  color:white;box-shadow:0 5px 0 #189030;
+  border:2px solid #20A040;
+}
+.cta-green:active{box-shadow:0 2px 0 #189030}
+.cta-gold{
+  background:linear-gradient(180deg,#FFD040,#FFB020);
+  color:#7A4000;box-shadow:0 5px 0 #CC8000;
+  border:2px solid #E8A010;
+}
+.cta-gold:active{box-shadow:0 2px 0 #CC8000}
+.cta-disabled{
+  background:#E8E0D8;color:#A0988E;box-shadow:0 4px 0 #D0C8C0;
+  border:2px solid #D8D0C8;cursor:not-allowed;
+}
+.cta-hint{
+  text-align:center;font-size:11px;font-weight:900;
+  letter-spacing:1.5px;text-transform:uppercase;color:#B0A090;
+  margin-top:10px;
+}
+
+/* XP popup */
+.xp-pop{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0);
+  background:linear-gradient(135deg,#FFD040,#FFB020);
+  border-radius:20px;padding:20px 32px;text-align:center;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);z-index:100;
+  font-family:'Fredoka One',cursive;
+  transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events:none;
+}
+.xp-pop.show{transform:translate(-50%,-50%) scale(1)}
+.xp-pop .xp-num{font-size:48px;color:#7A4000;line-height:1}
+.xp-pop .xp-label{font-size:16px;color:#AA6000}
+
+/* ── ANIMATIONS ── */
+@keyframes mascotBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes cloudDrift{0%{transform:translateX(0)}100%{transform:translateX(14px)}}
+@keyframes correctPop{0%{transform:scale(1)}40%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes coinSpin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}
+@keyframes starPop{0%{transform:scale(0) rotate(-30deg);opacity:0}60%{transform:scale(1.3) rotate(10deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
+@keyframes slideUp{0%{transform:translateY(20px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes pathDash{to{stroke-dashoffset:-32}}
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="pg-header">
+  <div class="pg-eyebrow">✨ InvestQuest · UI Redesign v2</div>
+  <div class="pg-title">📚 Lesson & Quiz</div>
+  <p class="pg-sub">Redesigned to match the colorful, friendly map — every zone has its own personality carried through the lesson and quiz experience.</p>
+</div>
+
+<!-- SWITCHER -->
+<div class="switcher">
+  <button class="sw-btn active" onclick="showScreen('lesson')">📖 Lesson Intro</button>
+  <button class="sw-btn" onclick="showScreen('quiz')">🧠 Quiz</button>
+</div>
+
+<!-- PHONES ROW -->
+<div class="phones-row">
+
+  <!-- ════════════════════════════════════ -->
+  <!-- PHONE 1 — LESSON INTRO             -->
+  <!-- ════════════════════════════════════ -->
+  <div class="phone-wrap" id="lessonPhone">
+    <div class="phone-label">📖 Langkah 011</div>
+    <div class="phone-sublabel">Halaman Materi Baru</div>
+
+    <div class="phone" style="position:relative">
+
+      <!-- Notch -->
+      <div class="phone-notch">
+        <div class="notch-dot"></div>
+        <div class="notch-bar"></div>
+        <div class="notch-dot"></div>
+      </div>
+
+      <!-- Top bar -->
+      <div class="topbar">
+        <div class="close-btn">✕</div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:28%"></div>
+        </div>
+        <div class="stars-badge">
+          <span style="font-size:16px">⭐</span>
+          <span>0</span>
+        </div>
+      </div>
+
+      <!-- ZONE SCENE (Dollar Dunes — warm golden sky) -->
+      <div class="zone-scene" style="height:230px">
+        <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 370 230" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="ls-sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#FFB830"/>
+              <stop offset="50%" stop-color="#FFD870"/>
+              <stop offset="100%" stop-color="#FFEC90"/>
+            </linearGradient>
+          </defs>
+          <rect width="370" height="230" fill="url(#ls-sky)"/>
+          <!-- Sun -->
+          <circle cx="310" cy="52" r="38" fill="#FFE040" opacity="0.2"/>
+          <circle cx="310" cy="52" r="28" fill="#FFE840" opacity="0.35"/>
+          <circle cx="310" cy="52" r="20" fill="#FFF060" opacity="0.65"/>
+          <circle cx="310" cy="52" r="14" fill="#FFF880" opacity="0.9"/>
+          <!-- Kawaii sun face -->
+          <circle cx="306" cy="48" r="2.5" fill="#F0A020"/>
+          <circle cx="314" cy="48" r="2.5" fill="#F0A020"/>
+          <path d="M304,55 Q310,59 316,55" stroke="#F0A020" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <!-- Clouds -->
+          <g style="animation:cloudDrift 10s ease-in-out infinite alternate">
+            <ellipse cx="88" cy="58" rx="46" ry="26" fill="white" opacity="0.92"/>
+            <ellipse cx="64" cy="66" rx="32" ry="22" fill="white" opacity="0.92"/>
+            <ellipse cx="112" cy="68" rx="34" ry="20" fill="white" opacity="0.92"/>
+          </g>
+          <!-- Rolling sandy hills -->
+          <path d="M0,230 Q40,180 100,200 Q160,218 220,185 Q280,155 340,180 Q356,188 370,182 L370,230 Z" fill="#F0B820"/>
+          <path d="M0,230 Q60,196 140,210 Q220,224 300,196 Q338,183 370,196 L370,230 Z" fill="#F8C838"/>
+          <path d="M0,230 Q80,208 180,218 Q280,228 370,212 L370,230 Z" fill="#FFD858"/>
+          <!-- Coins scattered -->
+          <circle cx="42" cy="200" r="10" fill="#C8900A"/>
+          <circle cx="42" cy="197" r="10" fill="#F5C518"/>
+          <text x="42" y="201" text-anchor="middle" font-size="11" fill="#9A6800" font-weight="900" font-family="Arial">$</text>
+          <circle cx="326" cy="196" r="8" fill="#C8900A"/>
+          <circle cx="326" cy="193" r="8" fill="#F5C518"/>
+          <text x="326" y="197" text-anchor="middle" font-size="9" fill="#9A6800" font-weight="900" font-family="Arial">$</text>
+          <!-- Cactus hints -->
+          <rect x="18" y="162" width="10" height="50" rx="4" fill="#28A840"/>
+          <rect x="2" y="176" width="26" height="8" rx="4" fill="#28A840"/>
+          <rect x="338" y="170" width="10" height="44" rx="4" fill="#30C050"/>
+          <rect x="322" y="183" width="26" height="8" rx="4" fill="#30C050"/>
+          <!-- Flowers -->
+          <circle cx="155" cy="213" r="3" fill="#FF6060"/>
+          <circle cx="160" cy="210" r="3" fill="#FF6060"/>
+          <circle cx="157" cy="206" r="3" fill="#FF6060"/>
+          <circle cx="152" cy="209" r="3" fill="#FF6060"/>
+          <circle cx="157" cy="210" r="4.5" fill="#FFE040"/>
+          <circle cx="210" cy="218" r="3" fill="#FF90C0"/>
+          <circle cx="215" cy="215" r="3" fill="#FF90C0"/>
+          <circle cx="212" cy="211" r="3" fill="#FF90C0"/>
+          <circle cx="207" cy="214" r="3" fill="#FF90C0"/>
+          <circle cx="212" cy="215" r="4.5" fill="#FFE040"/>
+        </svg>
+
+        <!-- Mascot center (large, bouncing) -->
+        <div style="position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:20;display:flex;flex-direction:column;align-items:center">
+          <!-- Mascot avatar circle -->
+          <div style="width:96px;height:96px;border-radius:50%;background:white;border:4px solid rgba(255,255,255,0.9);box-shadow:0 6px 24px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;animation:mascotBounce 2.5s ease-in-out infinite;overflow:hidden">
+            <!-- Penny mascot SVG (friendly chibi bull) -->
+            <svg viewBox="0 0 80 80" width="80">
+              <!-- Background circle -->
+              <circle cx="40" cy="40" r="38" fill="#FFF8E0"/>
+              <!-- Tiny horns -->
+              <path d="M28,22 Q22,14 25,9 Q27,6 28,16 Q23,18 28,22" fill="#EDD88A"/>
+              <path d="M52,22 Q58,14 55,9 Q53,6 52,16 Q57,18 52,22" fill="#EDD88A"/>
+              <!-- Ears -->
+              <circle cx="14" cy="40" r="10" fill="#F0A848"/>
+              <circle cx="14" cy="40" r="6" fill="#F8C070"/>
+              <circle cx="66" cy="40" r="10" fill="#F0A848"/>
+              <circle cx="66" cy="40" r="6" fill="#F8C070"/>
+              <!-- Head -->
+              <circle cx="40" cy="40" r="28" fill="#F0A848"/>
+              <ellipse cx="30" cy="36" rx="10" ry="11" fill="white"/>
+              <ellipse cx="50" cy="36" rx="10" ry="11" fill="white"/>
+              <circle cx="31" cy="38" r="7" fill="#2D1000"/>
+              <circle cx="51" cy="38" r="7" fill="#2D1000"/>
+              <circle cx="31" cy="39" r="4" fill="#080200"/>
+              <circle cx="51" cy="39" r="4" fill="#080200"/>
+              <circle cx="34" cy="33" r="3.5" fill="white"/>
+              <circle cx="54" cy="33" r="3.5" fill="white"/>
+              <circle cx="35" cy="35" r="1.5" fill="white" opacity="0.5"/>
+              <!-- Lashes -->
+              <path d="M22,30 Q31,24 40,30" stroke="#5A2A00" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M40,30 Q49,24 58,30" stroke="#5A2A00" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <!-- Snout -->
+              <ellipse cx="40" cy="48" rx="13" ry="9" fill="#F8C098"/>
+              <!-- Heart nose -->
+              <path d="M40,47 C40,47 38,45 36,46 C34,47 34,50 40,53 C46,50 46,47 44,46 C42,45 40,47 40,47 Z" fill="#E05050"/>
+              <!-- Smile + teeth -->
+              <path d="M30,56 Q40,63 50,56" stroke="#C87040" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <rect x="34" y="58" width="6" height="5" rx="2" fill="white"/>
+              <rect x="41" y="58" width="6" height="5" rx="2" fill="white"/>
+              <!-- Cheeks -->
+              <ellipse cx="20" cy="47" rx="8" ry="5" fill="#FF9090" opacity="0.3"/>
+              <ellipse cx="60" cy="47" rx="8" ry="5" fill="#FF9090" opacity="0.3"/>
+              <!-- Bow tie -->
+              <path d="M31,64 L40,67 L31,70 Z" fill="#FF5090"/>
+              <path d="M49,64 L40,67 L49,70 Z" fill="#FF5090"/>
+              <ellipse cx="40" cy="67" rx="4" ry="3" fill="#FF70A8"/>
+            </svg>
+          </div>
+          <!-- Zone label below mascot -->
+          <div style="background:rgba(0,0,0,0.18);backdrop-filter:blur(6px);border-radius:100px;padding:5px 16px;margin-top:8px">
+            <span style="font-family:'Fredoka One',cursive;font-size:15px;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.2)">Langkah 011 · Zona 2</span>
+          </div>
+          <!-- New material badge -->
+          <div style="background:rgba(255,255,255,0.25);border:1.5px solid rgba(255,255,255,0.5);border-radius:100px;padding:4px 14px;margin-top:6px">
+            <span style="font-size:12px;font-weight:900;color:white">📚 Materi Baru</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- WHITE CONTENT SHEET -->
+      <div class="sheet" style="margin-top:0">
+        <div class="sheet-handle"></div>
+
+        <!-- Streak badge -->
+        <div class="streak-badge" style="margin-bottom:12px">
+          🔥 Streak 3 Hari! Terus semangat!
+        </div>
+
+        <!-- Tip card -->
+        <div class="tip-card">
+          <div class="tip-icon">💡</div>
+          <div class="tip-text">Terus melangkah — kebiasaan belajar membentuk hasil jangka panjang yang luar biasa!</div>
+        </div>
+
+        <!-- Content description -->
+        <div class="content-card" style="margin-bottom:12px">
+          <div style="font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#B0A090;margin-bottom:8px">📖 Apa yang kamu pelajari</div>
+          <div class="content-text">
+            Kuis singkat membantu <strong style="color:#FF8820">memperkuat konsep</strong> sebelum kamu lanjut ke langkah berikutnya. Siap? Yuk mulai! 🚀
+          </div>
+        </div>
+
+        <!-- Key concepts -->
+        <div style="font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#B0A090;margin-bottom:10px">🎯 Konsep Kunci</div>
+        <div class="concepts-row" style="margin-bottom:14px">
+          <div class="concept-pill">
+            <span class="concept-emoji">💰</span>
+            <span class="concept-label">Fungsi Uang</span>
+          </div>
+          <div class="concept-pill">
+            <span class="concept-emoji">🔄</span>
+            <span class="concept-label">Alat Tukar</span>
+          </div>
+          <div class="concept-pill">
+            <span class="concept-emoji">📊</span>
+            <span class="concept-label">Nilai Barang</span>
+          </div>
+          <div class="concept-pill">
+            <span class="concept-emoji">🏦</span>
+            <span class="concept-label">Tabungan</span>
+          </div>
+        </div>
+
+        <!-- Fun fact -->
+        <div class="fun-fact" style="margin-bottom:16px">
+          <div class="fun-fact-icon">🤩</div>
+          <div class="fun-fact-text">Tahukah kamu? Uang pertama di dunia adalah biji-bijian gandum di Mesopotamia 5.000 tahun lalu!</div>
+        </div>
+
+        <!-- CTA Button -->
+        <button class="cta-btn cta-green" onclick="showScreen('quiz')">
+          <span>Lanjut ke Kuis</span>
+          <span style="font-size:20px">→</span>
+        </button>
+        <div class="cta-hint">3 SOAL · ~2 MENIT</div>
+      </div>
+
+    </div><!-- end phone -->
+  </div><!-- end phone-wrap lesson -->
+
+  <!-- ════════════════════════════════════ -->
+  <!-- PHONE 2 — QUIZ                     -->
+  <!-- ════════════════════════════════════ -->
+  <div class="phone-wrap" id="quizPhone" style="display:none">
+    <div class="phone-label">🧠 Soal 1 dari 3</div>
+    <div class="phone-sublabel">Pilih Jawaban yang Tepat</div>
+
+    <div class="phone" style="position:relative" id="quizPhoneEl">
+
+      <!-- XP Popup (hidden by default) -->
+      <div class="xp-pop" id="xpPop">
+        <div class="xp-num">+80</div>
+        <div class="xp-label">XP!</div>
+        <div style="font-size:28px;margin-top:4px">🎉</div>
+      </div>
+
+      <!-- Notch -->
+      <div class="phone-notch">
+        <div class="notch-dot"></div>
+        <div class="notch-bar"></div>
+        <div class="notch-dot"></div>
+      </div>
+
+      <!-- Top bar (further progress) -->
+      <div class="topbar">
+        <div class="close-btn">✕</div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:55%"></div>
+        </div>
+        <div class="stars-badge">
+          <span style="font-size:16px">⭐</span>
+          <span id="starCount">0</span>
+        </div>
+      </div>
+
+      <!-- ZONE SCENE with mascot + speech bubble -->
+      <div class="zone-scene" style="height:190px">
+        <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 370 190" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="qz-sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#60D0FF"/>
+              <stop offset="60%" stop-color="#98E8FF"/>
+              <stop offset="100%" stop-color="#C8F8FF"/>
+            </linearGradient>
+          </defs>
+          <rect width="370" height="190" fill="url(#qz-sky)"/>
+          <!-- Clouds -->
+          <g style="animation:cloudDrift 11s ease-in-out infinite alternate">
+            <ellipse cx="290" cy="50" rx="50" ry="28" fill="white" opacity="0.9"/>
+            <ellipse cx="266" cy="59" rx="35" ry="24" fill="white" opacity="0.9"/>
+            <ellipse cx="314" cy="61" rx="37" ry="22" fill="white" opacity="0.9"/>
+          </g>
+          <!-- Small cloud left -->
+          <g style="animation:cloudDrift 14s ease-in-out infinite alternate-reverse">
+            <ellipse cx="70" cy="40" rx="40" ry="22" fill="white" opacity="0.85"/>
+            <ellipse cx="50" cy="47" rx="28" ry="18" fill="white" opacity="0.85"/>
+            <ellipse cx="90" cy="49" rx="30" ry="17" fill="white" opacity="0.85"/>
+          </g>
+          <!-- Ground -->
+          <path d="M0,190 Q60,158 130,172 Q200,185 270,162 Q320,148 370,162 L370,190 Z" fill="#40C860"/>
+          <path d="M0,190 Q80,168 180,178 Q280,188 370,172 L370,190 Z" fill="#58E078"/>
+          <!-- Dollar Dunes hills hint -->
+          <path d="M0,190 Q40,172 90,182 Q140,190 190,175 Q240,162 290,176 Q330,185 370,178 L370,190 Z" fill="#F0B820" opacity="0.3"/>
+          <!-- Floating coins -->
+          <circle cx="22" cy="155" r="9" fill="#C8900A" style="animation:float 1.8s ease-in-out infinite 0.3s"/>
+          <circle cx="22" cy="153" r="9" fill="#F5C518" style="animation:float 1.8s ease-in-out infinite 0.3s"/>
+          <text x="22" y="157" text-anchor="middle" font-size="10" fill="#9A6800" font-weight="900" font-family="Arial" style="animation:float 1.8s ease-in-out infinite 0.3s">$</text>
+          <circle cx="348" cy="148" r="8" fill="#C8900A" style="animation:float 2.2s ease-in-out infinite 0.9s"/>
+          <circle cx="348" cy="146" r="8" fill="#F5C518" style="animation:float 2.2s ease-in-out infinite 0.9s"/>
+          <text x="348" y="150" text-anchor="middle" font-size="9" fill="#9A6800" font-weight="900" font-family="Arial" style="animation:float 2.2s ease-in-out infinite 0.9s">$</text>
+          <!-- Zone hint path (dotted) -->
+          <path d="M0,140 Q60,120 120,132 Q180,142 240,125 Q300,110 370,122" fill="none" stroke="white" stroke-width="3" stroke-dasharray="8 6" opacity="0.4" style="animation:pathDash 2s linear infinite"/>
+        </svg>
+
+        <!-- Mascot left + speech bubble right -->
+        <div class="mascot-row">
+          <!-- Mascot -->
+          <div class="mascot-circle" style="animation:mascotBounce 2.8s ease-in-out infinite">
+            <svg viewBox="0 0 72 72" width="70">
+              <circle cx="36" cy="36" r="34" fill="#FFF8E0"/>
+              <path d="M24,20 Q18,12 21,8 Q23,5 24,14 Q19,16 24,20" fill="#EDD88A"/>
+              <path d="M48,20 Q54,12 51,8 Q49,5 48,14 Q53,16 48,20" fill="#EDD88A"/>
+              <circle cx="12" cy="36" r="9" fill="#F0A848"/>
+              <circle cx="12" cy="36" r="5" fill="#F8C070"/>
+              <circle cx="60" cy="36" r="9" fill="#F0A848"/>
+              <circle cx="60" cy="36" r="5" fill="#F8C070"/>
+              <circle cx="36" cy="36" r="25" fill="#F0A848"/>
+              <ellipse cx="26" cy="32" rx="9" ry="10" fill="white"/>
+              <ellipse cx="46" cy="32" rx="9" ry="10" fill="white"/>
+              <circle cx="27" cy="34" r="6.5" fill="#2D1000"/>
+              <circle cx="47" cy="34" r="6.5" fill="#2D1000"/>
+              <circle cx="27" cy="35" r="3.5" fill="#080200"/>
+              <circle cx="47" cy="35" r="3.5" fill="#080200"/>
+              <circle cx="30" cy="30" r="3" fill="white"/>
+              <circle cx="50" cy="30" r="3" fill="white"/>
+              <path d="M18,26 Q27,20 36,26" stroke="#5A2A00" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <path d="M36,26 Q45,20 54,26" stroke="#5A2A00" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <ellipse cx="36" cy="43" rx="11" ry="8" fill="#F8C098"/>
+              <path d="M36,42 C36,42 34,40 32,41 C30,42 30,45 36,48 C42,45 42,42 40,41 C38,40 36,42 36,42 Z" fill="#E05050"/>
+              <path d="M27,52 Q36,58 45,52" stroke="#C87040" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <rect x="31" y="53" width="5" height="4" rx="2" fill="white"/>
+              <rect x="37" y="53" width="5" height="4" rx="2" fill="white"/>
+              <ellipse cx="18" cy="43" rx="7" ry="4.5" fill="#FF9090" opacity="0.3"/>
+              <ellipse cx="54" cy="43" rx="7" ry="4.5" fill="#FF9090" opacity="0.3"/>
+            </svg>
+          </div>
+
+          <!-- Speech bubble -->
+          <div class="speech-bubble">
+            <div class="bubble-label">Langkah 011 · Zona 2</div>
+            <div class="bubble-question" id="questionText">Fungsi uang sebagai alat tukar berarti...?</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WHITE QUIZ SHEET -->
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+
+        <!-- Question number pill -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#FFD040,#FFB020);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:14px;color:#7A4000;box-shadow:0 2px 0 #CC8000">1</div>
+            <span style="font-size:11px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#B0A090">dari 3 soal</span>
+          </div>
+          <!-- Hearts -->
+          <div style="display:flex;gap:4px">
+            <span style="font-size:18px" id="h1">❤️</span>
+            <span style="font-size:18px" id="h2">❤️</span>
+            <span style="font-size:18px" id="h3">❤️</span>
+          </div>
+        </div>
+
+        <!-- ANSWER INPUT FIELD (tapped answer preview) -->
+        <div id="answerPreview" style="
+          border:2.5px dashed #D8D0C8;border-radius:14px;
+          padding:14px 16px;margin-bottom:14px;
+          background:#FAFAF8;min-height:52px;
+          display:flex;align-items:center;
+          font-size:14px;font-weight:700;color:#C0B8B0;
+          transition:all 0.2s;
+        ">
+          Ketuk jawaban di bawah 👇
+        </div>
+
+        <!-- FEEDBACK BANNER (hidden initially) -->
+        <div class="feedback-banner" id="feedbackBanner">
+          <div class="feedback-icon" id="feedbackIcon">✅</div>
+          <div>
+            <div class="feedback-title" id="feedbackTitle">Jawaban Benar!</div>
+            <div class="feedback-sub" id="feedbackSub">Uang memudahkan pertukaran barang dan jasa tanpa perlu barter!</div>
+          </div>
+        </div>
+
+        <!-- ANSWER OPTIONS -->
+        <div class="answers">
+          <div class="answer-opt" onclick="selectAnswer(this, false)" data-idx="0">
+            <div class="answer-letter">A</div>
+            <div class="answer-text">Hanya untuk hiasan dinding rumah</div>
+            <div class="answer-result">❌</div>
+          </div>
+          <div class="answer-opt" onclick="selectAnswer(this, true)" data-idx="1">
+            <div class="answer-letter">B</div>
+            <div class="answer-text">Mempermudah pertukaran barang dan jasa</div>
+            <div class="answer-result">✅</div>
+          </div>
+          <div class="answer-opt" onclick="selectAnswer(this, false)" data-idx="2">
+            <div class="answer-letter">C</div>
+            <div class="answer-text">Menghapus harga semua produk di pasar</div>
+            <div class="answer-result">❌</div>
+          </div>
+          <div class="answer-opt" onclick="selectAnswer(this, false)" data-idx="3">
+            <div class="answer-letter">D</div>
+            <div class="answer-text">Membuat semua orang kaya secara otomatis</div>
+            <div class="answer-result">❌</div>
+          </div>
+        </div>
+
+        <!-- CTA BUTTON -->
+        <button class="cta-btn cta-disabled" id="submitBtn" onclick="submitAnswer()">
+          <span id="submitText">Pilih Jawaban Dulu</span>
+        </button>
+      </div>
+
+    </div><!-- end phone -->
+  </div><!-- end phone-wrap quiz -->
+
+</div><!-- end phones-row -->
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- STATES SHOWCASE                                    -->
+<!-- ══════════════════════════════════════════════════ -->
+<div style="max-width:900px;width:100%;margin-top:56px">
+  <div style="text-align:center;margin-bottom:28px">
+    <div style="font-size:11px;font-weight:900;letter-spacing:4px;text-transform:uppercase;color:#FFB830;margin-bottom:8px">Design System</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:32px;color:white">Interaction States</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px">
+
+    <!-- Default answer -->
+    <div style="background:white;border-radius:20px;padding:18px;border:2px solid rgba(0,0,0,0.06);box-shadow:0 4px 0 rgba(0,0,0,0.08)">
+      <div style="font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#B0A090;margin-bottom:10px">Default</div>
+      <div style="background:white;border:2.5px solid #E8E0D8;border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 3px 0 #D8D0C8">
+        <div style="width:38px;height:40px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:16px;background:#FFF0E8;color:#FF7030;border-right:2px solid #F0EDE8;margin:-10px 0 -10px -12px;border-radius:12px 0 0 12px;flex-shrink:0">A</div>
+        <span style="font-size:12px;font-weight:800;color:#2A2020">Pilihan Jawaban</span>
+      </div>
+    </div>
+
+    <!-- Selected -->
+    <div style="background:white;border-radius:20px;padding:18px;border:2px solid rgba(0,0,0,0.06);box-shadow:0 4px 0 rgba(0,0,0,0.08)">
+      <div style="font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#B0A090;margin-bottom:10px">✅ Dipilih</div>
+      <div style="background:#FFF8E8;border:2.5px solid #FFB830;border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 3px 0 #CC8800">
+        <div style="width:38px;height:40px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:16px;background:#FFF0E8;color:#FF7030;border-right:2px solid #F0EDE8;margin:-10px 0 -10px -12px;border-radius:12px 0 0 12px;flex-shrink:0">B</div>
+        <span style="font-size:12px;font-weight:800;color:#2A2020">Jawaban Dipilih</span>
+      </div>
+    </div>
+
+    <!-- Correct -->
+    <div style="background:white;border-radius:20px;padding:18px;border:2px solid rgba(0,0,0,0.06);box-shadow:0 4px 0 rgba(0,0,0,0.08)">
+      <div style="font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#B0A090;margin-bottom:10px">🎉 Benar!</div>
+      <div style="background:#F0FFF4;border:2.5px solid #40C860;border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 3px 0 #288040">
+        <div style="width:38px;height:40px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:16px;background:#E8FFF0;color:#20A040;border-right:2px solid #D0F0E0;margin:-10px 0 -10px -12px;border-radius:12px 0 0 12px;flex-shrink:0">✓</div>
+        <span style="font-size:12px;font-weight:800;color:#2A2020">Jawaban Benar!</span>
+        <div style="margin-left:auto;width:28px;height:28px;border-radius:50%;background:#E0FFF0;display:flex;align-items:center;justify-content:center;font-size:14px">✅</div>
+      </div>
+    </div>
+
+    <!-- Wrong -->
+    <div style="background:white;border-radius:20px;padding:18px;border:2px solid rgba(0,0,0,0.06);box-shadow:0 4px 0 rgba(0,0,0,0.08)">
+      <div style="font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#B0A090;margin-bottom:10px">😅 Salah</div>
+      <div style="background:#FFF0F0;border:2.5px solid #FF5060;border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 3px 0 #CC2030">
+        <div style="width:38px;height:40px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:16px;background:#FFE8E8;color:#E03040;border-right:2px solid #F0D0D0;margin:-10px 0 -10px -12px;border-radius:12px 0 0 12px;flex-shrink:0">✗</div>
+        <span style="font-size:12px;font-weight:800;color:#2A2020">Jawaban Salah</span>
+        <div style="margin-left:auto;width:28px;height:28px;border-radius:50%;background:#FFE0E0;display:flex;align-items:center;justify-content:center;font-size:14px">❌</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Feedback banners showcase -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+    <!-- Correct feedback -->
+    <div style="background:#E8FFF0;border:2px solid #40C860;border-radius:20px;padding:18px;display:flex;gap:12px;align-items:center;box-shadow:0 4px 0 rgba(64,200,96,0.2)">
+      <span style="font-size:32px">🎉</span>
+      <div>
+        <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#20A040">Mantap Sekali!</div>
+        <div style="font-size:12px;font-weight:700;color:#2A7A4A;line-height:1.4;margin-top:2px">Uang memudahkan pertukaran — itulah gunanya!</div>
+      </div>
+    </div>
+    <!-- Wrong feedback -->
+    <div style="background:#FFF0F0;border:2px solid #FF5060;border-radius:20px;padding:18px;display:flex;gap:12px;align-items:center;box-shadow:0 4px 0 rgba(255,80,96,0.15)">
+      <span style="font-size:32px">💪</span>
+      <div>
+        <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#E03040">Hampir Benar!</div>
+        <div style="font-size:12px;font-weight:700;color:#9A3A3A;line-height:1.4;margin-top:2px">Coba lagi! Uang bukan hiasan ya 😄</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Buttons showcase -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+    <div style="background:white;border-radius:20px;padding:18px;border:2px solid rgba(0,0,0,0.06);box-shadow:0 4px 0 rgba(0,0,0,0.08)">
+      <div style="font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#B0A090;margin-bottom:10px">CTA — Aktif</div>
+      <button class="cta-btn cta-green" style="font-size:15px">Lanjut ke Kuis →</button>
+    </div>
+    <div style="background:white;border-radius:20px;padding:18px;border:2px solid rgba(0,0,0,0.06);box-shadow:0 4px 0 rgba(0,0,0,0.08)">
+      <div style="font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#B0A090;margin-bottom:10px">CTA — Selesai 🥇</div>
+      <button class="cta-btn cta-gold" style="font-size:15px">⭐ Lihat Hasilku!</button>
+    </div>
+  </div>
+</div>
+
+<!-- JAVASCRIPT -->
+<script>
+let selectedOpt = null;
+let answered = false;
+
+function showScreen(screen) {
+  const btns = document.querySelectorAll('.sw-btn');
+  btns.forEach(b => b.classList.remove('active'));
+
+  if (screen === 'lesson') {
+    document.getElementById('lessonPhone').style.display = 'flex';
+    document.getElementById('quizPhone').style.display = 'none';
+    btns[0].classList.add('active');
+  } else {
+    document.getElementById('lessonPhone').style.display = 'none';
+    document.getElementById('quizPhone').style.display = 'flex';
+    btns[1].classList.add('active');
+  }
+}
+
+function selectAnswer(el, isCorrect) {
+  if (answered) return;
+
+  // Clear previous selection
+  document.querySelectorAll('.answer-opt').forEach(o => {
+    o.classList.remove('selected');
+  });
+
+  el.classList.add('selected');
+  selectedOpt = { el, isCorrect };
+
+  // Update preview
+  const preview = document.getElementById('answerPreview');
+  const text = el.querySelector('.answer-text').textContent;
+  preview.textContent = '✏️ ' + text;
+  preview.style.color = '#2A2020';
+  preview.style.borderColor = '#FFB830';
+  preview.style.background = '#FFF8E8';
+
+  // Enable submit button
+  const btn = document.getElementById('submitBtn');
+  btn.className = 'cta-btn cta-gold';
+  document.getElementById('submitText').textContent = 'Cek Jawaban! ✓';
+}
+
+function submitAnswer() {
+  if (!selectedOpt || answered) return;
+  answered = true;
+
+  const { el, isCorrect } = selectedOpt;
+  const feedback = document.getElementById('feedbackBanner');
+  const icon = document.getElementById('feedbackIcon');
+  const title = document.getElementById('feedbackTitle');
+  const sub = document.getElementById('feedbackSub');
+  const btn = document.getElementById('submitBtn');
+
+  // Disable all options
+  document.querySelectorAll('.answer-opt').forEach(o => o.style.cursor = 'default');
+
+  if (isCorrect) {
+    el.classList.remove('selected');
+    el.classList.add('correct');
+    feedback.className = 'feedback-banner show correct-fb';
+    icon.textContent = '🎉';
+    title.textContent = 'Mantap Sekali! +80 XP!';
+    sub.textContent = 'Uang memudahkan pertukaran barang & jasa tanpa perlu barter. Kamu hebat!';
+    btn.className = 'cta-btn cta-green';
+    document.getElementById('submitText').textContent = 'Soal Berikutnya →';
+
+    // XP pop
+    const xp = document.getElementById('xpPop');
+    setTimeout(() => {
+      xp.classList.add('show');
+      setTimeout(() => xp.classList.remove('show'), 1600);
+    }, 300);
+
+    // Update stars
+    setTimeout(() => {
+      document.getElementById('starCount').textContent = '80';
+    }, 400);
+
+  } else {
+    el.classList.remove('selected');
+    el.classList.add('wrong');
+
+    // Show correct answer too
+    setTimeout(() => {
+      document.querySelectorAll('.answer-opt').forEach(o => {
+        const txt = o.querySelector('.answer-text').textContent;
+        if (txt.includes('pertukaran barang')) o.classList.add('correct');
+      });
+    }, 400);
+
+    feedback.className = 'feedback-banner show wrong-fb';
+    icon.textContent = '💪';
+    title.textContent = 'Hampir Benar! Coba Lagi!';
+    sub.textContent = 'Jawaban yang benar adalah "Mempermudah pertukaran barang dan jasa". Ingat ya!';
+    btn.className = 'cta-btn cta-green';
+    document.getElementById('submitText').textContent = 'Soal Berikutnya →';
+
+    // Remove a heart
+    document.getElementById('h3').textContent = '🖤';
+  }
+
+  btn.onclick = () => {
+    alert('Lanjut ke soal berikutnya! (Demo selesai 🎉)');
+  };
+}
+</script>
+
+</body>
+</html>
