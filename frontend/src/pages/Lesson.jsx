@@ -3,13 +3,13 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchLessonsByLevel } from '../api/lessons'
 import { CURRICULUM_LEVELS } from '../lib/curriculum'
 import { GUEST_MAX_FREE_PATH_STEP, GUEST_UNLOCK_PATH, isLoggedIn } from '../lib/guestGate'
-import { XP_PER_CORRECT, XP_PER_LESSON_COMPLETE, markLessonComplete, deductLife } from '../lib/gamification'
+import { XP_PER_CORRECT, XP_PER_LESSON_COMPLETE, markLessonComplete, deductLife, getDisplayMascotEvolutionLevel } from '../lib/gamification'
 import { playCorrect, playWrong, playComplete, playTap, playSelect, playStepNext } from '../lib/sounds'
 import { EVENTS, trackEvent } from '../tracking/events'
-import { AppHeader } from '../components/AppHeader'
 import { Button } from '../components/Button'
 import { LessonIntro } from '../components/LessonIntro'
-import { ProgressBar } from '../components/ProgressBar'
+import MascotEvolution, { getMascotByLevel } from '../components/MascotEvolution'
+import { useGamificationStats } from '../hooks/useGamificationStats'
 import { cn } from '../lib/cn'
 
 function hasIntroContent(lesson) {
@@ -18,50 +18,110 @@ function hasIntroContent(lesson) {
 }
 
 /* ─────────────────────────────────────────────
+   Zone-aware SVG scene for quiz area
+───────────────────────────────────────────── */
+const LESSON_SKY_STOPS = {
+  1: ['#60D0FF', '#C8F4FF'],
+  2: ['#FFB830', '#FFEC90'],
+  3: ['#60C8FF', '#D0F0FF'],
+  4: ['#38C8FF', '#A0F0FF'],
+  5: ['#FFA040', '#FFE8A0'],
+  6: ['#4FC8FF', '#D0F8E8'],
+  7: ['#1A0850', '#3A2888'],
+  8: ['#FF6B35', '#FFD090'],
+}
+const LESSON_GROUND_COLOR = {
+  1: '#40D864', 2: '#F8C838', 3: '#40D864', 4: '#1890CC',
+  5: '#E8B840', 6: '#38D470', 7: '#180C38', 8: '#C87830',
+}
+
+function ZoneLessonScene({ level }) {
+  const [s1, s2] = LESSON_SKY_STOPS[level] || LESSON_SKY_STOPS[1]
+  const gnd = LESSON_GROUND_COLOR[level] || LESSON_GROUND_COLOR[1]
+  const gradId = `lsn-sky-${level}`
+  return (
+    <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} viewBox="0 0 370 200" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={s1} />
+          <stop offset="100%" stopColor={s2} />
+        </linearGradient>
+      </defs>
+      <rect width="370" height="200" fill={`url(#${gradId})`} />
+      {level === 2 || level === 5 ? (
+        <>
+          <circle cx="310" cy="52" r="38" fill="#FFE040" opacity="0.2"/>
+          <circle cx="310" cy="52" r="26" fill="#FFF060" opacity="0.5"/>
+        </>
+      ) : level <= 6 ? (
+        <>
+          <circle cx="50" cy="50" r="32" fill="#FFE840" opacity="0.25"/>
+          <circle cx="50" cy="50" r="20" fill="#FFF060" opacity="0.5"/>
+        </>
+      ) : null}
+      {level !== 7 && level !== 8 && (
+        <g style={{ animation: 'iq-cloud-drift 10s ease-in-out infinite alternate' }}>
+          <ellipse cx="260" cy="45" rx="50" ry="28" fill="white" opacity="0.9"/>
+          <ellipse cx="236" cy="54" rx="35" ry="24" fill="white" opacity="0.9"/>
+          <ellipse cx="284" cy="56" rx="37" ry="22" fill="white" opacity="0.9"/>
+        </g>
+      )}
+      <path d={`M0,200 Q60,165 130,178 Q200,190 270,168 Q320,154 370,168 L370,200 Z`} fill={gnd} opacity="0.8"/>
+      <path d={`M0,200 Q80,178 180,186 Q280,194 370,182 L370,200 Z`} fill={gnd}/>
+      {/* Floating coins */}
+      <circle cx="22" cy="155" r="9" fill="#C8900A" style={{ animation: 'iq-coin-bob 1.8s ease-in-out infinite 0.3s' }}/>
+      <circle cx="22" cy="153" r="9" fill="#F5C518" style={{ animation: 'iq-coin-bob 1.8s ease-in-out infinite 0.3s' }}/>
+      <text x="22" y="157" textAnchor="middle" fontSize="10" fill="#9A6800" fontWeight="900" fontFamily="Arial" style={{ animation: 'iq-coin-bob 1.8s ease-in-out infinite 0.3s' }}>$</text>
+      <circle cx="348" cy="148" r="8" fill="#C8900A" style={{ animation: 'iq-coin-bob 2.2s ease-in-out infinite 0.9s' }}/>
+      <circle cx="348" cy="146" r="8" fill="#F5C518" style={{ animation: 'iq-coin-bob 2.2s ease-in-out infinite 0.9s' }}/>
+      <text x="348" y="150" textAnchor="middle" fontSize="9" fill="#9A6800" fontWeight="900" fontFamily="Arial" style={{ animation: 'iq-coin-bob 2.2s ease-in-out infinite 0.9s' }}>$</text>
+      {/* Dotted hint path */}
+      <path d="M0,140 Q60,120 120,132 Q180,142 240,125 Q300,110 370,122" fill="none" stroke="white" strokeWidth="3" strokeDasharray="8 6" opacity="0.4" style={{ animation: 'iq-path-dash 2s linear infinite' }}/>
+    </svg>
+  )
+}
+
+/* ─────────────────────────────────────────────
    Shared header used in all lesson states
 ───────────────────────────────────────────── */
 function LessonHeader({ onExit, progressValue, sessionXp, xpGain, answered, result }) {
   return (
-    <AppHeader
-      mode="lesson"
-      variant="light"
-      className="py-2"
-      left={
-        <button
-          type="button"
-          onClick={onExit}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg font-bold text-muted transition-colors hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
-          aria-label="Keluar dari pelajaran"
-        >
-          ✕
-        </button>
-      }
-      center={
-        <div className="w-full min-w-0">
-          <ProgressBar value={progressValue} />
-        </div>
-      }
-      right={
-        <div className="inline-flex max-w-[min(100%,9rem)] items-center gap-0.5 rounded-full border border-yellow-100 bg-yellow-50 px-2 py-1.5 sm:px-3">
-          <span className="shrink-0 text-sm leading-none" aria-hidden="true">
-            ⭐
-          </span>
-          <span
-            className={cn(
-              'text-xs font-extrabold tabular-nums sm:text-sm',
-              sessionXp > 0 ? 'text-yellow-600' : 'text-gray-400',
-            )}
-          >
-            {sessionXp}
-          </span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px 8px', background: '#FAFAF8', borderBottom: '1px solid #F0EDE8' }}>
+      <button
+        type="button"
+        onClick={onExit}
+        style={{
+          width: 34, height: 34, borderRadius: '50%',
+          background: '#F0EDE8', border: '2px solid #E0D8D0',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 16, color: '#8A7A6A', cursor: 'pointer', fontWeight: 900, flexShrink: 0,
+        }}
+        aria-label="Keluar dari pelajaran"
+      >✕</button>
+      <div style={{ flex: 1, height: 14, background: '#F0EDE8', borderRadius: 100, overflow: 'hidden', border: '2px solid #E0D8D0' }}>
+        <div style={{
+          height: '100%', borderRadius: 100,
+          background: 'linear-gradient(90deg,#40C860,#60E880)',
+          boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.4)',
+          transition: 'width 0.6s ease',
+          width: `${progressValue}%`,
+        }} />
+      </div>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 4,
+        background: '#FFF8E0', border: '2px solid #F5C518',
+        borderRadius: 100, padding: '5px 12px',
+        flexShrink: 0, boxShadow: '0 3px 0 #C8A010',
+      }}>
+        <span style={{ fontSize: 16 }}>⭐</span>
+        <span style={{ fontFamily: "'Fredoka One',cursive", fontSize: 15, color: '#9A6800' }}>
+          {sessionXp}
           {answered && result === 'correct' && xpGain != null && (
-            <span className="animate-lesson-xp-pop ml-0.5 text-xs font-extrabold text-primary sm:text-sm">
-              +{xpGain}
-            </span>
+            <span style={{ marginLeft: 4, fontSize: 13, color: '#20A040' }}>+{xpGain}</span>
           )}
-        </div>
-      }
-    />
+        </span>
+      </div>
+    </div>
   )
 }
 
@@ -75,6 +135,8 @@ export function Lesson() {
     const n = parseInt(levelParam ?? '1', 10)
     return Number.isFinite(n) && n >= 1 ? n : 1
   }, [levelParam])
+
+  const { streak, xp, lives: livesFromStats, completedLessons } = useGamificationStats()
 
   const [lessons, setLessons] = useState(null)
   const [loadState, setLoadState] = useState('loading')
@@ -93,11 +155,31 @@ export function Lesson() {
   const [exitConfirmOpen, setExitConfirmOpen] = useState(false)
   const [priorLevelLessonCount, setPriorLevelLessonCount] = useState(0)
   const lessonStartSentRef = useRef(null)
+  // Snapshot of completed lessons when this level session begins — used to block replay XP
+  const sessionCompletedRef = useRef(null)
 
   const lesson = useMemo(
     () => (lessons?.length ? lessons[Math.min(activeIndex, lessons.length - 1)] : null),
     [lessons, activeIndex],
   )
+
+  // Cap mascot tier by path step — same logic as Home, prevents tier mismatch
+  const displayMascotLevel = useMemo(() => {
+    const step = priorLevelLessonCount + activeIndex + 1
+    return getDisplayMascotEvolutionLevel(xp, step > 0 ? step : 1)
+  }, [xp, priorLevelLessonCount, activeIndex])
+  const mascotTier = useMemo(() => getMascotByLevel(displayMascotLevel), [displayMascotLevel])
+
+  // Shuffle options once per lesson so the correct answer isn't always in the same slot
+  const shuffledOptions = useMemo(() => {
+    const opts = (lesson?.options ?? []).slice(0, 4)
+    const arr = [...opts]
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[arr[i], arr[j]] = [arr[j], arr[i]]
+    }
+    return arr
+  }, [lesson?.id]) // re-shuffle only when the lesson changes, stable within a session
 
   const answered = result !== null
 
@@ -153,7 +235,9 @@ export function Lesson() {
     setSessionXp(0)
     setSessionCorrect(0)
     setSessionAttempted(0)
-  }, [level])
+    // Snapshot which lessons were already complete before this session started
+    sessionCompletedRef.current = new Set(completedLessons)
+  }, [level]) // eslint-disable-line react-hooks/exhaustive-deps — intentional: snapshot once per level, not on every completedLessons change
 
   useEffect(() => {
     setLessonStep(0)
@@ -245,7 +329,8 @@ export function Lesson() {
     } else {
       playComplete()
       const totalQ = sessionAttempted > 0 ? sessionAttempted : lessons.length
-      const xpTotal = sessionXp + XP_PER_LESSON_COMPLETE
+      const hasNewCompletions = lessons.some((l) => !sessionCompletedRef.current?.has(l.id))
+      const xpTotal = sessionXp + (hasNewCompletions ? XP_PER_LESSON_COMPLETE : 0)
       navigate('/result', {
         replace: true,
         state: { xp: xpTotal, correct: sessionCorrect, total: totalQ },
@@ -253,7 +338,7 @@ export function Lesson() {
     }
   }
 
-  /** Submit the pending answer (called by PERIKSA button) */
+  /** Submit the pending answer (called by Cek Jawaban button) */
   function handleSubmit() {
     if (!lesson || !pendingAnswer || answered) return
     playTap()
@@ -264,8 +349,10 @@ export function Lesson() {
     if (choice === lesson.answer) {
       playCorrect()
       trackEvent(EVENTS.LESSON_COMPLETE, { lesson_id: lesson.id, level })
-      setXpGain(XP_PER_CORRECT)
-      setSessionXp((x) => x + XP_PER_CORRECT)
+      const alreadyDone = sessionCompletedRef.current?.has(lesson.id) ?? false
+      const earned = alreadyDone ? 0 : XP_PER_CORRECT
+      setXpGain(earned > 0 ? earned : null)
+      if (earned > 0) setSessionXp((x) => x + earned)
       setSessionCorrect((c) => c + 1)
       setResult('correct')
     } else {
@@ -328,7 +415,7 @@ export function Lesson() {
     )
   }
 
-  const displayOptions = (lesson.options ?? []).slice(0, 4)
+  const displayOptions = shuffledOptions
   const correctAnswer = lesson.answer
   const showIntro = hasIntroContent(lesson) && lessonStep === 0
 
@@ -350,6 +437,9 @@ export function Lesson() {
             title={lesson.title}
             hook={lesson.hook}
             body={lesson.body}
+            level={level}
+            mascotEvolutionLevel={displayMascotLevel}
+            streak={streak}
             onContinue={() => { playStepNext(); setLessonStep(1) }}
           />
         </div>
@@ -357,199 +447,162 @@ export function Lesson() {
         /* ── Two-zone quiz layout ── */
         <div className="flex flex-1 flex-col overflow-hidden">
 
-          {/* ── ZONE 1: Illustrated scene ── */}
-          <div
-            className="relative shrink-0 overflow-hidden"
-            style={{ minHeight: 240 }}
-          >
-            {/* SVG landscape background */}
-            <svg
-              viewBox="0 0 400 240"
-              preserveAspectRatio="xMidYMid slice"
-              className="absolute inset-0 w-full h-full"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <defs>
-                <linearGradient id="ls-sky" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#5BBDE4" />
-                  <stop offset="100%" stopColor="#A8D8F0" />
-                </linearGradient>
-              </defs>
+          {/* ── ZONE: Illustrated scene with mascot + question ── */}
+          <div className="relative shrink-0 overflow-hidden" style={{ height: 200 }}>
+            {/* Zone-aware background SVG */}
+            <ZoneLessonScene level={level} />
 
-              {/* Sky */}
-              <rect width="400" height="240" fill="url(#ls-sky)" />
-
-              {/* Sun */}
-              <circle cx="348" cy="36" r="26" fill="#FFF9C4" opacity="0.55" />
-              <circle cx="348" cy="36" r="18" fill="#FFE082" opacity="0.8" />
-
-              {/* Cloud left */}
-              <g opacity="0.97">
-                <ellipse cx="72" cy="54" rx="44" ry="21" fill="white" />
-                <ellipse cx="93" cy="44" rx="31" ry="26" fill="white" />
-                <ellipse cx="55" cy="51" rx="27" ry="17" fill="white" />
-              </g>
-
-              {/* Cloud right */}
-              <g opacity="0.92">
-                <ellipse cx="308" cy="42" rx="39" ry="19" fill="white" />
-                <ellipse cx="330" cy="32" rx="27" ry="23" fill="white" />
-                <ellipse cx="292" cy="40" rx="23" ry="15" fill="white" />
-              </g>
-
-              {/* Back hills — soft light green */}
-              <path d="M0 178 C55 148 110 165 165 152 C220 139 270 128 320 148 C355 163 378 152 400 158 L400 240 L0 240 Z" fill="#B8E4A0" />
-
-              {/* Back trees — left cluster */}
-              {/* Pine left-1 */}
-              <polygon points="36,158 49,120 62,158" fill="#3A9B5C" />
-              <polygon points="33,170 49,134 65,170" fill="#4DB870" />
-              <rect x="45" y="168" width="8" height="13" fill="#7B5E45" rx="2" />
-              {/* Round tree left-2 */}
-              <ellipse cx="82" cy="160" rx="15" ry="17" fill="#3A9B5C" />
-              <ellipse cx="82" cy="152" rx="11" ry="13" fill="#52C97A" />
-              <rect x="79" y="173" width="6" height="10" fill="#7B5E45" rx="2" />
-
-              {/* Back trees — right cluster */}
-              {/* Pine right-1 */}
-              <polygon points="318,152 332,113 346,152" fill="#3A9B5C" />
-              <polygon points="315,164 332,127 349,164" fill="#4DB870" />
-              <rect x="328" y="162" width="8" height="13" fill="#7B5E45" rx="2" />
-              {/* Round tree right-2 */}
-              <ellipse cx="362" cy="163" rx="16" ry="18" fill="#3A9B5C" />
-              <ellipse cx="362" cy="155" rx="12" ry="14" fill="#52C97A" />
-              <rect x="359" y="177" width="6" height="10" fill="#7B5E45" rx="2" />
-
-              {/* Mid hill — medium green */}
-              <path d="M0 198 C45 178 95 188 148 181 C200 174 250 167 300 178 C338 186 368 180 400 184 L400 240 L0 240 Z" fill="#72C464" />
-
-              {/* Ground strip */}
-              <rect y="218" width="400" height="22" fill="#5CAF55" />
-
-              {/* Ground highlight */}
-              <path d="M0 218 Q100 214 200 218 Q300 222 400 218" stroke="#6DC95E" strokeWidth="3" fill="none" opacity="0.6" />
-
-              {/* Grass tufts */}
-              <path d="M18 218 Q20 210 22 218" stroke="#4A9A47" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-              <path d="M23 218 Q25 212 27 218" stroke="#4A9A47" strokeWidth="2" fill="none" strokeLinecap="round" />
-              <path d="M155 218 Q157 211 159 218" stroke="#4A9A47" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-              <path d="M240 218 Q242 212 244 218" stroke="#4A9A47" strokeWidth="2" fill="none" strokeLinecap="round" />
-              <path d="M340 218 Q342 210 344 218" stroke="#4A9A47" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-              <path d="M346 218 Q348 213 350 218" stroke="#4A9A47" strokeWidth="2" fill="none" strokeLinecap="round" />
-            </svg>
-
-            {/* Mascot + speech bubble */}
-            <div className="relative z-10 flex items-start gap-3 px-5 pt-5 pb-14">
-              {/* Large mascot — reacts to answer */}
-              <div
-                key={result ?? 'idle'}
-                className={cn(
-                  'shrink-0 flex h-[88px] w-[88px] items-center justify-center rounded-full text-[52px] leading-none shadow-xl border-4 border-white transition-colors duration-300',
-                  !answered && 'bg-white/90',
-                  answered && result === 'correct' && 'bg-yellow-100 animate-mascot-bounce',
-                  answered && result === 'wrong' && 'bg-red-100 animate-mascot-shake',
-                )}
-                aria-hidden="true"
-              >
-                {answered && result === 'correct' ? '🎉' : answered && result === 'wrong' ? '😅' : '🐂'}
-              </div>
-
-              {/* Speech bubble */}
-              <div className="relative flex-1 mt-2">
-                {/* Bubble tail */}
-                <div className="absolute -left-[9px] top-4 w-0 h-0
-                  border-t-[9px] border-t-transparent
-                  border-r-[9px] border-r-gray-200
-                  border-b-[9px] border-b-transparent" />
-                <div className="absolute -left-[7px] top-4 w-0 h-0
-                  border-t-[9px] border-t-transparent
-                  border-r-[9px] border-r-white
-                  border-b-[9px] border-b-transparent" />
-                <div className="rounded-2xl rounded-tl-sm border-2 border-gray-200 bg-white px-4 py-3 shadow-md">
-                  <p className="m-0 text-sm text-muted font-semibold mb-1">{lesson.title}</p>
-                  <p className="m-0 text-[0.9375rem] font-bold text-text leading-snug">{lesson.question}</p>
+            {/* Mascot left + speech bubble right */}
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, display: 'flex', alignItems: 'flex-end', gap: 0, padding: '0 12px', zIndex: 10 }}>
+              {/* Profile-style mascot card */}
+              <div style={{
+                width: 88, flexShrink: 0, marginBottom: 8,
+                borderRadius: 20, overflow: 'hidden',
+                background: `linear-gradient(180deg, ${mascotTier.color}40 0%, rgba(15,10,30,0.96) 55%)`,
+                border: `2.5px solid ${mascotTier.tierColor}`,
+                boxShadow: `0 0 0 4px ${mascotTier.tierColor}22, 0 8px 24px rgba(0,0,0,0.55)`,
+                animation: mascotTier.anim,
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 4 }}>
+                  <MascotEvolution level={displayMascotLevel} size={88} />
+                </div>
+                <div style={{
+                  background: `linear-gradient(90deg, ${mascotTier.tierColor}, ${mascotTier.color})`,
+                  textAlign: 'center', fontSize: 9, fontWeight: 900, letterSpacing: '1.5px',
+                  color: 'rgba(0,0,0,0.8)', padding: '4px 4px', textTransform: 'uppercase',
+                }}>
+                  {mascotTier.name}
                 </div>
               </div>
-            </div>
-
-            {/* Instruction badge — floats above the white card overlap */}
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10">
-              <span className={cn(
-                'whitespace-nowrap rounded-full px-4 py-1 text-[11px] font-extrabold uppercase tracking-widest shadow-sm',
-                !answered && 'bg-white/80 text-gray-600',
-                answered && result === 'correct' && 'bg-green-500 text-white',
-                answered && result === 'wrong' && 'bg-red-500 text-white',
-              )}>
-                {answered
-                  ? result === 'correct' ? '🎉 Luar Biasa!'
-                  : '💡 Hampir Benar'
-                  : 'Pilih jawaban yang tepat'}
-              </span>
+              <div style={{
+                background: 'white', borderRadius: '18px 18px 18px 4px',
+                padding: '14px 16px', marginLeft: 10, marginBottom: 16,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                flex: 1, maxWidth: 240, border: '2px solid rgba(0,0,0,0.06)',
+              }}>
+                <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#8A9AB0', marginBottom: 4 }}>Zona {level}</div>
+                <div style={{ fontSize: 15, fontWeight: 900, color: '#2A2020', lineHeight: 1.4 }}>{lesson.question}</div>
+              </div>
             </div>
           </div>
 
-          {/* ── ZONE 2: White answer card ── */}
-          <div
-            className={cn(
-              'relative z-10 -mt-5 flex flex-1 flex-col rounded-t-[28px] bg-white overflow-hidden',
-              'shadow-[0_-6px_24px_rgba(0,0,0,0.10)]',
-            )}
-          >
-            {/* Answer zone — shows selection / feedback */}
-            <div className="px-4 pt-5 pb-3">
-              <div
-                className={cn(
-                  'min-h-[56px] flex items-center justify-center rounded-2xl border-2 px-4 py-3 transition-all duration-300',
-                  !answered && !pendingAnswer && 'border-dashed border-gray-200 bg-gray-50',
-                  !answered && pendingAnswer && 'border-primary/60 bg-green-50',
-                  answered && result === 'correct' && 'border-green-500 bg-green-50',
-                  answered && result === 'wrong' && 'border-red-400 bg-red-50',
-                )}
-                role="status"
-                aria-live="polite"
-              >
-                {!answered && !pendingAnswer && (
-                  <p className="m-0 text-sm text-gray-400 font-semibold">Ketuk jawaban di bawah</p>
-                )}
-                {!answered && pendingAnswer && (
-                  <p className="m-0 text-base font-bold text-text">{pendingAnswer}</p>
-                )}
+          {/* XP popup on correct */}
+          {answered && result === 'correct' && xpGain != null && (
+            <div style={{
+              position: 'fixed', top: '50%', left: '50%',
+              transform: 'translate(-50%,-50%)',
+              background: 'linear-gradient(135deg,#FFD040,#FFB020)',
+              borderRadius: 20, padding: '20px 32px', textAlign: 'center',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)', zIndex: 100,
+              fontFamily: "'Fredoka One',cursive", pointerEvents: 'none',
+              animation: 'iq-xp-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards',
+            }}>
+              <div style={{ fontSize: 48, color: '#7A4000', lineHeight: 1 }}>+{xpGain}</div>
+              <div style={{ fontSize: 16, color: '#AA6000' }}>XP!</div>
+              <div style={{ fontSize: 28, marginTop: 4 }}>🎉</div>
+            </div>
+          )}
+
+          {/* ── White quiz sheet ── */}
+          <div className="relative z-10 -mt-3 flex flex-1 flex-col rounded-t-[28px] bg-white overflow-hidden" style={{ boxShadow: '0 -6px 24px rgba(0,0,0,0.10)' }}>
+            {/* Sheet handle */}
+            <div style={{ width: 40, height: 4, borderRadius: 2, background: '#E8E0D8', margin: '12px auto 0' }} />
+
+            <div className="flex flex-1 flex-col px-4 pt-3 pb-3 overflow-y-auto">
+              {/* Question number + hearts */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: '50%',
+                    background: 'linear-gradient(135deg,#FFD040,#FFB020)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: "'Fredoka One',cursive", fontSize: 14, color: '#7A4000',
+                    boxShadow: '0 2px 0 #CC8000',
+                  }}>
+                    {activeIndex + 1}
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#B0A090' }}>dari {totalInLevel} soal</span>
+                </div>
+                <div style={{ display: 'flex', gap: 3 }}>
+                  {[...Array(3)].map((_, i) => (
+                    <span key={i} style={{ fontSize: 18, opacity: i < livesFromStats ? 1 : 0.2 }} aria-hidden="true">❤️</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Answer preview box */}
+              <div style={{
+                border: answered
+                  ? result === 'correct' ? '2.5px solid #40C860' : '2.5px solid #FF5060'
+                  : pendingAnswer ? '2.5px solid #FFB830' : '2.5px dashed #D8D0C8',
+                borderRadius: 14, padding: '14px 16px', marginBottom: 12,
+                background: answered
+                  ? result === 'correct' ? '#F0FFF4' : '#FFF0F0'
+                  : pendingAnswer ? '#FFF8E8' : '#FAFAF8',
+                minHeight: 52, display: 'flex', alignItems: 'center',
+                fontSize: 14, fontWeight: 700,
+                color: pendingAnswer || answered ? '#2A2020' : '#C0B8B0',
+                transition: 'all 0.2s',
+              }} role="status" aria-live="polite">
+                {!answered && !pendingAnswer && 'Ketuk jawaban di bawah 👇'}
+                {!answered && pendingAnswer && `✏️ ${pendingAnswer}`}
                 {answered && result === 'correct' && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-600 font-bold text-sm">{selected}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ color: '#20A040', fontWeight: 800 }}>{selected}</span>
                     {xpGain != null && (
-                      <span className="ml-2 text-xs font-extrabold bg-primary text-white rounded-full px-2.5 py-0.5">
-                        +{xpGain} XP
-                      </span>
+                      <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 900, background: '#28B050', color: 'white', borderRadius: 100, padding: '2px 10px' }}>+{xpGain} XP</span>
                     )}
                   </div>
                 )}
                 {answered && result === 'wrong' && (
-                  <div className="text-center">
-                    <p className="m-0 text-sm font-bold text-red-700">
-                      Jawaban: <span className="underline">{correctAnswer}</span>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 800, color: '#E03040' }}>
+                      Jawaban benar: <span style={{ textDecoration: 'underline' }}>{correctAnswer}</span>
                     </p>
                     {lesson?.explanation?.trim() && (
-                      <p className="m-0 mt-1 text-xs text-red-600 leading-snug">{lesson.explanation.trim()}</p>
+                      <p style={{ margin: '4px 0 0', fontSize: 12, color: '#9A3A3A', lineHeight: 1.4 }}>{lesson.explanation.trim()}</p>
                     )}
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* Word-bank chips */}
-            <div className="flex-1 flex flex-col justify-center px-4 py-2">
-              <div
-                className="flex flex-wrap justify-center gap-2.5"
-                role="group"
-                aria-label="Pilihan jawaban"
-              >
-                {displayOptions.map((option) => {
+              {/* Feedback banner */}
+              {answered && (
+                <div style={{
+                  borderRadius: 16, padding: '14px 16px', marginBottom: 12,
+                  display: 'flex', gap: 12, alignItems: 'center',
+                  background: result === 'correct' ? '#E8FFF0' : '#FFF0F0',
+                  border: `2px solid ${result === 'correct' ? '#40C860' : '#FF5060'}`,
+                }}>
+                  <span style={{ fontSize: 28, flexShrink: 0 }}>{result === 'correct' ? '🎉' : '💪'}</span>
+                  <div>
+                    <div style={{ fontFamily: "'Fredoka One',cursive", fontSize: 17, color: result === 'correct' ? '#20A040' : '#E03040', marginBottom: 2 }}>
+                      {result === 'correct' ? `Mantap Sekali! +${xpGain} XP!` : 'Hampir Benar! Coba Lagi!'}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#6A5A4A', fontWeight: 700, lineHeight: 1.4 }}>
+                      {result === 'correct'
+                        ? `${selected} — jawaban yang tepat!`
+                        : `Jawaban yang benar adalah "${correctAnswer}". Ingat ya!`}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Answer options — A/B/C/D list */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
+                {displayOptions.map((option, idx) => {
+                  const letters = ['A', 'B', 'C', 'D']
+                  const letterColors = [
+                    { bg: '#FFF0E8', color: '#FF7030' },
+                    { bg: '#E8F8FF', color: '#2090D0' },
+                    { bg: '#F0FFF0', color: '#30A850' },
+                    { bg: '#F8F0FF', color: '#8040C0' },
+                  ]
+                  const lc = letterColors[idx] || letterColors[0]
                   const isPending = !answered && pendingAnswer === option
                   const isCorrect = answered && option === correctAnswer
                   const isWrong = answered && selected === option && option !== correctAnswer
-                  const isNeutral = answered && option !== selected && option !== correctAnswer
+                  const isLocked = answered && !isCorrect && !isWrong
 
                   return (
                     <button
@@ -557,43 +610,72 @@ export function Lesson() {
                       type="button"
                       disabled={answered}
                       onClick={() => { if (!answered) { playSelect(); setPendingAnswer(option === pendingAnswer ? null : option) } }}
-                      className={cn(
-                        'px-5 py-3.5 rounded-2xl border-2 text-sm font-bold transition-all duration-150',
-                        'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
-                        !answered && !isPending && 'bg-white border-gray-200 border-b-[3px] border-b-gray-300 text-text shadow-sm hover:border-gray-300 hover:bg-gray-50 active:translate-y-px active:border-b',
-                        isPending && 'bg-green-50 border-primary border-b-[3px] border-b-green-700 text-primary shadow-sm scale-[1.03]',
-                        isCorrect && 'bg-green-50 border-green-500 border-b-[3px] border-b-green-700 text-green-800 cursor-default',
-                        isWrong && 'bg-red-50 border-red-400 border-b-[3px] border-b-red-600 text-red-700 cursor-default',
-                        isNeutral && 'bg-white border-gray-100 text-gray-400 opacity-35 cursor-default',
-                      )}
+                      style={{
+                        background: isPending ? '#FFF8E8' : isCorrect ? '#F0FFF4' : isWrong ? '#FFF0F0' : 'white',
+                        border: `2.5px solid ${isPending ? '#FFB830' : isCorrect ? '#40C860' : isWrong ? '#FF5060' : '#E8E0D8'}`,
+                        borderRadius: 16, padding: 0, cursor: answered ? 'default' : 'pointer',
+                        transition: 'transform .15s, box-shadow .15s',
+                        boxShadow: isPending ? '0 3px 0 #CC8800' : isCorrect ? '0 3px 0 #288040' : isWrong ? '0 3px 0 #CC2030' : '0 3px 0 #D8D0C8',
+                        overflow: 'hidden', display: 'flex', alignItems: 'center',
+                        opacity: isLocked ? 0.45 : 1,
+                      }}
                     >
-                      {option}
+                      <div style={{
+                        width: 44, height: 52,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontFamily: "'Fredoka One',cursive", fontSize: 18, flexShrink: 0,
+                        borderRight: '2px solid #F0EDE8',
+                        background: isCorrect ? '#E8FFF0' : isWrong ? '#FFE8E8' : lc.bg,
+                        color: isCorrect ? '#20A040' : isWrong ? '#E03040' : lc.color,
+                      }}>
+                        {isCorrect ? '✓' : isWrong ? '✗' : letters[idx]}
+                      </div>
+                      <div style={{ padding: '14px 14px', fontSize: 13, fontWeight: 800, color: isCorrect ? '#1A6A30' : isWrong ? '#9A2020' : '#2A2020', lineHeight: 1.4, flex: 1, textAlign: 'left' }}>
+                        {option}
+                      </div>
+                      {(isCorrect || isWrong) && (
+                        <div style={{ width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, marginRight: 10, background: isCorrect ? '#E0FFF0' : '#FFE0E0' }}>
+                          {isCorrect ? '✅' : '❌'}
+                        </div>
+                      )}
                     </button>
                   )
                 })}
               </div>
             </div>
 
-            {/* ── PERIKSA / LANJUT button ── */}
-            <div
-              className={cn(
-                'px-4 pb-6 pt-3 border-t transition-colors duration-300',
-                answered && result === 'correct' && 'border-green-200 bg-green-50',
-                answered && result === 'wrong' && 'border-red-200 bg-red-50',
-                !answered && 'border-gray-100',
-              )}
-            >
-              <Button
+            {/* CTA button */}
+            <div style={{
+              padding: '12px 16px 24px',
+              borderTop: `1px solid ${answered && result === 'correct' ? '#C0F0D0' : answered && result === 'wrong' ? '#FFD0D0' : '#F0EDE8'}`,
+              background: answered && result === 'correct' ? '#F0FFF4' : answered && result === 'wrong' ? '#FFF0F0' : 'white',
+            }}>
+              <button
                 type="button"
-                variant="primary"
-                className="w-full font-extrabold text-base tracking-wide"
                 disabled={!pendingAnswer && !answered}
                 onClick={answered ? handleNext : handleSubmit}
+                style={{
+                  width: '100%', padding: 16, borderRadius: 16, border: 'none',
+                  cursor: (!pendingAnswer && !answered) ? 'not-allowed' : 'pointer',
+                  fontFamily: "'Fredoka One',cursive", fontSize: 18,
+                  background: !pendingAnswer && !answered
+                    ? '#E8E0D8'
+                    : answered
+                    ? 'linear-gradient(180deg,#48D870,#28B050)'
+                    : 'linear-gradient(180deg,#FFD040,#FFB020)',
+                  color: !pendingAnswer && !answered ? '#A0988E' : answered ? 'white' : '#7A4000',
+                  boxShadow: !pendingAnswer && !answered ? '0 4px 0 #D0C8C0' : answered ? '0 5px 0 #189030' : '0 5px 0 #CC8000',
+                  border: !pendingAnswer && !answered ? '2px solid #D8D0C8' : answered ? '2px solid #20A040' : '2px solid #E8A010',
+                  transition: 'background 0.2s',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                }}
               >
-                {answered
-                  ? hasNextLesson ? 'LANJUT →' : 'SELESAI 🎉'
-                  : pendingAnswer ? 'PERIKSA →' : 'Pilih Jawaban'}
-              </Button>
+                <span>
+                  {answered
+                    ? hasNextLesson ? 'Soal Berikutnya →' : 'Selesai! 🎉'
+                    : pendingAnswer ? 'Cek Jawaban! ✓' : 'Pilih Jawaban Dulu'}
+                </span>
+              </button>
             </div>
           </div>
         </div>

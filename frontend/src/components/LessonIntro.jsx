@@ -1,153 +1,245 @@
-import { Button } from './Button'
+import MascotEvolution from './MascotEvolution'
+
+const ZONE_SKY = {
+  1: ['#60D0FF', '#98E8FF', '#C8F4FF'],
+  2: ['#FFB830', '#FFD870', '#FFEC90'],
+  3: ['#60C8FF', '#A8E0FF', '#D0F0FF'],
+  4: ['#38C8FF', '#70DEFF', '#A0F0FF'],
+  5: ['#FFA040', '#FFCC70', '#FFE8A0'],
+  6: ['#4FC8FF', '#A0ECFF', '#D0F8E8'],
+  7: ['#1A0850', '#2A1870', '#3A2888'],
+  8: ['#FF6B35', '#FF9B5A', '#FFD090'],
+}
+
+const ZONE_GROUND = {
+  1: '#40D864',
+  2: '#F8C838',
+  3: '#40D864',
+  4: '#1890CC',
+  5: '#E8B840',
+  6: '#38D470',
+  7: '#180C38',
+  8: '#C87830',
+}
 
 /**
  * Hook + micro content before quiz / interaction.
  * Two-zone layout: illustrated hero (top) + white content card (bottom).
  *
- * @param {{ title: string, hook: string, body: string, onContinue: () => void }} props
+ * @param {{ title: string, hook: string, body: string, level?: number, mascotEvolutionLevel?: number, streak?: number, onContinue: () => void }} props
  */
-export function LessonIntro({ title, hook, body, onContinue }) {
+export function LessonIntro({ title, hook, body, level = 1, mascotEvolutionLevel = 1, streak = 0, onContinue }) {
+  const safeLevel = Math.min(Math.max(1, level), 8)
+  const [sky1, , sky3] = ZONE_SKY[safeLevel] || ZONE_SKY[1]
+  const ground = ZONE_GROUND[safeLevel] || ZONE_GROUND[1]
+  const gradId = `intro-sky-${safeLevel}`
+  const isDark = safeLevel === 7
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden animate-lesson-fade">
 
-      {/* ── Zone 1: Hero landscape ── */}
-      <div
-        className="relative shrink-0 overflow-hidden"
-        style={{ minHeight: 240 }}
-      >
-        {/* SVG landscape background */}
+      {/* ── Zone scene ── */}
+      <div className="relative shrink-0 overflow-hidden" style={{ height: 230 }}>
+        {/* Zone-aware SVG background */}
         <svg
-          viewBox="0 0 400 240"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+          viewBox="0 0 370 230"
           preserveAspectRatio="xMidYMid slice"
-          className="absolute inset-0 w-full h-full"
-          xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
         >
           <defs>
-            <linearGradient id="intro-sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#5BBDE4" />
-              <stop offset="100%" stopColor="#A8D8F0" />
+            <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={sky1} />
+              <stop offset="100%" stopColor={sky3} />
             </linearGradient>
           </defs>
+          <rect width="370" height="230" fill={`url(#${gradId})`} />
 
-          {/* Sky */}
-          <rect width="400" height="240" fill="url(#intro-sky)" />
+          {/* Sun / orb decoration */}
+          {(safeLevel === 2 || safeLevel === 5) ? (
+            <>
+              <circle cx="310" cy="52" r="38" fill="#FFE040" opacity="0.2"/>
+              <circle cx="310" cy="52" r="26" fill="#FFF060" opacity="0.5"/>
+            </>
+          ) : safeLevel <= 6 ? (
+            <>
+              <circle cx="50" cy="50" r="32" fill="#FFE840" opacity="0.25"/>
+              <circle cx="50" cy="50" r="20" fill="#FFF060" opacity="0.5"/>
+            </>
+          ) : null}
 
-          {/* Sun */}
-          <circle cx="348" cy="36" r="26" fill="#FFF9C4" opacity="0.55" />
-          <circle cx="348" cy="36" r="18" fill="#FFE082" opacity="0.8" />
-
-          {/* Cloud left */}
-          <g opacity="0.97">
-            <ellipse cx="72" cy="54" rx="44" ry="21" fill="white" />
-            <ellipse cx="93" cy="44" rx="31" ry="26" fill="white" />
-            <ellipse cx="55" cy="51" rx="27" ry="17" fill="white" />
-          </g>
-
-          {/* Cloud right */}
-          <g opacity="0.92">
-            <ellipse cx="308" cy="42" rx="39" ry="19" fill="white" />
-            <ellipse cx="330" cy="32" rx="27" ry="23" fill="white" />
-            <ellipse cx="292" cy="40" rx="23" ry="15" fill="white" />
-          </g>
-
-          {/* Back hills */}
-          <path d="M0 178 C55 148 110 165 165 152 C220 139 270 128 320 148 C355 163 378 152 400 158 L400 240 L0 240 Z" fill="#B8E4A0" />
-
-          {/* Back trees left */}
-          <polygon points="36,158 49,120 62,158" fill="#3A9B5C" />
-          <polygon points="33,170 49,134 65,170" fill="#4DB870" />
-          <rect x="45" y="168" width="8" height="13" fill="#7B5E45" rx="2" />
-          <ellipse cx="82" cy="160" rx="15" ry="17" fill="#3A9B5C" />
-          <ellipse cx="82" cy="152" rx="11" ry="13" fill="#52C97A" />
-          <rect x="79" y="173" width="6" height="10" fill="#7B5E45" rx="2" />
-
-          {/* Back trees right */}
-          <polygon points="318,152 332,113 346,152" fill="#3A9B5C" />
-          <polygon points="315,164 332,127 349,164" fill="#4DB870" />
-          <rect x="328" y="162" width="8" height="13" fill="#7B5E45" rx="2" />
-          <ellipse cx="362" cy="163" rx="16" ry="18" fill="#3A9B5C" />
-          <ellipse cx="362" cy="155" rx="12" ry="14" fill="#52C97A" />
-          <rect x="359" y="177" width="6" height="10" fill="#7B5E45" rx="2" />
-
-          {/* Mid hill */}
-          <path d="M0 198 C45 178 95 188 148 181 C200 174 250 167 300 178 C338 186 368 180 400 184 L400 240 L0 240 Z" fill="#72C464" />
+          {/* Clouds */}
+          {safeLevel !== 7 && safeLevel !== 8 && (
+            <g style={{ animation: 'iq-cloud-drift 10s ease-in-out infinite alternate' }}>
+              <ellipse cx="260" cy="45" rx="50" ry="28" fill="white" opacity="0.9"/>
+              <ellipse cx="236" cy="54" rx="35" ry="24" fill="white" opacity="0.9"/>
+              <ellipse cx="284" cy="56" rx="37" ry="22" fill="white" opacity="0.9"/>
+            </g>
+          )}
 
           {/* Ground */}
-          <rect y="218" width="400" height="22" fill="#5CAF55" />
-          <path d="M0 218 Q100 214 200 218 Q300 222 400 218" stroke="#6DC95E" strokeWidth="3" fill="none" opacity="0.6" />
-
-          {/* Grass tufts */}
-          <path d="M18 218 Q20 210 22 218" stroke="#4A9A47" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          <path d="M23 218 Q25 212 27 218" stroke="#4A9A47" strokeWidth="2" fill="none" strokeLinecap="round" />
-          <path d="M155 218 Q157 211 159 218" stroke="#4A9A47" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          <path d="M340 218 Q342 210 344 218" stroke="#4A9A47" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <path d={`M0,230 Q60,195 130,208 Q200,220 270,198 Q320,184 370,198 L370,230 Z`} fill={ground} opacity="0.8"/>
+          <path d={`M0,230 Q80,208 180,216 Q280,224 370,212 L370,230 Z`} fill={ground}/>
         </svg>
 
-        {/* Mascot + title overlay */}
-        <div className="relative z-10 flex flex-col items-center justify-center gap-3 px-6 pt-6 pb-16 h-full" style={{ minHeight: 240 }}>
-          {/* Mascot in frosted circle */}
-          <div
-            className="flex h-24 w-24 items-center justify-center rounded-full bg-white/85 border-4 border-white shadow-2xl text-[56px] leading-none animate-mascot-bounce"
-            aria-hidden="true"
-          >
-            🐂
+        {/* Mascot + badges — centered overlay */}
+        <div
+          style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            zIndex: 10,
+          }}
+        >
+          {/* "Materi Baru" badge */}
+          <div style={{
+            background: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.18)',
+            backdropFilter: 'blur(6px)',
+            borderRadius: 100,
+            padding: '5px 14px',
+            marginBottom: 10,
+          }}>
+            <span style={{
+              fontFamily: "'Fredoka One',cursive",
+              fontSize: 13,
+              color: 'white',
+              textShadow: '0 1px 4px rgba(0,0,0,0.2)',
+            }}>
+              📚 Materi Baru
+            </span>
           </div>
 
-          {/* Title */}
-          <h2
-            id="lesson-intro-title"
-            className="m-0 text-2xl font-extrabold text-white leading-tight tracking-tight text-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.25)]"
-          >
-            {title}
-          </h2>
+          {/* Bouncing mascot circle */}
+          <div style={{
+            width: 96, height: 96, borderRadius: '50%',
+            background: 'white', border: '4px solid rgba(255,255,255,0.9)',
+            boxShadow: '0 6px 24px rgba(0,0,0,0.15)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            animation: 'mcard-bounce 2.5s ease-in-out infinite',
+            overflow: 'hidden',
+          }}>
+            <div style={{ marginTop: -2 }}>
+              <MascotEvolution level={mascotEvolutionLevel} size={96} />
+            </div>
+          </div>
 
-          {/* "Materi baru" badge */}
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/25 border border-white/40 px-3 py-1 backdrop-blur-sm">
-            <span className="text-xs leading-none" aria-hidden="true">📚</span>
-            <span className="text-xs font-bold text-white tracking-wide drop-shadow-sm">Materi Baru</span>
+          {/* Zone label badge */}
+          <div style={{
+            background: 'rgba(0,0,0,0.18)',
+            backdropFilter: 'blur(6px)',
+            borderRadius: 100,
+            padding: '5px 16px',
+            marginTop: 8,
+          }}>
+            <span style={{
+              fontFamily: "'Fredoka One',cursive",
+              fontSize: 15,
+              color: 'white',
+              textShadow: '0 1px 4px rgba(0,0,0,0.2)',
+            }}>
+              Zona {safeLevel}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* ── Zone 2: Content card ── */}
+      {/* ── White sheet ── */}
       <div
         className="relative z-10 -mt-5 flex flex-1 flex-col rounded-t-[28px] bg-white overflow-hidden"
         style={{ boxShadow: '0 -6px 24px rgba(0,0,0,0.10)' }}
       >
-        <div className="flex flex-1 flex-col gap-3 px-5 pt-6 pb-4">
+        {/* Sheet handle */}
+        <div style={{ width: 40, height: 4, borderRadius: 2, background: '#E8E0D8', margin: '12px auto 0' }} />
 
-          {/* Hook — blue highlight card */}
-          {hook ? (
-            <div className="rounded-2xl bg-blue-50 border border-blue-100 px-4 py-4">
-              <div className="flex items-start gap-3">
-                <span className="text-xl leading-none shrink-0 mt-0.5" aria-hidden="true">💡</span>
-                <p className="m-0 text-base font-bold leading-snug text-text">{hook}</p>
-              </div>
-            </div>
-          ) : null}
+        <div className="flex flex-1 flex-col px-4 pt-3 pb-3 overflow-y-auto">
 
-          {/* Body — subtle card */}
-          {body ? (
-            <div className="rounded-2xl bg-gray-50 border border-gray-100 px-4 py-4">
-              <p className="m-0 text-sm leading-relaxed text-text">{body}</p>
+          {/* Streak badge */}
+          {streak > 0 && (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: 'linear-gradient(135deg,#FF8C30,#FF6010)',
+              borderRadius: 100, padding: '6px 16px',
+              marginBottom: 12, alignSelf: 'center',
+              boxShadow: '0 3px 0 #CC4010',
+            }}>
+              <span style={{ fontSize: 16 }}>🔥</span>
+              <span style={{
+                fontFamily: "'Fredoka One',cursive",
+                fontSize: 14, color: 'white',
+                textShadow: '0 1px 3px rgba(0,0,0,0.2)',
+              }}>
+                Streak {streak} Hari!
+              </span>
             </div>
-          ) : null}
+          )}
+
+          {/* Tip card (yellow) */}
+          <div style={{
+            background: 'linear-gradient(135deg,#FFF8E8,#FFF0D0)',
+            border: '2px solid #F5C518',
+            borderRadius: 16, padding: '14px 16px',
+            marginBottom: 14, display: 'flex', gap: 12,
+          }}>
+            <span style={{ fontSize: 24, flexShrink: 0, marginTop: 2 }}>💡</span>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 800, color: '#8A6000', lineHeight: 1.5 }}>
+              {hook || 'Terus melangkah — kebiasaan belajar membentuk hasil jangka panjang!'}
+            </p>
+          </div>
+
+          {/* Content card */}
+          <div style={{
+            background: '#FAFAF8', border: '2px solid #F0EDE8',
+            borderRadius: 16, padding: 16, marginBottom: 14,
+          }}>
+            <div style={{
+              fontSize: 11, fontWeight: 900, letterSpacing: 2,
+              textTransform: 'uppercase', color: '#B0A090', marginBottom: 8,
+            }}>
+              📖 Apa yang kamu pelajari
+            </div>
+            <p style={{ margin: 0, fontSize: 13, color: '#4A3A2A', lineHeight: 1.7, fontWeight: 600 }}>
+              {body || 'Kuis singkat membantu memperkuat konsep sebelum kamu lanjut ke langkah berikutnya.'}
+            </p>
+          </div>
+
+          {/* Fun fact strip (blue) */}
+          <div style={{
+            background: 'linear-gradient(135deg,#E8F8FF,#D0F0FF)',
+            border: '2px solid #80D0F0',
+            borderRadius: 14, padding: '12px 14px',
+            marginBottom: 16, display: 'flex', gap: 10, alignItems: 'center',
+          }}>
+            <span style={{ fontSize: 22, flexShrink: 0 }}>🤩</span>
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: '#2A6A8A', lineHeight: 1.5 }}>
+              Tahukah kamu? Investasi rutin sejak muda bisa melipatgandakan kekayaanmu berkali-kali lipat!
+            </p>
+          </div>
 
           <div className="flex-1" />
         </div>
 
         {/* CTA anchored to bottom */}
-        <div className="px-5 pb-6 pt-2 border-t border-gray-100">
-          <Button
+        <div className="px-4 pb-6 pt-2">
+          <button
             type="button"
-            variant="primary"
-            className="w-full font-bold"
             onClick={onContinue}
+            style={{
+              width: '100%', padding: 16, borderRadius: 16,
+              border: 'none', cursor: 'pointer',
+              fontFamily: "'Fredoka One',cursive", fontSize: 18,
+              background: 'linear-gradient(180deg,#48D870,#28B050)',
+              color: 'white', boxShadow: '0 5px 0 #189030',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+            }}
           >
-            Lanjut ke Quiz →
-          </Button>
-          <p className="m-0 mt-2.5 text-center text-xs font-semibold uppercase tracking-wide text-muted">
+            <span>Lanjut ke Kuis</span>
+            <span style={{ fontSize: 20 }}>→</span>
+          </button>
+          <p style={{
+            margin: '10px 0 0', textAlign: 'center',
+            fontSize: 11, fontWeight: 900,
+            letterSpacing: '1.5px', textTransform: 'uppercase', color: '#B0A090',
+          }}>
             Quiz di langkah berikutnya
           </p>
         </div>

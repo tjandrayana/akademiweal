@@ -1,4 +1,4 @@
-import { getTotalXp, mergeServerXp } from '../lib/gamification'
+import { getTotalXp, mergeServerXp, XP_UPDATED_EVENT } from '../lib/gamification'
 import { getUserIdFromToken, migrateGuestProgressToUser, migrateLegacyProgressIfNeeded } from '../lib/progressScope'
 import { apiPost, setAuthToken } from './client'
 import { syncXpTotal } from './progress'
@@ -12,6 +12,8 @@ async function applyAuthPayload(data) {
   if (uid != null) {
     migrateLegacyProgressIfNeeded(uid)
     migrateGuestProgressToUser(uid)
+    // Notify any mounted HUD components that XP may have changed after guest merge
+    try { window.dispatchEvent(new CustomEvent(XP_UPDATED_EVENT)) } catch { /* ignore */ }
   }
   if (typeof data.xp === 'number' && Number.isFinite(data.xp)) {
     mergeServerXp(data.xp)
