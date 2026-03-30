@@ -7,7 +7,7 @@ FRONTEND_DIR := $(REPO_ROOT)/frontend
 
 .DEFAULT_GOAL := help
 
-.PHONY: help db db-down db-reset migrate backend frontend dev dev-all install install-frontend install-backend
+.PHONY: help db db-down db-reset migrate migrate-file backend frontend dev dev-all install install-frontend install-backend
 
 help:
 	@echo "Akademiweal — common targets"
@@ -16,6 +16,7 @@ help:
 	@echo "  make db-down     Stop PostgreSQL container"
 	@echo "  make db-reset    Stop Postgres and remove data volume (use if password/auth fails)"
 	@echo "  make migrate     Apply backend/migrations/*.sql (psql or Docker; run make db first if using Docker)"
+	@echo "  make migrate-file FILE=013_backfill_lesson_explanations.sql  Apply one chosen migration"
 	@echo "  make backend     Run API on http://localhost:9001 (needs DB)"
 	@echo "  make frontend    Run Vite dev server (proxies /api → backend)"
 	@echo "  make dev         Start DB, then API (one terminal)"
@@ -37,6 +38,9 @@ db-reset:
 
 migrate:
 	$(MAKE) -C $(BACKEND_DIR) migrate
+
+migrate-file:
+	$(MAKE) -C $(BACKEND_DIR) migrate-file FILE="$(FILE)"
 
 backend:
 	$(MAKE) -C $(BACKEND_DIR) run
