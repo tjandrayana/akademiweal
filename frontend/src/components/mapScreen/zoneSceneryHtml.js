@@ -1,6 +1,8 @@
 /** Zone scenery HTML strings (innerHTML of SVG) — v2 colorful designs */
 
 export const ZONE_VIEWBOX = {
+  10: '0 0 366 400',
+  9: '0 0 366 380',
   8: '0 0 366 400',
   7: '0 0 366 380',
   6: '0 0 366 380',
@@ -13,6 +15,8 @@ export const ZONE_VIEWBOX = {
 
 /** Per-zone trail path data + stroke color for animated dashed trail */
 export const ZONE_TRAIL_PATHS = {
+  10: { d: 'M183,380 Q120,350 100,305 Q80,265 150,245 Q210,230 260,270 Q310,305 270,345', color: '#FF8040' },
+  9: { d: 'M183,370 Q110,340 100,290 Q92,252 140,235 Q190,220 245,255 Q290,282 260,325', color: '#B8A8E8' },
   8: { d: 'M183,380 Q120,350 100,305 Q80,265 150,245 Q210,230 260,270 Q310,305 270,345', color: '#FF8040' },
   7: { d: 'M183,370 Q110,340 100,290 Q92,252 140,235 Q190,220 245,255 Q290,282 260,325', color: '#B8A8E8' },
   6: { d: 'M183,370 Q115,345 105,298 Q96,258 142,238 Q188,220 242,258 Q280,286 258,328', color: '#60D880' },
@@ -410,6 +414,8 @@ export const SCENERY_ZONE_2_HTML = `
 `
 
 export const SCENERY_BY_ZONE = {
+  10: SCENERY_ZONE_8_HTML,
+  9: SCENERY_ZONE_7_HTML,
   8: SCENERY_ZONE_8_HTML,
   7: SCENERY_ZONE_7_HTML,
   6: SCENERY_ZONE_6_HTML,

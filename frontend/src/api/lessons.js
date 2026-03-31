@@ -11,6 +11,8 @@ import { apiGet } from './client'
  * @property {string} [hook]
  * @property {string} [body]
  * @property {string} [explanation]
+ * @property {string} [insight]
+ * @property {string} [source_reference]
  */
 
 /**

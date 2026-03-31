@@ -1,5 +1,5 @@
 /**
- * Map nodes — 8 zones × 10 langkah (global map level 1–80).
+ * Map nodes — 10 zones × 10 langkah (global map level 1–100).
  * Positions: winding path template reused per zone (matches single-zone viewport).
  */
 
@@ -63,7 +63,7 @@ const NODE_TEMPLATE = [
   { left: 183, top: 328 },
 ]
 
-const ZONE_BOSS_ICON = ['🌱', '🏜', '🏙', '🌊', '🏛', '🌿', '🏔', '🐉']
+const ZONE_BOSS_ICON = ['🌱', '🏜', '🏙', '🌊', '🏛', '🌿', '🏔', '🐉', '📊', '🧠']
 
 const ZONE_BOSS_STYLE = [
   { borderColor: '#047857', boxShadow: '0 0 16px rgba(4,120,87,0.25)' },
@@ -74,11 +74,13 @@ const ZONE_BOSS_STYLE = [
   { borderColor: '#15803D', boxShadow: '0 0 16px rgba(21,128,61,0.28)' },
   { borderColor: '#5B21B6', boxShadow: '0 0 18px rgba(91,33,182,0.3)' },
   { borderColor: '#9A3412', boxShadow: '0 0 20px rgba(154,52,18,0.35)' },
+  { borderColor: '#5B21B6', boxShadow: '0 0 18px rgba(91,33,182,0.28)' },
+  { borderColor: '#9A3412', boxShadow: '0 0 20px rgba(154,52,18,0.32)' },
 ]
 
 function buildMapNodes() {
   const nodes = []
-  for (let zone = 1; zone <= 8; zone++) {
+  for (let zone = 1; zone <= 10; zone++) {
     const bossIcon = ZONE_BOSS_ICON[zone - 1]
     const bossChrome = ZONE_BOSS_STYLE[zone - 1]
     for (let i = 0; i < 10; i++) {
@@ -103,7 +105,7 @@ function buildMapNodes() {
             title: `Boss Zona ${zone}`,
             sub: 'Tantangan akhir',
             desc: 'Selesaikan tantangan untuk melanjutkan petualangan ke zona berikutnya.',
-            reward: `${80 + zone * 15} XP + 🏆`,
+            reward: `${60 + zone * 20} XP + 🏆`,
             isBossAction: true,
           },
         })

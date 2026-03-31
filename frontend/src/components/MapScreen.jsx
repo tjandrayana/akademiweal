@@ -6,7 +6,19 @@ import { defaultMapProgress, MAP_NODES } from './mapScreen/mapNodes'
 import { findZoneForMapLevel } from './mapScreen/mapZoneUtils'
 import { MapContainer } from './mapScreen/MapContainer'
 
+const ZONES_TOTAL = 10
+
 const ZONE_BANNER_META = {
+  10: {
+    label: '🧠 Lembah Pikiran',
+    range: 'Langkah 91–100',
+    rangeStyle: { background: '#F3E8FF', color: '#6B21A8' },
+  },
+  9: {
+    label: '📊 Puncak Strategi',
+    range: 'Langkah 81–90',
+    rangeStyle: { background: '#E0F2FE', color: '#0369A1' },
+  },
   8: {
     label: '🐉 Bawah Tanah Naga',
     range: 'Langkah 71–80',
@@ -49,7 +61,7 @@ const ZONE_BANNER_META = {
   },
 }
 
-const ZONE_ORDER = [8, 7, 6, 5, 4, 3, 2, 1]
+const ZONE_ORDER = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
 
 const ZONE_LABEL_SHORT = {
   1: 'Dataran Penny',
@@ -60,6 +72,8 @@ const ZONE_LABEL_SHORT = {
   6: 'Lembah Dividen',
   7: 'Puncak Kripto',
   8: 'Bawah Tanah Naga',
+  9: 'Puncak Strategi',
+  10: 'Lembah Pikiran',
 }
 
 /**
@@ -108,7 +122,7 @@ export default function MapScreen({
   }, [activeZone])
 
   const goPrevZone = useCallback(() => setActiveZone((z) => Math.max(1, z - 1)), [])
-  const goNextZone = useCallback(() => setActiveZone((z) => Math.min(8, z + 1)), [])
+  const goNextZone = useCallback(() => setActiveZone((z) => Math.min(ZONES_TOTAL, z + 1)), [])
   const closePopup = useCallback(() => setPopup(null), [])
 
   const openNode = useCallback(
@@ -212,14 +226,14 @@ export default function MapScreen({
               ←
             </button>
             <div className="map-zone-page-info">
-              <span className="map-zone-page-num">Zona {activeZone} / 8</span>
+              <span className="map-zone-page-num">Zona {activeZone} / {ZONES_TOTAL}</span>
               <span className="map-zone-page-name">{ZONE_LABEL_SHORT[activeZone]}</span>
             </div>
             <button
               type="button"
               className="map-zone-page-btn"
               onClick={goNextZone}
-              disabled={activeZone >= 8}
+              disabled={activeZone >= ZONES_TOTAL}
               aria-label="Zona berikutnya"
             >
               →

@@ -234,6 +234,8 @@
 }
 
 /* Zone fallback backgrounds (SVG scenery covers these) */
+.iq-map-screen .zone-10 { height: 400px; background: linear-gradient(180deg, #7C3AED 0%, #A78BFA 45%, #DDD6FE 85%, #EDE9FE 100%); }
+.iq-map-screen .zone-9 { height: 380px; background: linear-gradient(180deg, #0369A1 0%, #0EA5E9 50%, #BAE6FD 100%); }
 .iq-map-screen .zone-8 { height: 400px; background: linear-gradient(180deg, #FF6B35 0%, #FF9B5A 40%, #FFD090 80%, #FFE8C0 100%); }
 .iq-map-screen .zone-7 { height: 380px; background: linear-gradient(180deg, #0E0830 0%, #1E1050 50%, #2A1870 100%); }
 .iq-map-screen .zone-6 { height: 380px; background: linear-gradient(180deg, #4FC8FF 0%, #A0ECFF 60%, #D0F8E8 100%); }
