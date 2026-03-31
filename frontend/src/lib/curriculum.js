@@ -1,5 +1,5 @@
-/** 8 akademi levels × 10 lessons = 80 langkah (satu zona peta per level). */
-export const CURRICULUM_LEVELS = [1, 2, 3, 4, 5, 6, 7, 8]
+/** 10 akademi levels × 10 lessons = 100 langkah (satu zona peta per level). */
+export const CURRICULUM_LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 /** Shared with Home + Pelajaran so lesson batch cache stays in sync. */
 export const LEVELS_CACHE_KEY = 'akademiweal_levels_cache'
@@ -28,4 +28,6 @@ export const AKADEMI_ZONE_SHORT = {
   6: 'Lembah Dividen',
   7: 'Puncak Kripto',
   8: 'Bawah Tanah Naga',
+  9: 'Puncak Strategi',
+  10: 'Lembah Pikiran',
 }

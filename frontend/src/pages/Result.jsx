@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { syncXpTotal } from '../api/progress'
 import { addXp, getTotalXp, getMascotEvolutionLevel, recordDailyStreak, resetLives } from '../lib/gamification'
@@ -48,7 +48,13 @@ export function Result() {
   const stars = correct === total ? 3 : correct / total >= 0.5 ? 2 : 1
   const isPerfect = stars === 3
 
-  const [celebration, setCelebration] = useState(null)
+  // Preview tier-up before addXp — no side effects at render time
+  const currentXp = getTotalXp()
+  const currentTier = getMascotByLevel(getMascotEvolutionLevel(currentXp))
+  const nextTier = getMascotByLevel(getMascotEvolutionLevel(currentXp + xp))
+  const celebKey = storageKey('last_celebrated_mascot_tier')
+  const lastCelebrated = (() => { try { return localStorage.getItem(celebKey) } catch { return null } })()
+  const hasTierUp = nextTier.name !== currentTier.name && nextTier.name !== lastCelebrated
 
   // For perfect score, layer an extra fanfare on top of playComplete() from Lesson
   useEffect(() => {
@@ -60,93 +66,119 @@ export function Result() {
   function handleContinue() {
     playNavigate()
     recordDailyStreak()
-    const prevTier = getMascotByLevel(getMascotEvolutionLevel(getTotalXp()))
     addXp(xp)
     const newXp = getTotalXp()
-    const newTier = getMascotByLevel(getMascotEvolutionLevel(newXp))
     resetLives()
     syncXpTotal(newXp).catch(() => {})
-
-    const celebKey = storageKey('last_celebrated_mascot_tier')
-    const lastCelebrated = (() => { try { return localStorage.getItem(celebKey) } catch { return null } })()
-    if (newTier.name !== prevTier.name && newTier.name !== lastCelebrated) {
-      try { localStorage.setItem(celebKey, newTier.name) } catch { /* ignore */ }
-      setCelebration(newTier)
-    } else {
-      navigate('/home', { replace: true })
+    if (hasTierUp) {
+      try { localStorage.setItem(celebKey, nextTier.name) } catch { /* ignore */ }
     }
+    navigate('/home', { replace: true })
   }
 
   return (
     <div className="flex min-h-svh flex-col overflow-hidden">
 
-      {/* ── ZONE 1: Celebration hero ── */}
+      {/* ── ZONE 1: Hero — tier-up evolution OR normal celebration ── */}
       <div
         className="relative shrink-0 flex flex-col items-center justify-end pb-16 pt-10 px-6"
         style={{
-          /* Quest navy → teal / green — aligned with index.css tokens */
-          background: isPerfect
-            ? 'linear-gradient(180deg, var(--color-iq-navy) 0%, var(--color-primary-dark) 44%, var(--color-primary) 100%)'
-            : 'linear-gradient(180deg, var(--color-iq-navy-mid) 0%, var(--color-iq-teal-dark) 42%, var(--color-primary) 100%)',
+          background: hasTierUp
+            ? `linear-gradient(160deg, #06112a 0%, #0b1c44 50%, ${nextTier.color}22 100%)`
+            : isPerfect
+              ? 'linear-gradient(180deg, var(--color-iq-navy) 0%, var(--color-primary-dark) 44%, var(--color-primary) 100%)'
+              : 'linear-gradient(180deg, var(--color-iq-navy-mid) 0%, var(--color-iq-teal-dark) 42%, var(--color-primary) 100%)',
           minHeight: 260,
         }}
       >
-        {/* Confetti dots — decorative */}
+        {/* Confetti / sparkles */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-          {[
-            { top: 16, left: 32,  emoji: '⭐' },
-            { top: 24, right: 40, emoji: '✨' },
-            { top: 48, left: '33%', emoji: '🌟' },
-            { top: 12, right: '33%', emoji: '💫' },
-            { top: 32, left: '50%', emoji: '⭐' },
-          ].map((conf, i) => (
+          {(hasTierUp
+            ? [{ top: '8%', left: '12%', e: '✨', d: '0s' }, { top: '14%', right: '10%', e: '⭐', d: '0.2s' }, { top: '28%', left: '6%', e: '💫', d: '0.4s' }, { top: '18%', right: '18%', e: '✨', d: '0.6s' }]
+            : [{ top: 16, left: 32, e: '⭐', d: '0s' }, { top: 24, right: 40, e: '✨', d: '0.15s' }, { top: 48, left: '33%', e: '🌟', d: '0.3s' }, { top: 12, right: '33%', e: '💫', d: '0.45s' }, { top: 32, left: '50%', e: '⭐', d: '0.6s' }]
+          ).map((c, i) => (
             <span
               key={i}
-              className="absolute text-lg animate-confetti-drift"
-              style={{ top: conf.top, left: conf.left, right: conf.right, animationDelay: `${i * 0.15}s`, animationDuration: '1.4s' }}
+              className={`absolute text-lg ${hasTierUp ? 'animate-sparkle' : 'animate-confetti-drift'}`}
+              style={{ top: c.top, left: c.left, right: c.right, animationDelay: c.d, animationDuration: hasTierUp ? '0.7s' : '1.4s' }}
             >
-              {conf.emoji}
+              {c.e}
             </span>
           ))}
         </div>
 
-        {/* Stars row */}
-        <div className="flex items-center justify-center gap-3 mb-4" aria-label={`${stars} dari 3 bintang`}>
-          {[1, 2, 3].map((s, i) => (
-            <span
-              key={s}
-              className="text-4xl leading-none"
-              style={{
-                animationDelay: `${i * 180}ms`,
-                animation: s <= stars
-                  ? 'star-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both'
-                  : 'none',
-                filter: s <= stars ? 'none' : 'grayscale(1) opacity(0.25)',
-                display: 'block',
-              }}
+        {hasTierUp ? (
+          /* ── Mascot evolution reveal ── */
+          <>
+            <div style={{
+              background: `linear-gradient(90deg, ${nextTier.tierColor}, ${nextTier.color})`,
+              borderRadius: 100, padding: '4px 16px', marginBottom: 12,
+              fontFamily: "'Fredoka One',cursive", fontSize: 11, fontWeight: 900,
+              letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(0,0,0,0.75)',
+            }}>
+              ✨ Maskot Berevolusi!
+            </div>
+            <div style={{
+              borderRadius: 24, overflow: 'hidden',
+              background: `linear-gradient(180deg, ${nextTier.color}40 0%, rgba(6,17,42,0.97) 60%)`,
+              border: `3px solid ${nextTier.tierColor}`,
+              boxShadow: `0 0 0 5px ${nextTier.tierColor}28, 0 12px 40px rgba(0,0,0,0.7)`,
+              animation: nextTier.anim, marginBottom: 10,
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 20px 6px' }}>
+                <MascotEvolution level={nextTier.minLevel} size={100} />
+              </div>
+              <div style={{
+                background: `linear-gradient(90deg, ${nextTier.tierColor}, ${nextTier.color})`,
+                textAlign: 'center', fontSize: 9, fontWeight: 900,
+                letterSpacing: '2px', color: 'rgba(0,0,0,0.75)',
+                padding: '5px', textTransform: 'uppercase',
+              }}>
+                {nextTier.tier} · {nextTier.name}
+              </div>
+            </div>
+            <p style={{ margin: '0 0 2px', fontFamily: "'Fredoka One',cursive", fontSize: 24, color: 'white', textAlign: 'center' }}>
+              {nextTier.name}
+            </p>
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: nextTier.tierColor, letterSpacing: '1px', textTransform: 'uppercase' }}>
+              {nextTier.species}
+            </p>
+          </>
+        ) : (
+          /* ── Normal completion ── */
+          <>
+            <div className="flex items-center justify-center gap-3 mb-4" aria-label={`${stars} dari 3 bintang`}>
+              {[1, 2, 3].map((s, i) => (
+                <span
+                  key={s}
+                  className="text-4xl leading-none"
+                  style={{
+                    animationDelay: `${i * 180}ms`,
+                    animation: s <= stars ? 'star-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both' : 'none',
+                    filter: s <= stars ? 'none' : 'grayscale(1) opacity(0.25)',
+                    display: 'block',
+                  }}
+                  aria-hidden="true"
+                >
+                  ⭐
+                </span>
+              ))}
+            </div>
+            <div
+              className="flex h-28 w-28 items-center justify-center rounded-[2rem] bg-white/20 border-4 border-white/40 shadow-2xl text-[72px] leading-none animate-mascot-bounce"
               aria-hidden="true"
+              style={{ backdropFilter: 'blur(4px)' }}
             >
-              ⭐
-            </span>
-          ))}
-        </div>
-
-        {/* Mascot in styled card */}
-        <div
-          className="flex h-28 w-28 items-center justify-center rounded-[2rem] bg-white/20 border-4 border-white/40 shadow-2xl text-[72px] leading-none animate-mascot-bounce"
-          aria-hidden="true"
-          style={{ backdropFilter: 'blur(4px)' }}
-        >
-          {isPerfect ? '🏆' : '🐂'}
-        </div>
-
-        {/* Level complete badge */}
-        <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/20 border border-white/30 px-4 py-1.5">
-          <span className="text-sm leading-none" aria-hidden="true">🎉</span>
-          <span className="text-sm font-extrabold text-white tracking-wide">
-            {isPerfect ? 'Sempurna!' : 'Level Selesai!'}
-          </span>
-        </div>
+              {isPerfect ? '🏆' : '🐂'}
+            </div>
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/20 border border-white/30 px-4 py-1.5">
+              <span className="text-sm leading-none" aria-hidden="true">🎉</span>
+              <span className="text-sm font-extrabold text-white tracking-wide">
+                {isPerfect ? 'Sempurna!' : 'Level Selesai!'}
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* ── ZONE 2: White stats card ── */}
@@ -202,7 +234,7 @@ export function Result() {
             className="w-full font-extrabold text-base tracking-wide"
             onClick={handleContinue}
           >
-            Lanjut Belajar →
+            {hasTierUp ? 'Kembali ke Peta 🗺️' : 'Lanjut Belajar →'}
           </Button>
         </div>
       </div>

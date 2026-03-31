@@ -29,10 +29,13 @@ const LESSON_SKY_STOPS = {
   6: ['#4FC8FF', '#D0F8E8'],
   7: ['#1A0850', '#3A2888'],
   8: ['#FF6B35', '#FFD090'],
+  9: ['#0369A1', '#BAE6FD'],
+  10: ['#5B21B6', '#DDD6FE'],
 }
 const LESSON_GROUND_COLOR = {
   1: '#40D864', 2: '#F8C838', 3: '#40D864', 4: '#1890CC',
   5: '#E8B840', 6: '#38D470', 7: '#180C38', 8: '#C87830',
+  9: '#0C4A6E', 10: '#4C1D95',
 }
 
 function ZoneLessonScene({ level }) {
@@ -147,6 +150,7 @@ export function Lesson() {
   const [selected, setSelected] = useState(null)             // submitted answer
   const [result, setResult] = useState(null)
   const [xpGain, setXpGain] = useState(null)
+  const [xpPopupVisible, setXpPopupVisible] = useState(false)
   const [sessionXp, setSessionXp] = useState(0)
   const [sessionCorrect, setSessionCorrect] = useState(0)
   const [sessionAttempted, setSessionAttempted] = useState(0)
@@ -266,7 +270,16 @@ export function Lesson() {
     setResult(null)
     setXpGain(null)
     setPendingAnswer(null)
+    setXpPopupVisible(false)
   }, [level, lesson?.id])
+
+  // Auto-hide XP popup after a short moment
+  useEffect(() => {
+    if (!(result === 'correct' && xpGain != null && xpGain > 0)) return
+    setXpPopupVisible(true)
+    const t = window.setTimeout(() => setXpPopupVisible(false), 900)
+    return () => window.clearTimeout(t)
+  }, [result, xpGain])
 
   useEffect(() => {
     if (loadState !== 'ready' || !lesson) return
@@ -326,6 +339,7 @@ export function Lesson() {
       setResult(null)
       setXpGain(null)
       setPendingAnswer(null)
+      setXpPopupVisible(false)
     } else {
       playComplete()
       const totalQ = sessionAttempted > 0 ? sessionAttempted : lessons.length
@@ -438,6 +452,8 @@ export function Lesson() {
             hook={lesson.hook}
             body={lesson.body}
             explanation={lesson.explanation}
+            insight={lesson.insight}
+            source_reference={lesson.source_reference}
             level={level}
             mascotEvolutionLevel={displayMascotLevel}
             streak={streak}
@@ -488,7 +504,7 @@ export function Lesson() {
           </div>
 
           {/* XP popup on correct */}
-          {answered && result === 'correct' && xpGain != null && (
+          {xpPopupVisible && answered && result === 'correct' && xpGain != null && (
             <div style={{
               position: 'fixed', top: '50%', left: '50%',
               transform: 'translate(-50%,-50%)',
@@ -586,6 +602,20 @@ export function Lesson() {
                         : `Jawaban yang benar adalah "${correctAnswer}". Ingat ya!`}
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* Source citation — shown after answering */}
+              {answered && lesson?.source_reference?.trim() && (
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '6px 10px', borderRadius: 8, marginBottom: 8,
+                  background: '#F8F6F2', border: '1px solid #EDE8E0',
+                }}>
+                  <span style={{ fontSize: 11 }}>📚</span>
+                  <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: '#A09080', letterSpacing: '0.3px', fontStyle: 'italic' }}>
+                    Sumber: {lesson.source_reference.trim()}
+                  </p>
                 </div>
               )}
 

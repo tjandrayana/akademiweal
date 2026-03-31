@@ -2,7 +2,7 @@ import { getAuthToken } from '../api/client'
 import { getUserIdFromToken } from './progressScope'
 
 const DEFAULT_GUEST_MAX_FREE = 5
-const CURRICULUM_PATH_MAX = 80
+const CURRICULUM_PATH_MAX = 100
 
 function readGuestMaxFreePathStep() {
   const raw = import.meta.env.VITE_GUEST_MAX_FREE_PATH_STEP

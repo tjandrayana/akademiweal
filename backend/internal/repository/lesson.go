@@ -18,13 +18,15 @@ type Lesson struct {
 	Question    string   `json:"question"`
 	Options     []string `json:"options"`
 	Answer      string   `json:"answer"`
-	Hook        *string  `json:"hook,omitempty"`
-	Body        *string  `json:"body,omitempty"`
-	Explanation *string  `json:"explanation,omitempty"`
+	Hook            *string  `json:"hook,omitempty"`
+	Body            *string  `json:"body,omitempty"`
+	Explanation     *string  `json:"explanation,omitempty"`
+	Insight         *string  `json:"insight,omitempty"`
+	SourceReference *string  `json:"source_reference,omitempty"`
 }
 
 const lessonSelectByLevel = `
-SELECT id, level, title, question, options, answer, hook, body, explanation
+SELECT id, level, title, question, options, answer, hook, body, explanation, insight, source_reference
 FROM lessons
 WHERE level = $1
 ORDER BY id
@@ -92,6 +94,8 @@ func (r *Repository) queryLessonsByLevel(ctx context.Context, level int) ([]Less
 			hookNS      sql.NullString
 			bodyNS      sql.NullString
 			explainNS   sql.NullString
+			insightNS   sql.NullString
+			sourceRefNS sql.NullString
 		)
 		if err := rows.Scan(
 			&lesson.ID,
@@ -103,6 +107,8 @@ func (r *Repository) queryLessonsByLevel(ctx context.Context, level int) ([]Less
 			&hookNS,
 			&bodyNS,
 			&explainNS,
+			&insightNS,
+			&sourceRefNS,
 		); err != nil {
 			return nil, fmt.Errorf("repository: scan lesson: %w", err)
 		}
@@ -122,6 +128,14 @@ func (r *Repository) queryLessonsByLevel(ctx context.Context, level int) ([]Less
 		if explainNS.Valid {
 			s := explainNS.String
 			lesson.Explanation = &s
+		}
+		if insightNS.Valid {
+			s := insightNS.String
+			lesson.Insight = &s
+		}
+		if sourceRefNS.Valid {
+			s := sourceRefNS.String
+			lesson.SourceReference = &s
 		}
 		out = append(out, lesson)
 	}
