@@ -1,6 +1,9 @@
--- Inserts 100 new lessons (ids 101-200) from new_curriculum_zones_1_10_id.json.
--- Requires: 016_lesson_source_reference.sql.
+-- Inserts lessons from new_curriculum_zones_1_10_id.json.
+-- Self-contained: ensures required columns exist before inserting.
 -- Each zone maps to level (zone 1 = level 1, …, zone 10 = level 10).
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS insight TEXT;
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS source_reference TEXT;
+
 TRUNCATE lessons RESTART IDENTITY CASCADE;
 
 INSERT INTO lessons (id, level, title, question, options, answer, hook, body, explanation, insight, source_reference) VALUES (1, 1, 'Dana darurat berapa bulan', 'Berapa bulan pengeluaran yang ideal disimpan sebagai dana darurat bagi karyawan tetap?', '["Satu bulan sudah cukup", "Tiga sampai enam bulan pengeluaran", "Dua puluh empat bulan minimal"]'::jsonb, 'Tiga sampai enam bulan pengeluaran', 'Dapat PHK mendadak—tabunganmu cukup berapa hari sebenarnya?', 'Aturan umum tiga sampai enam bulan pengeluaran berbeda untuk freelancer dan karyawan tetap. Tidak ada angka universal yang cocok semua situasi.', 'Karyawan tetap butuh lebih sedikit; freelancer tanpa kontrak perlu lebih besar karena pendapatan tidak pasti.', 'Hitung bulan, bukan rasa tenang.', 'Dave Ramsey, Personal Finance Basics') ON CONFLICT (id) DO NOTHING;
