@@ -31,6 +31,18 @@
   --color-muted: #6B7280;
   --color-border: #E5E7EB;
 
+  /* ── Arena design tokens ── */
+  --arena-bg-deep:        #0A2010;
+  --arena-bg-mid:         #1A4030;
+  --arena-accent:         #4ADE80;
+  --arena-accent-dim:     rgba(74,222,128,0.15);
+  --arena-accent-border:  rgba(74,222,128,0.4);
+  --arena-sell:           #F87171;
+  --arena-text-muted:     #7AB090;
+  --arena-text-dim:       #4A7060;
+  --arena-surface:        rgba(255,255,255,0.08);
+  --arena-border:         rgba(255,255,255,0.1);
+
   /* ── Semantic ── */
   --color-correct: #22C55E;
   --color-wrong: #EF4444;
@@ -48,6 +60,24 @@
 
   /* ── Spacing base: 8px grid ── */
   --spacing-base: 8px;
+}
+
+/* ── Skeleton shimmer ── */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #e8e4e0 25%, #f5f2ef 50%, #e8e4e0 75%);
+  background-size: 800px 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: 8px;
+}
+.skeleton-dark {
+  background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%);
+  background-size: 800px 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: 8px;
 }
 
 @layer base {

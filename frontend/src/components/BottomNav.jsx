@@ -17,21 +17,18 @@ function IconHome({ active }) {
   )
 }
 
-function IconBook({ active }) {
+function IconArena({ active }) {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
-        d="M4 19.5A2.5 2.5 0 016.5 17H20"
+        d="M12 2L2 7l10 5 10-5-10-5z"
         stroke={active ? '#22C55E' : '#9CA3AF'}
         strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"
-        stroke={active ? '#22C55E' : '#9CA3AF'}
-        strokeWidth="2"
+        strokeLinejoin="round"
         fill={active ? '#DCFCE7' : 'none'}
       />
+      <path d="M2 12l10 5 10-5" stroke={active ? '#22C55E' : '#9CA3AF'} strokeWidth="2" strokeLinejoin="round" />
+      <path d="M2 17l10 5 10-5" stroke={active ? '#22C55E' : '#9CA3AF'} strokeWidth="2" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -56,14 +53,11 @@ function IconTrophy({ active }) {
   )
 }
 
-function IconGift({ active }) {
+function IconFeed({ active }) {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="3" y="10" width="18" height="12" rx="1" stroke={active ? '#22C55E' : '#9CA3AF'} strokeWidth="2" fill={active ? '#DCFCE7' : 'none'} />
-      <rect x="2" y="6" width="20" height="4" rx="1" stroke={active ? '#22C55E' : '#9CA3AF'} strokeWidth="2" fill={active ? '#DCFCE7' : 'none'} />
-      <path d="M12 6V22" stroke={active ? '#22C55E' : '#9CA3AF'} strokeWidth="2" />
-      <path d="M12 6C12 6 9 3 7 4s-1 3 0 3.5" stroke={active ? '#22C55E' : '#9CA3AF'} strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M12 6C12 6 15 3 17 4s1 3 0 3.5" stroke={active ? '#22C55E' : '#9CA3AF'} strokeWidth="1.5" strokeLinecap="round" />
+      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" stroke={active ? '#22C55E' : '#9CA3AF'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points="16 7 22 7 22 13" stroke={active ? '#22C55E' : '#9CA3AF'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill={active ? '#DCFCE7' : 'none'} />
     </svg>
   )
 }
@@ -82,12 +76,11 @@ function IconPerson({ active }) {
   )
 }
 
-// disabled: true = coming soon, not yet implemented
 const TABS = [
   { path: '/home',        Icon: IconHome,   label: 'Belajar'  },
-  { path: '/pelajaran',    Icon: IconBook,   label: 'Pelajaran' },
+  { path: '/feed',        Icon: IconFeed,   label: 'Feed'      },
+  { path: '/arena',       Icon: IconArena,  label: 'Arena'    },
   { path: '/leaderboard', Icon: IconTrophy, label: 'Peringkat' },
-  { path: null,           Icon: IconGift,   label: 'Hadiah',    disabled: true },
   { path: '/profile',     Icon: IconPerson, label: 'Profil'   },
 ]
 

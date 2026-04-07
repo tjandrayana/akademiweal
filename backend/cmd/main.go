@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/fluxystack/akademiweal/backend/internal/auth"
@@ -71,6 +74,11 @@ func main() {
 	evtTracker := tracking.New(repo)
 	svc := service.New(repo, signer, evtTracker)
 	h := handler.New(svc, signer)
+
+	// Start background arena fill job (fills pending limit orders every minute).
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	repo.StartFillJob(ctx)
 
 	addr := listenAddr()
 

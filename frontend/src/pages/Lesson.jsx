@@ -347,7 +347,7 @@ export function Lesson() {
       const xpTotal = sessionXp + (hasNewCompletions ? XP_PER_LESSON_COMPLETE : 0)
       navigate('/result', {
         replace: true,
-        state: { xp: xpTotal, correct: sessionCorrect, total: totalQ },
+        state: { xp: xpTotal, correct: sessionCorrect, total: totalQ, zone: level },
       })
     }
   }

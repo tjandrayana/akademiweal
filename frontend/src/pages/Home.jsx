@@ -328,6 +328,29 @@ export function Home() {
         </div>
       </div>
 
+      {/* ── Feed strip — contextual bridge to market ── */}
+      <button
+        type="button"
+        onClick={() => navigate('/feed')}
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '7px 16px', background: 'rgba(74,222,128,0.07)',
+          borderTop: '1px solid rgba(74,222,128,0.12)',
+          borderBottom: '1px solid rgba(74,222,128,0.12)',
+          cursor: 'pointer', flexShrink: 0,
+          border: 'none', width: '100%',
+          borderTop: '1px solid rgba(74,222,128,0.12)',
+          borderBottom: '1px solid rgba(74,222,128,0.12)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 14 }}>📈</span>
+          <span style={{ fontSize: 11, fontWeight: 800, color: '#4ADE80' }}>Pasar Saham</span>
+          <span style={{ fontSize: 11, color: '#5A8A6A' }}>· Lihat analisis saham hari ini</span>
+        </div>
+        <span style={{ fontSize: 12, color: '#4ADE80', fontWeight: 700 }}>→</span>
+      </button>
+
       {/* ── Map: fills remaining height; no vertical scroll on map ── */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden pb-20">
         {goalLabel && (

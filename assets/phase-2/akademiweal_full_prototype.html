@@ -1,0 +1,369 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+.pw{display:flex;justify-content:center;padding:1.5rem 0;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);}
+.phone{width:355px;height:680px;background:var(--color-background-primary);border-radius:32px;border:0.5px solid var(--color-border-secondary);overflow:hidden;display:flex;flex-direction:column;}
+.screen{display:none;flex:1;flex-direction:column;overflow:hidden;}
+.screen.active{display:flex;}
+.topbar{padding:14px 14px 10px;border-bottom:0.5px solid var(--color-border-tertiary);flex-shrink:0;}
+.scroll{flex:1;overflow-y:auto;padding:10px 12px;}
+.bnav{display:flex;border-top:0.5px solid var(--color-border-secondary);flex-shrink:0;}
+.nb{flex:1;padding:8px 4px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--color-text-tertiary);font-family:var(--font-sans);}
+.nb.active{color:var(--color-text-info);}
+.nb svg{flex-shrink:0;}
+.scard{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:10px;margin-bottom:8px;cursor:pointer;}
+.scard:hover{border-color:var(--color-border-secondary);}
+.tup{background:#EAF3DE;color:#3B6D11;font-size:11px;padding:2px 7px;border-radius:var(--border-radius-md);font-weight:500;}
+.tdown{background:#FCEBEB;color:#791F1F;font-size:11px;padding:2px 7px;border-radius:var(--border-radius-md);font-weight:500;}
+.mrow{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0;}
+.mbox{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px;text-align:center;}
+.qbox{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:11px;margin:10px 0;border:0.5px solid var(--color-border-secondary);}
+.qopt{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:9px 11px;margin:5px 0;cursor:pointer;font-size:12px;color:var(--color-text-primary);width:100%;text-align:left;font-family:var(--font-sans);line-height:1.4;}
+.qopt:hover{border-color:var(--color-border-info);background:var(--color-background-info);color:var(--color-text-info);}
+.qopt.ok{border-color:var(--color-border-success);background:var(--color-background-success);color:var(--color-text-success);}
+.qopt.no{border-color:var(--color-border-danger);background:var(--color-background-danger);color:var(--color-text-danger);}
+.rev{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:10px;margin-top:8px;border:0.5px solid var(--color-border-success);display:none;}
+.rev.show{display:block;}
+.toast{display:none;align-items:center;gap:7px;font-size:12px;margin-top:7px;padding:8px 10px;border-radius:var(--border-radius-md);}
+.toast.show{display:flex;}
+.ptrack{background:var(--color-background-secondary);border-radius:4px;height:7px;overflow:hidden;}
+.pfill{height:100%;background:#1D9E75;border-radius:4px;}
+.plancard{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px;margin-bottom:9px;}
+.plancard.feat{border:2px solid var(--color-border-info);}
+.abtn{width:100%;padding:11px;background:#1D9E75;color:#04342C;border:none;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;margin-top:8px;font-family:var(--font-sans);}
+.slabel{font-size:10px;color:var(--color-text-tertiary);font-weight:500;letter-spacing:.05em;text-transform:uppercase;margin:12px 0 5px;}
+.divl{height:.5px;background:var(--color-border-tertiary);margin:10px 0;}
+.qitem{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:11px;margin-bottom:7px;}
+.xpp{background:#FAEEDA;color:#633806;font-size:11px;padding:2px 7px;border-radius:var(--border-radius-md);font-weight:500;flex-shrink:0;}
+.ckp{background:#EAF3DE;color:#27500A;font-size:11px;padding:2px 7px;border-radius:var(--border-radius-md);font-weight:500;flex-shrink:0;}
+.av{width:30px;height:30px;border-radius:50%;background:var(--color-background-info);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--color-text-info);flex-shrink:0;}
+.lrow{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:.5px solid var(--color-border-tertiary);}
+.partcard{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);border:.5px solid var(--color-border-tertiary);padding:12px;margin-top:8px;}
+.backbtn{background:none;border:none;cursor:pointer;font-size:12px;color:var(--color-text-info);font-family:var(--font-sans);padding:0;margin-bottom:8px;}
+.aisumm{background:var(--color-background-secondary);border-left:2px solid #1D9E75;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;padding:9px 11px;font-size:12px;color:var(--color-text-secondary);line-height:1.6;margin:8px 0;}
+.lbar{background:#FAEEDA;border-radius:var(--border-radius-md);padding:7px 11px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.bdrow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:6px;}
+.bdg{background:var(--color-background-secondary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:7px 10px;font-size:11px;text-align:center;}
+.bdg.e{background:#FAEEDA;border-color:#EF9F27;color:#633806;}
+</style>
+
+<div class="pw">
+<div class="phone">
+
+<div class="screen active" id="sc-feed">
+  <div class="topbar">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <p style="font-size:10px;color:var(--color-text-tertiary);">Selasa, 1 April 2025</p>
+        <p style="font-size:15px;font-weight:500;color:var(--color-text-primary);">Selamat pagi, Budi 👋</p>
+      </div>
+      <div style="text-align:right;">
+        <p style="font-size:10px;color:var(--color-text-tertiary);">IHSG</p>
+        <p style="font-size:13px;font-weight:500;color:#3B6D11;">7.284 &nbsp;+0.8%</p>
+      </div>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="lbar">
+      <span style="font-size:11px;color:#633806;font-weight:500;">Sisa analisis gratis hari ini</span>
+      <span style="font-size:12px;color:#633806;font-weight:500;">3 / 3</span>
+    </div>
+    <div class="slabel">Saham IDX hari ini</div>
+    <div class="scard" onclick="openDetail('BBCA')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
+        <div><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);">BBCA</p><p style="font-size:10px;color:var(--color-text-tertiary);">Bank Central Asia</p></div>
+        <div style="text-align:right;"><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Rp 9.575</p><span class="tup">+2.1%</span></div>
+      </div>
+      <p style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;">Naik didorong keputusan BI tahan suku bunga di 5.75%, positif bagi NIM bank...</p>
+      <p style="font-size:10px;color:var(--color-text-tertiary);margin-top:5px;">Ketuk untuk analisis + kuis</p>
+    </div>
+    <div class="scard" onclick="openDetail('BBRI')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
+        <div><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);">BBRI</p><p style="font-size:10px;color:var(--color-text-tertiary);">Bank Rakyat Indonesia</p></div>
+        <div style="text-align:right;"><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Rp 4.120</p><span class="tup">+1.4%</span></div>
+      </div>
+      <p style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;">Sentimen positif dari laporan NPL yang membaik ke 2.98% di kuartal terakhir...</p>
+      <p style="font-size:10px;color:var(--color-text-tertiary);margin-top:5px;">Ketuk untuk analisis + kuis</p>
+    </div>
+    <div class="scard" onclick="openDetail('GOTO')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
+        <div><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);">GOTO</p><p style="font-size:10px;color:var(--color-text-tertiary);">GoTo Gojek Tokopedia</p></div>
+        <div style="text-align:right;"><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Rp 87</p><span class="tdown">-3.3%</span></div>
+      </div>
+      <p style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;">Tekanan jual dari isu divestasi saham Alibaba di pasar sekunder...</p>
+      <p style="font-size:10px;color:var(--color-text-tertiary);margin-top:5px;">Ketuk untuk analisis + kuis</p>
+    </div>
+    <div class="scard" onclick="openDetail('TLKM')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
+        <div><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);">TLKM</p><p style="font-size:10px;color:var(--color-text-tertiary);">Telkom Indonesia</p></div>
+        <div style="text-align:right;"><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Rp 3.240</p><span class="tup">+0.6%</span></div>
+      </div>
+      <p style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;">Stabil usai umumkan kemitraan data center dengan Microsoft Azure...</p>
+      <p style="font-size:10px;color:var(--color-text-tertiary);margin-top:5px;">Ketuk untuk analisis + kuis</p>
+    </div>
+    <div class="scard" style="opacity:.55;" onclick="goTo('premium')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
+        <div><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);">ASII</p><p style="font-size:10px;color:var(--color-text-tertiary);">Astra International</p></div>
+        <div style="text-align:right;"><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Rp 5.150</p><span class="tdown">-0.9%</span></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;padding:6px 0;gap:5px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <span style="font-size:11px;color:var(--color-text-secondary);">Buka dengan Premium · +45 saham lagi</span>
+      </div>
+    </div>
+    <div style="height:12px;"></div>
+  </div>
+</div>
+
+<div class="screen" id="sc-detail">
+  <div class="topbar">
+    <button class="backbtn" onclick="goTo('feed')">← Kembali ke Feed</button>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <p style="font-size:17px;font-weight:500;color:var(--color-text-primary);" id="d-code">BBCA</p>
+        <p style="font-size:11px;color:var(--color-text-tertiary);" id="d-name">Bank Central Asia</p>
+      </div>
+      <div style="text-align:right;">
+        <p style="font-size:17px;font-weight:500;color:var(--color-text-primary);" id="d-price">Rp 9.575</p>
+        <span id="d-chg" class="tup">+2.1%</span>
+      </div>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="slabel">Ringkasan AI hari ini</div>
+    <div class="aisumm" id="d-summ"></div>
+    <div class="slabel">Indikator kunci</div>
+    <div class="mrow">
+      <div class="mbox"><p style="font-size:10px;color:var(--color-text-tertiary);">P/E Ratio</p><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);" id="d-pe">24.3x</p></div>
+      <div class="mbox"><p style="font-size:10px;color:var(--color-text-tertiary);">Volume</p><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);" id="d-vol">+34%</p></div>
+      <div class="mbox"><p style="font-size:10px;color:var(--color-text-tertiary);">Mkt Cap</p><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);" id="d-cap">Rp1.175T</p></div>
+    </div>
+    <div class="divl"></div>
+    <div class="slabel">Belajar dengan analisis ✦</div>
+    <div class="qbox">
+      <p style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px;">Pertanyaan Hari Ini</p>
+      <p style="font-size:11px;color:var(--color-text-secondary);margin-bottom:9px;line-height:1.5;" id="d-q"></p>
+      <div id="d-opts"></div>
+      <div class="toast" id="d-toast"></div>
+      <div class="rev" id="d-rev">
+        <p style="font-size:11px;font-weight:500;color:var(--color-text-success);margin-bottom:5px;">Penjelasan lengkap</p>
+        <p style="font-size:11px;color:var(--color-text-secondary);line-height:1.6;" id="d-exp"></p>
+      </div>
+    </div>
+    <div style="height:12px;"></div>
+  </div>
+</div>
+
+<div class="screen" id="sc-quests">
+  <div class="topbar">
+    <p style="font-size:15px;font-weight:500;color:var(--color-text-primary);">Misi & Progres</p>
+  </div>
+  <div class="scroll">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;">
+      <div class="mbox" style="text-align:left;padding:10px;">
+        <p style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:3px;">Streak</p>
+        <p style="font-size:20px;font-weight:500;color:var(--color-text-primary);">7 🔥</p>
+        <p style="font-size:10px;color:var(--color-text-tertiary);">hari berturut-turut</p>
+      </div>
+      <div class="mbox" style="text-align:left;padding:10px;">
+        <p style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:3px;">Total XP</p>
+        <p style="font-size:20px;font-weight:500;color:var(--color-text-primary);">1.250</p>
+        <p style="font-size:10px;color:var(--color-text-tertiary);">Level 5 — Analis</p>
+      </div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+        <span style="font-size:10px;color:var(--color-text-tertiary);">Level 5</span>
+        <span style="font-size:10px;color:var(--color-text-tertiary);">1.250 / 2.000 XP</span>
+      </div>
+      <div class="ptrack"><div class="pfill" style="width:63%;"></div></div>
+      <p style="font-size:10px;color:var(--color-text-tertiary);margin-top:3px;">750 XP lagi → Level 6 Manajer Portofolio</p>
+    </div>
+    <div class="slabel">Misi aktif</div>
+    <div class="qitem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+        <p style="font-size:12px;font-weight:500;color:var(--color-text-primary);">Analis Mingguan</p>
+        <span class="xpp">+100 XP</span>
+      </div>
+      <p style="font-size:11px;color:var(--color-text-secondary);margin-bottom:7px;">Analisis 5 saham IDX minggu ini</p>
+      <div class="ptrack"><div class="pfill" style="width:60%;"></div></div>
+      <p style="font-size:10px;color:var(--color-text-tertiary);margin-top:3px;">3 / 5 saham dianalisis</p>
+    </div>
+    <div class="qitem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+        <p style="font-size:12px;font-weight:500;color:var(--color-text-primary);">Kuiz Sempurna</p>
+        <span class="xpp">+50 XP</span>
+      </div>
+      <p style="font-size:11px;color:var(--color-text-secondary);margin-bottom:7px;">Jawab 3 kuis berturut-turut dengan benar</p>
+      <div class="ptrack"><div class="pfill" style="width:33%;"></div></div>
+      <p style="font-size:10px;color:var(--color-text-tertiary);margin-top:3px;">1 / 3 kuis berhasil</p>
+    </div>
+    <div class="qitem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <p style="font-size:12px;font-weight:500;color:var(--color-text-primary);">Streak 7 Hari</p>
+        <span class="ckp">Selesai!</span>
+      </div>
+      <p style="font-size:11px;color:var(--color-text-secondary);">Login dan belajar 7 hari berturut-turut</p>
+    </div>
+    <div class="slabel">Lencana</div>
+    <div class="bdrow">
+      <div class="bdg e">🎖 Pemula<br><span style="font-size:9px;">Analis Saham</span></div>
+      <div class="bdg e">📊 Konsisten<br><span style="font-size:9px;">Streak 7 Hari</span></div>
+      <div class="bdg e">🏦 Bankir<br><span style="font-size:9px;">Analisis 5 Bank</span></div>
+      <div class="bdg" style="opacity:.4;">🔒 Upcoming<br><span style="font-size:9px;">Manajer Port.</span></div>
+    </div>
+    <div class="slabel">Leaderboard — minggu ini</div>
+    <div class="lrow"><span style="font-size:11px;color:var(--color-text-tertiary);width:14px;">1</span><div class="av">AR</div><span style="flex:1;font-size:12px;color:var(--color-text-primary);">Andi Rahmawan</span><span style="font-size:11px;font-weight:500;color:#3B6D11;">3.450 XP</span></div>
+    <div class="lrow"><span style="font-size:11px;color:var(--color-text-tertiary);width:14px;">2</span><div class="av">SR</div><span style="flex:1;font-size:12px;color:var(--color-text-primary);">Siti Rahayu</span><span style="font-size:11px;font-weight:500;color:#3B6D11;">2.980 XP</span></div>
+    <div class="lrow" style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:7px;"><span style="font-size:11px;color:var(--color-text-tertiary);width:14px;">8</span><div class="av" style="background:var(--color-background-success);color:var(--color-text-success);">BU</div><span style="flex:1;font-size:12px;font-weight:500;color:var(--color-text-primary);">Budi (Kamu)</span><span style="font-size:11px;font-weight:500;color:#3B6D11;">1.250 XP</span></div>
+    <div class="lrow"><span style="font-size:11px;color:var(--color-text-tertiary);width:14px;">9</span><div class="av">DP</div><span style="flex:1;font-size:12px;color:var(--color-text-primary);">Deni Pratama</span><span style="font-size:11px;color:var(--color-text-tertiary);">1.100 XP</span></div>
+    <div style="height:12px;"></div>
+  </div>
+</div>
+
+<div class="screen" id="sc-premium">
+  <div class="topbar">
+    <p style="font-size:15px;font-weight:500;color:var(--color-text-primary);">Upgrade ke Premium</p>
+    <p style="font-size:10px;color:var(--color-text-tertiary);">Batalkan kapan saja · tanpa kontrak</p>
+  </div>
+  <div class="scroll">
+    <div class="plancard">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;">
+        <p style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Gratis</p>
+        <span style="background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:10px;padding:2px 7px;border-radius:var(--border-radius-md);">Plan saat ini</span>
+      </div>
+      <ul style="list-style:none;font-size:11px;color:var(--color-text-secondary);line-height:1.9;">
+        <li>✓ 3 analisis saham / hari</li>
+        <li>✓ Kuis harian</li>
+        <li>✓ 5 saham IDX blue chip</li>
+        <li style="color:var(--color-text-tertiary);">✗ Analisis teknikal (RSI, MACD)</li>
+        <li style="color:var(--color-text-tertiary);">✗ Alert pergerakan harga real-time</li>
+        <li style="color:var(--color-text-tertiary);">✗ Seluruh 50+ saham IDX</li>
+      </ul>
+    </div>
+    <div class="plancard feat">
+      <p style="font-size:10px;color:var(--color-text-info);font-weight:500;margin-bottom:8px;">PALING POPULER</p>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;">
+        <p style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Premium</p>
+        <div style="text-align:right;"><p style="font-size:15px;font-weight:500;color:var(--color-text-primary);">Rp 30.000</p><p style="font-size:10px;color:var(--color-text-tertiary);">per bulan</p></div>
+      </div>
+      <ul style="list-style:none;font-size:11px;color:var(--color-text-secondary);line-height:1.9;">
+        <li>✓ Analisis tidak terbatas setiap hari</li>
+        <li>✓ Seluruh 50+ saham IDX</li>
+        <li>✓ Analisis teknikal — RSI, MACD, Bollinger</li>
+        <li>✓ Alert harga real-time</li>
+        <li>✓ Laporan mingguan personal</li>
+        <li>✓ Kuis lanjutan + XP 2× lipat</li>
+      </ul>
+      <button class="abtn">Mulai 7 Hari Gratis →</button>
+    </div>
+    <div class="slabel">Dapatkan Premium Gratis</div>
+    <div class="partcard">
+      <p style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px;">Buka rekening Ajaib → 1 bulan gratis</p>
+      <p style="font-size:11px;color:var(--color-text-secondary);margin-bottom:9px;line-height:1.5;">Buka rekening saham via Ajaib melalui Akademiweal dan dapatkan 1 bulan Premium gratis — senilai Rp 30.000.</p>
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:9px;">
+        <div style="width:30px;height:30px;background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;color:var(--color-text-secondary);">AJB</div>
+        <div><p style="font-size:11px;font-weight:500;color:var(--color-text-primary);">Ajaib Sekuritas</p><p style="font-size:10px;color:var(--color-text-tertiary);">OJK terdaftar & diawasi</p></div>
+      </div>
+      <button class="abtn" style="background:var(--color-background-primary);color:var(--color-text-info);border:.5px solid var(--color-border-info);" onclick="sendPrompt('Explain the brokerage referral monetization model for Akademiweal — how much can it realistically earn and how should it be structured?')">Pelajari model referral ini ↗</button>
+    </div>
+    <div class="slabel">Untuk bank & fintech (B2B)</div>
+    <div class="partcard">
+      <p style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px;">White-label Akademiweal</p>
+      <p style="font-size:11px;color:var(--color-text-secondary);margin-bottom:9px;line-height:1.5;">Platform literasi keuangan gamifikasi untuk nasabah bank atau pengguna fintech Anda. Lisensi tahunan B2B.</p>
+      <button class="abtn" style="background:var(--color-background-primary);color:var(--color-text-primary);border:.5px solid var(--color-border-secondary);" onclick="sendPrompt('How should Akademiweal pitch its white-label B2B offering to Indonesian banks and fintechs? What pricing model makes sense?')">Strategi B2B selengkapnya ↗</button>
+    </div>
+    <div style="height:14px;"></div>
+  </div>
+</div>
+
+<div class="bnav">
+  <button class="nb active" id="nb-feed" onclick="goTo('feed')">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Feed
+  </button>
+  <button class="nb" id="nb-quests" onclick="goTo('quests')">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Misi
+  </button>
+  <button class="nb" id="nb-premium" onclick="goTo('premium')">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="2"/></svg>Premium
+  </button>
+</div>
+</div>
+</div>
+
+<script>
+const SD={
+  BBCA:{name:'Bank Central Asia',price:'Rp 9.575',chg:'+2.1%',up:true,pe:'24.3x',vol:'+34%',cap:'Rp1.175T',
+    summ:'BBCA naik 2.1% setelah Bank Indonesia mempertahankan suku bunga acuan di 5.75%. Keputusan ini positif bagi bank dengan Net Interest Margin tinggi karena biaya dana tidak naik. Volume transaksi meningkat 34% di atas rata-rata 30 hari.',
+    q:'Mengapa BI menahan suku bunga bisa positif untuk saham bank seperti BBCA?',
+    opts:['Karena bunga pinjaman tetap tinggi, margin keuntungan bank terjaga','Karena bank mendapat dana lebih murah dari BI langsung','Karena suku bunga rendah otomatis mendorong orang nabung di bank'],cor:0,
+    exp:'Ketika BI menahan suku bunga, biaya dana (cost of fund) bank tidak naik. Sementara bunga pinjaman yang sudah ada tetap tinggi. Selisih ini disebut Net Interest Margin (NIM) — BBCA punya NIM tertinggi di industri, sekitar 5.8%.'},
+  BBRI:{name:'Bank Rakyat Indonesia',price:'Rp 4.120',chg:'+1.4%',up:true,pe:'12.1x',vol:'+18%',cap:'Rp625T',
+    summ:'Sentimen positif dari laporan NPL yang membaik ke 2.98% di kuartal terakhir. Penurunan kredit macet ini menunjukkan kualitas portofolio BBRI membaik, terutama di segmen UMKM yang jadi core business mereka.',
+    q:'Apa itu NPL dan mengapa penurunannya menjadi sinyal positif untuk saham bank?',
+    opts:['NPL adalah laba bersih; penurunannya berarti bank lebih hemat','NPL adalah kredit macet; penurunannya berarti risiko gagal bayar berkurang','NPL adalah jumlah nasabah baru; penurunannya berarti pertumbuhan melambat'],cor:1,
+    exp:'Non-Performing Loan (NPL) adalah rasio kredit bermasalah terhadap total kredit. Semakin rendah NPL, semakin sedikit kredit yang gagal dibayar. Ini mengurangi risiko kerugian bank dan meningkatkan kepercayaan investor.'},
+  GOTO:{name:'GoTo Gojek Tokopedia',price:'Rp 87',chg:'-3.3%',up:false,pe:'N/A',vol:'+52%',cap:'Rp107T',
+    summ:'Tekanan jual dari isu divestasi saham Alibaba Group di pasar sekunder. Alibaba dikabarkan melepas sebagian kepemilikannya di GOTO, memicu kekhawatiran oversupply saham di pasar dan menekan harga.',
+    q:'Mengapa aksi jual oleh investor besar seperti Alibaba bisa menekan harga saham GOTO?',
+    opts:['Karena Alibaba akan menghapus fitur Tokopedia dari platformnya','Karena pasokan saham bertambah tiba-tiba sementara permintaan tetap sama','Karena ini berarti GOTO akan bangkrut dalam waktu dekat'],cor:1,
+    exp:'Saat pemegang saham besar menjual dalam jumlah besar, supply saham di pasar meningkat drastis. Jika permintaan (demand) tidak ikut naik, harga tertekan turun — ini hukum dasar supply & demand yang berlaku di pasar saham.'},
+  TLKM:{name:'Telkom Indonesia',price:'Rp 3.240',chg:'+0.6%',up:true,pe:'17.8x',vol:'+11%',cap:'Rp321T',
+    summ:'Stabil menyusul pengumuman kemitraan infrastruktur data center dengan Microsoft Azure. Kemitraan ini berpotensi menambah pendapatan segmen enterprise TLKM yang sudah berkontribusi sekitar 40% dari total revenue.',
+    q:'Mengapa kemitraan dengan perusahaan teknologi besar bisa meningkatkan nilai saham TLKM?',
+    opts:['Karena TLKM akan segera diakuisisi oleh Microsoft','Karena membuka aliran pendapatan baru dari segmen enterprise yang tumbuh pesat','Karena harga saham Microsoft otomatis mendongkrak TLKM'],cor:1,
+    exp:'Kemitraan strategis membuka akses ke segmen klien enterprise yang punya margin lebih tinggi. Data center adalah industri yang tumbuh pesat seiring adopsi cloud — dan TLKM sudah punya infrastruktur jaringan kuat sebagai modal utama.'}
+};
+
+let qDone=false;
+
+function goTo(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sc-'+n).classList.add('active');
+  const nb=document.getElementById('nb-'+n);
+  if(nb)nb.classList.add('active');
+}
+
+function openDetail(code){
+  const s=SD[code];if(!s)return;
+  qDone=false;
+  document.getElementById('d-code').textContent=code;
+  document.getElementById('d-name').textContent=s.name;
+  document.getElementById('d-price').textContent=s.price;
+  const dc=document.getElementById('d-chg');dc.textContent=s.chg;dc.className=s.up?'tup':'tdown';
+  document.getElementById('d-pe').textContent=s.pe;
+  document.getElementById('d-vol').textContent=s.vol;
+  document.getElementById('d-cap').textContent=s.cap;
+  document.getElementById('d-summ').textContent=s.summ;
+  document.getElementById('d-q').textContent=s.q;
+  const od=document.getElementById('d-opts');od.innerHTML='';
+  s.opts.forEach((o,i)=>{
+    const b=document.createElement('button');b.className='qopt';b.textContent=o;
+    b.onclick=function(){answer(this,i===s.cor,s.exp);};
+    od.appendChild(b);
+  });
+  document.getElementById('d-toast').className='toast';
+  document.getElementById('d-rev').className='rev';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sc-detail').classList.add('active');
+}
+
+function answer(btn,ok,exp){
+  if(qDone)return;qDone=true;
+  document.querySelectorAll('.qopt').forEach(b=>{b.style.pointerEvents='none';});
+  btn.classList.add(ok?'ok':'no');
+  const t=document.getElementById('d-toast');
+  if(ok){
+    t.style.background='#EAF3DE';t.style.border='.5px solid #639922';
+    t.innerHTML='<span style="font-weight:500;color:#27500A;">+25 XP</span><span style="color:#3B6D11;">Tepat! Kamu paham konsep ini.</span>';
+  } else {
+    t.style.background='#FCEBEB';t.style.border='.5px solid #F09595';
+    t.innerHTML='<span style="color:#791F1F;">Belum tepat.</span><span style="color:var(--color-text-secondary);">Simak penjelasannya ya.</span>';
+  }
+  t.classList.add('show');
+  document.getElementById('d-exp').textContent=exp;
+  document.getElementById('d-rev').classList.add('show');
+}
+</script>

@@ -29,10 +29,25 @@ func (h *Handler) Routes() http.Handler {
 	r.Post("/events", h.createEvent)
 	r.Get("/leaderboard", h.leaderboard)
 
+	// Stock feed — public
+	r.Get("/stocks/feed", h.stockFeed)
+
+	// Auth-required routes
 	r.Group(func(r chi.Router) {
 		r.Use(h.signer.Middleware)
 		r.Get("/me", h.me)
 		r.Post("/me/sync", h.syncProgress)
+		r.Get("/me/rank", h.meRank)
+		r.Get("/stocks/{code}/today", h.stockToday)
+		r.Get("/stocks/{code}/bars", h.stockBars)
+		r.Get("/stocks/{code}/sim-dates", h.stockSimDates)
+		r.Post("/stocks/{code}/fetch-bars", h.stockFetchBars)
+		r.Post("/stocks/{code}/quiz", h.stockQuiz)
+		// Arena
+		r.Get("/arena/today", h.arenaToday)
+		r.Post("/arena/orders", h.arenaPlaceOrder)
+		r.Post("/arena/orders/{id}/cancel", h.arenaCancelOrder)
+		r.Get("/arena/leaderboard", h.arenaLeaderboard)
 	})
 
 	return r
