@@ -18,6 +18,8 @@ help:
 	@echo "  make migrate     Apply backend/migrations/*.sql (psql or Docker; run make db first if using Docker)"
 	@echo "  make migrate-file FILE=013_backfill_lesson_explanations.sql  Apply one chosen migration"
 	@echo "  make backend     Run API on http://localhost:9001 (needs DB)"
+	@echo "  make fetch-intraday     Fetch intraday data from Yahoo Finance"
+	@echo "  make generate-curriculum     Generate curriculum from assets/new_curriculum_zones_1_10_id.json"
 	@echo "  make frontend    Run Vite dev server (proxies /api → backend)"
 	@echo "  make dev         Start DB, then API (one terminal)"
 	@echo "  make dev-all     Start DB, then API + Vite together (Ctrl+C stops both)"
@@ -44,6 +46,12 @@ migrate-file:
 
 backend:
 	$(MAKE) -C $(BACKEND_DIR) run
+
+fetch-intraday:
+	$(MAKE) -C $(BACKEND_DIR) fetch-intraday
+
+generate-curriculum:
+	$(MAKE) -C $(BACKEND_DIR) generate-curriculum
 
 frontend:
 	cd $(FRONTEND_DIR) && npm run dev

@@ -18,14 +18,42 @@ const TIMES = [
   { id: '10', icon: '🏆', label: '10 menit', recommended: false },
 ]
 
-const TOTAL_STEPS = 4
+const TOTAL_STEPS = 5
 
 const STEP_BG = {
   0: 'bg-gradient-to-b from-[#FFF7ED] to-[#FEF3C7]',
-  1: 'bg-[#F9FAFB]',
+  1: 'bg-gradient-to-b from-[#F0FDF4] to-[#ECFDF5]',
   2: 'bg-[#F9FAFB]',
-  3: 'bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4]',
+  3: 'bg-[#F9FAFB]',
+  4: 'bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4]',
 }
+
+const PILLARS = [
+  {
+    icon: '🎓',
+    color: '#4ADE80',
+    bg: '#F0FFF4',
+    border: '#B0EFC0',
+    title: 'Belajar',
+    desc: 'Kuasai konsep investasi lewat pelajaran singkat, kuis, dan XP harian.',
+  },
+  {
+    icon: '📈',
+    color: '#3B82F6',
+    bg: '#EFF6FF',
+    border: '#BFDBFE',
+    title: 'Analisis',
+    desc: 'Baca ringkasan AI saham IDX nyata dan uji pemahamanmu setiap hari.',
+  },
+  {
+    icon: '⚔️',
+    color: '#F59E0B',
+    bg: '#FFFBEB',
+    border: '#FDE68A',
+    title: 'Arena',
+    desc: 'Latih trading dengan uang virtual dan data historis asli pasar IDX.',
+  },
+]
 
 export function Onboarding() {
   const navigate = useNavigate()
@@ -40,10 +68,10 @@ export function Onboarding() {
   function goNext() {
     playStepNext()
     try {
-      if (step === 1 && goalId != null) {
+      if (step === 2 && goalId != null) {
         localStorage.setItem(storageKey('onboarding_goal'), goalId)
       }
-      if (step === 2 && timeId != null) {
+      if (step === 3 && timeId != null) {
         localStorage.setItem(storageKey('onboarding_time'), timeId)
       }
     } catch {
@@ -98,8 +126,8 @@ export function Onboarding() {
           {/* Brand */}
           <span className="text-sm font-extrabold text-primary tracking-tight">AkademiWeal</span>
 
-          {/* Skip (only steps 0–2) */}
-          {step < 3 ? (
+          {/* Skip (only steps 0–3) */}
+          {step < 4 ? (
             <button
               type="button"
               onClick={skip}
@@ -183,8 +211,69 @@ export function Onboarding() {
             </section>
           )}
 
-          {/* ── Step 1: Goal ── */}
+          {/* ── Step 1: App tour — the three pillars ── */}
           {step === 1 && (
+            <section
+              className="flex min-h-0 flex-1 flex-col gap-5 pt-2"
+              aria-labelledby="onb-tour-title"
+            >
+              <div className="text-center">
+                <h1
+                  id="onb-tour-title"
+                  className="m-0 text-2xl font-extrabold leading-tight tracking-tight text-text"
+                >
+                  Satu loop, tiga langkah
+                </h1>
+                <p className="m-0 mt-1.5 text-sm text-muted">
+                  Begini cara AkademiWeal membuatmu jadi investor lebih baik
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                {PILLARS.map((p, i) => (
+                  <div
+                    key={p.title}
+                    className="flex items-start gap-4 rounded-2xl border-2 px-4 py-4"
+                    style={{ background: p.bg, borderColor: p.border }}
+                  >
+                    <div
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-2xl leading-none"
+                      style={{ background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
+                      aria-hidden="true"
+                    >
+                      {p.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span
+                          className="text-xs font-black uppercase tracking-widest"
+                          style={{ color: p.color }}
+                        >
+                          {i + 1}
+                        </span>
+                        <p className="m-0 text-base font-bold text-text">{p.title}</p>
+                      </div>
+                      <p className="m-0 text-xs text-muted leading-relaxed">{p.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-auto pt-2">
+                <Button
+                  type="button"
+                  variant="primary"
+                  className="w-full font-bold"
+                  onClick={goNext}
+                >
+                  Mengerti, lanjut →
+                </Button>
+              </div>
+            </section>
+          )}
+
+          {/* ── Step 2: Goal ── */}
+          {step === 2 && (
             <section
               className="flex min-h-0 flex-1 flex-col gap-5 pt-2"
               aria-labelledby="onb-goal-title"
@@ -259,8 +348,8 @@ export function Onboarding() {
             </section>
           )}
 
-          {/* ── Step 2: Time ── */}
-          {step === 2 && (
+          {/* ── Step 3: Time ── */}
+          {step === 3 && (
             <section
               className="flex min-h-0 flex-1 flex-col gap-5 pt-2"
               aria-labelledby="onb-time-title"
@@ -342,8 +431,8 @@ export function Onboarding() {
             </section>
           )}
 
-          {/* ── Step 3: Celebrate + Start ── */}
-          {step === 3 && (
+          {/* ── Step 4: Celebrate + Start ── */}
+          {step === 4 && (
             <section
               className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5 py-4 text-center"
               aria-labelledby="onb-start-title"

@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom'
 import { syncXpTotal } from '../api/progress'
 import { addXp, getTotalXp, getMascotEvolutionLevel, recordDailyStreak, resetLives } from '../lib/gamification'
 import { storageKey } from '../lib/progressScope'
@@ -8,6 +8,20 @@ import { Button } from '../components/Button'
 import { XPDisplay } from '../components/XPDisplay'
 import { useGamificationStats } from '../hooks/useGamificationStats'
 import { playCelebration, playNavigate } from '../lib/sounds'
+
+// Zone → Feed stock bridge: maps each zone to the most relevant stock in Feed
+const ZONE_FEED_BRIDGE = {
+  1:  { code: 'BBCA', reason: 'Lihat kepemilikan nyata saham perbankan terbesar RI' },
+  2:  { code: 'BBRI', reason: 'Laporan keuangan BBRI — contoh nyata konsep yang baru kamu pelajari' },
+  3:  { code: 'GOTO', reason: 'GoTo — sentimen pasar bergerak cepat, cocok untuk latihan psikologi trading' },
+  4:  { code: 'BBCA', reason: 'Harga BBCA sensitif terhadap suku bunga BI — saham dan obligasi terhubung' },
+  5:  { code: 'BBRI', reason: 'BBRI termasuk dalam banyak ETF IDX30 dan LQ45' },
+  6:  { code: 'TLKM', reason: 'Telkom rutin bagi dividen — cek dividend yield-nya hari ini' },
+  7:  { code: 'GOTO', reason: 'GoTo — volatilitas tinggi mirip aset kripto, cocok pelajari risiko' },
+  8:  { code: 'TLKM', reason: 'Telkom cocok jadi anchor portofolio defensif jangka panjang' },
+  9:  { code: 'BBCA', reason: 'BBCA sering jadi pilihan utama strategi portofolio konservatif' },
+  10: { code: 'BBRI', reason: 'BBRI + BBCA — contoh klasik diversifikasi portofolio perbankan' },
+}
 
 function encouragementMessage(correct, total) {
   if (total === 0) return 'Terus belajar, setiap langkah itu berarti.'
@@ -43,7 +57,7 @@ export function Result() {
     return <Navigate to="/home" replace />
   }
 
-  const { xp, correct, total } = state
+  const { xp, correct, total, zone } = state
   const msg = encouragementMessage(correct, total)
   const stars = correct === total ? 3 : correct / total >= 0.5 ? 2 : 1
   const isPerfect = stars === 3
@@ -227,7 +241,32 @@ export function Result() {
         </div>
 
         {/* CTA anchored to bottom */}
-        <div className="px-5 pb-8 pt-2 border-t border-gray-100">
+        <div className="px-5 pb-8 pt-2 border-t border-gray-100 flex flex-col gap-3">
+          {/* Feed bridge — contextual link to a relevant stock */}
+          {zone && ZONE_FEED_BRIDGE[zone] && (() => {
+            const { code, reason } = ZONE_FEED_BRIDGE[zone]
+            return (
+              <Link
+                to={`/stocks/${code.toLowerCase()}`}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '10px 14px', borderRadius: 12, textDecoration: 'none',
+                  background: '#F5FDF8', border: '1.5px solid #B0EFC0',
+                }}
+              >
+                <div>
+                  <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '1px', textTransform: 'uppercase', color: '#1A7040', margin: 0, marginBottom: 2 }}>
+                    📈 Lihat di Feed
+                  </p>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: '#1A2030', margin: 0 }}>
+                    {code} — {reason}
+                  </p>
+                </div>
+                <span style={{ fontSize: 18, marginLeft: 8 }}>→</span>
+              </Link>
+            )
+          })()}
+
           <Button
             type="button"
             variant="primary"

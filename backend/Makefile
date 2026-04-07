@@ -29,6 +29,8 @@ help:
 	@echo "  make run      Run API on :9001 (requires DB reachable)"
 	@echo "  make server   Same as run"
 	@echo "  make dev      Start DB then run the server"
+	@echo "  make fetch-intraday     Fetch intraday data from Yahoo Finance"
+	@echo "  make generate-curriculum     Generate curriculum from assets/new_curriculum_zones_1_10_id.json"
 
 db db-up:
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d --wait
@@ -105,3 +107,9 @@ run server:
 
 dev: db
 	cd $(BACKEND_ROOT) && go run ./cmd
+
+fetch-intraday:
+	cd $(BACKEND_ROOT) && go run ./cmd/fetch_intraday/
+
+generate-curriculum:
+	cd $(BACKEND_ROOT) && go run ./cmd/gen_curriculum_sql/

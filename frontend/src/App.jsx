@@ -21,6 +21,11 @@ import { Onboarding } from './pages/Onboarding'
 import { Pelajaran } from './pages/Pelajaran'
 import { Profile } from './pages/Profile'
 import { Result } from './pages/Result'
+import { Feed } from './pages/Feed'
+import { StockDetail } from './pages/StockDetail'
+import { Arena } from './pages/Arena'
+import { ArenaStock } from './pages/ArenaStock'
+import { ArenaTrade } from './pages/ArenaTrade'
 
 /** Logged-in: onboarding vs home. Guest: go straight to home (try before sign-in). */
 function RootRedirect() {
@@ -53,7 +58,7 @@ function RequireAuth() {
 function BackgroundMusicRouteSync() {
   const { pathname } = useLocation()
   useEffect(() => {
-    const lessonLike = pathname === '/lesson' || pathname === '/result'
+    const lessonLike = pathname === '/lesson' || pathname === '/result' || pathname === '/feed' || pathname.startsWith('/stocks/') || pathname.startsWith('/arena')
     if (lessonLike) stopBackgroundMusic()
     else if (!isMuted()) ensureBackgroundMusicStarted()
   }, [pathname])
@@ -82,8 +87,13 @@ export default function App() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/lesson" element={<Lesson />} />
           <Route path="/result" element={<Result />} />
+          <Route path="/feed" element={<Feed />} />
           <Route element={<RequireAuth />}>
             <Route path="/profile" element={<Profile />} />
+            <Route path="/stocks/:code" element={<StockDetail />} />
+            <Route path="/arena" element={<Arena />} />
+            <Route path="/arena/stock/:code" element={<ArenaStock />} />
+            <Route path="/arena/trade/:code" element={<ArenaTrade />} />
           </Route>
         </Routes>
       </div>

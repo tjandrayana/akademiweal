@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>InvestQuest — Paper Trading Arena</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#0F0820;
+  font-family:'Nunito',sans-serif;
+  display:flex;flex-direction:column;align-items:center;
+  padding:40px 20px 80px;
+  min-height:100vh;
+  position:relative;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 10%,rgba(255,184,48,0.06) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 70% at 80% 80%,rgba(64,200,96,0.05) 0%,transparent 60%);
+  pointer-events:none;z-index:0;
+}
+
+/* ── PAGE HEADER ── */
+.pg{text-align:center;margin-bottom:36px;position:relative;z-index:1}
+.pg-eye{font-size:11px;font-weight:900;letter-spacing:4px;text-transform:uppercase;color:#FFB830;margin-bottom:10px}
+.pg-title{font-family:'Fredoka One',cursive;font-size:48px;
+  background:linear-gradient(135deg,#FFE060,#FFB830,#FF8C00);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1;letter-spacing:2px;margin-bottom:8px}
+.pg-sub{font-size:14px;color:#6A4A8A;max-width:560px;margin:0 auto;line-height:1.6}
+
+/* ── SCREEN TAB SWITCHER ── */
+.tabs{
+  display:flex;gap:8px;margin-bottom:32px;
+  background:rgba(255,255,255,0.04);border-radius:16px;padding:6px;
+  position:relative;z-index:1;flex-wrap:wrap;justify-content:center;
+}
+.tab{
+  font-family:'Fredoka One',cursive;font-size:13px;
+  padding:8px 18px;border-radius:12px;cursor:pointer;
+  transition:all .2s;border:none;background:transparent;
+  color:#5A3A8A;
+}
+.tab.active{
+  background:linear-gradient(135deg,#FFD040,#FFB020);
+  color:#7A4000;
+  box-shadow:0 3px 0 #CC8000;
+}
+.tab:not(.active):hover{color:#FFB830;background:rgba(255,184,48,0.08)}
+
+/* ── SCREEN WRAPPER ── */
+.screen{display:none;position:relative;z-index:1}
+.screen.active{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+
+/* ── PHONE FRAME ── */
+.phone{
+  width:375px;
+  border-radius:50px;
+  background:#F8F6F2;
+  border:4px solid #E8E0D4;
+  box-shadow:
+    0 0 0 1px rgba(255,184,48,0.2),
+    0 8px 0 #D4CCC0,
+    0 30px 80px rgba(0,0,0,0.6);
+  overflow:hidden;flex-shrink:0;
+}
+.notch{width:120px;height:32px;background:#F0EDE8;border-radius:0 0 20px 20px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:8px}
+.nd{width:9px;height:9px;border-radius:50%;background:#DDD8D0}
+.nb{width:48px;height:4px;border-radius:2px;background:#DDD8D0}
+.status-bar{display:flex;justify-content:space-between;padding:3px 22px 6px;font-size:11px;font-weight:800;color:#8A7A6A}
+
+/* ── SHARED COMPONENTS ── */
+.topbar{
+  background:white;
+  padding:10px 16px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:2px solid #F0EDE8;
+}
+.back-btn{width:34px;height:34px;border-radius:50%;background:#F0EDE8;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;border:none}
+.topbar-title{font-family:'Fredoka One',cursive;font-size:18px;color:#2A1A06}
+
+/* ── ARENA HOME SCREEN ── */
+.arena-header{
+  position:relative;overflow:hidden;height:260px;
+}
+.arena-banner{
+  position:absolute;inset:0;
+}
+.portfolio-card{
+  position:absolute;bottom:0;left:0;right:0;
+  background:white;
+  border-radius:28px 28px 0 0;
+  padding:20px 18px 8px;
+  z-index:10;
+}
+.portfolio-main-value{
+  font-family:'Fredoka One',cursive;font-size:38px;
+  color:#1A1A1A;line-height:1;margin-bottom:4px;
+}
+.portfolio-change{
+  display:inline-flex;align-items:center;gap:6px;
+  border-radius:100px;padding:4px 12px;
+  font-size:13px;font-weight:900;
+  margin-bottom:12px;
+}
+.pnl-positive{background:#E8FFF0;color:#20A040;border:1.5px solid rgba(32,160,64,0.25)}
+.pnl-negative{background:#FFF0F0;color:#E03040;border:1.5px solid rgba(224,48,64,0.25)}
+
+/* Quick stats row */
+.quick-stats{display:flex;gap:10px;margin-bottom:14px}
+.qs-item{
+  flex:1;background:#FAFAF8;border:2px solid #F0EDE8;border-radius:14px;
+  padding:10px 12px;text-align:center;
+}
+.qs-label{font-size:9px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#B0A090;margin-bottom:4px}
+.qs-value{font-family:'Fredoka One',cursive;font-size:17px;color:#2A1A06}
+.qs-value.up{color:#20A040}
+.qs-value.down{color:#E03040}
+
+/* Rank banner */
+.rank-banner{
+  background:linear-gradient(135deg,#FFF8E0,#FFF0D0);
+  border:2px solid #F5C518;border-radius:16px;
+  padding:12px 14px;margin-bottom:14px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 3px 0 rgba(245,197,24,0.2);
+}
+.rank-badge{
+  width:48px;height:48px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#FFD040,#FFB020);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fredoka One',cursive;font-size:22px;
+  color:#7A4000;box-shadow:0 3px 0 #CC8000;
+}
+.rank-info-label{font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#9A6800;margin-bottom:2px}
+.rank-info-val{font-family:'Fredoka One',cursive;font-size:18px;color:#7A4000}
+.rank-trend{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end}
+.rank-trend-up{font-size:12px;font-weight:900;color:#20A040}
+
+/* Holdings list */
+.section-label{
+  font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;
+  color:#B0A090;margin-bottom:10px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.see-all{font-size:12px;font-weight:900;color:#FFB830;cursor:pointer}
+.holding-row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 0;border-bottom:1.5px solid #F8F4F0;
+}
+.holding-logo{
+  width:44px;height:44px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+  box-shadow:0 3px 0 rgba(0,0,0,0.08);
+}
+.holding-info{flex:1}
+.holding-ticker{font-family:'Fredoka One',cursive;font-size:16px;color:#1A1A1A;line-height:1}
+.holding-name{font-size:11px;font-weight:700;color:#8A7A6A;margin-top:1px}
+.holding-shares{font-size:10px;font-weight:800;color:#B0A090;margin-top:2px}
+.holding-right{text-align:right}
+.holding-value{font-family:'Fredoka One',cursive;font-size:16px;color:#1A1A1A}
+.holding-pnl{font-size:12px;font-weight:800;margin-top:2px}
+.holding-pnl.up{color:#20A040}
+.holding-pnl.dn{color:#E03040}
+
+/* Bottom nav */
+.bnav{
+  background:white;border-top:2px solid #F0EDE8;
+  padding:8px 0 12px;
+  display:flex;justify-content:space-around;
+}
+.bnav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 12px;border-radius:12px}
+.bnav-btn.active{background:#FFF8E0}
+.bnav-icon{font-size:22px;line-height:1}
+.bnav-lbl{font-size:9px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
+.bnav-btn.active .bnav-lbl{color:#FFB830}
+.bnav-btn:not(.active) .bnav-lbl{color:#C0B8B0}
+
+/* FAB */
+.fab{
+  position:relative;width:calc(100% - 32px);margin:0 16px 16px;
+  background:linear-gradient(180deg,#48D870,#28B050);
+  border:2px solid #20A040;border-radius:16px;
+  padding:14px;text-align:center;cursor:pointer;
+  font-family:'Fredoka One',cursive;font-size:17px;color:white;
+  box-shadow:0 5px 0 #189030;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+
+/* ── STOCK PICKER SCREEN ── */
+.search-bar{
+  margin:12px 16px;
+  background:#F0EDE8;border-radius:14px;
+  display:flex;align-items:center;gap:8px;padding:12px 14px;
+  border:2px solid #E8E0D8;
+}
+.search-icon{font-size:16px}
+.search-input{
+  background:transparent;border:none;outline:none;
+  font-size:14px;font-family:'Nunito',sans-serif;font-weight:700;
+  color:#2A1A06;flex:1;
+}
+.search-input::placeholder{color:#B0A090}
+
+/* Filter chips */
+.filter-row{
+  display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;
+  scrollbar-width:none;
+}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-chip{
+  font-size:11px;font-weight:900;padding:6px 14px;border-radius:100px;
+  border:2px solid;white-space:nowrap;cursor:pointer;flex-shrink:0;
+  font-family:'Nunito',sans-serif;
+}
+.fc-active{background:#FFB830;border-color:#CC8800;color:#7A4000;box-shadow:0 2px 0 #AA6600}
+.fc-inactive{background:white;border-color:#E8E0D8;color:#8A7A6A}
+
+/* Stock rows */
+.stock-row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-bottom:1.5px solid #F8F4F0;
+  cursor:pointer;transition:background .15s;
+}
+.stock-row:hover{background:#FAFAF8}
+.stock-logo{
+  width:46px;height:46px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+  box-shadow:0 3px 0 rgba(0,0,0,0.08);
+}
+.stock-info{flex:1}
+.stock-ticker{font-family:'Fredoka One',cursive;font-size:16px;color:#1A1A1A}
+.stock-name{font-size:11px;font-weight:700;color:#8A7A6A}
+.stock-market{font-size:10px;font-weight:800;color:#B0A090;margin-top:2px}
+.stock-right{text-align:right}
+.stock-price{font-family:'Fredoka One',cursive;font-size:16px;color:#1A1A1A}
+.stock-change{font-size:12px;font-weight:900;padding:2px 8px;border-radius:6px;margin-top:2px;display:inline-block}
+.chg-up{background:#E8FFF0;color:#20A040}
+.chg-dn{background:#FFF0F0;color:#E03040}
+
+/* Watchlist tag */
+.wl-tag{
+  font-size:9px;font-weight:900;letter-spacing:1px;text-transform:uppercase;
+  background:#FFF8E0;color:#C89000;border:1px solid rgba(200,144,0,0.3);
+  border-radius:100px;padding:2px 7px;margin-left:6px;
+}
+
+/* ── TRADE EXECUTION SCREEN ── */
+.trade-sheet{background:white;padding:20px 18px 8px}
+
+.stock-detail-hero{
+  display:flex;align-items:center;gap:14px;margin-bottom:16px;
+}
+.sdh-logo{width:56px;height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 0 rgba(0,0,0,0.1)}
+.sdh-ticker{font-family:'Fredoka One',cursive;font-size:26px;color:#1A1A1A;line-height:1}
+.sdh-name{font-size:12px;font-weight:700;color:#8A7A6A}
+.sdh-price{font-family:'Fredoka One',cursive;font-size:24px;line-height:1}
+.sdh-chg{font-size:13px;font-weight:900;padding:4px 10px;border-radius:8px;margin-top:4px;display:inline-block}
+
+/* Mini chart */
+.mini-chart{
+  background:#FAFAF8;border:2px solid #F0EDE8;border-radius:16px;
+  padding:12px;margin-bottom:14px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.chart-timeframes{display:flex;gap:6px}
+.tf{font-size:11px;font-weight:900;padding:4px 10px;border-radius:8px;cursor:pointer;border:none}
+.tf.active{background:#FFB830;color:#7A4000}
+.tf:not(.active){background:#F0EDE8;color:#8A7A6A}
+
+/* Trade type toggle */
+.trade-toggle{
+  display:flex;background:#F0EDE8;border-radius:14px;padding:4px;
+  margin-bottom:14px;
+}
+.tt-btn{
+  flex:1;padding:10px;border-radius:11px;text-align:center;
+  font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;
+  transition:all .2s;border:none;background:transparent;
+}
+.tt-buy{color:#20A040}
+.tt-buy.active{background:#20A040;color:white;box-shadow:0 3px 0 #107020}
+.tt-sell{color:#E03040}
+.tt-sell.active{background:#E03040;color:white;box-shadow:0 3px 0 #901020}
+
+/* Quantity control */
+.qty-row{
+  background:#FAFAF8;border:2px solid #F0EDE8;border-radius:16px;
+  padding:14px 16px;margin-bottom:14px;
+}
+.qty-label{font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#B0A090;margin-bottom:10px}
+.qty-control{display:flex;align-items:center;gap:0}
+.qty-btn{
+  width:42px;height:42px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:900;cursor:pointer;border:none;
+  background:#F0EDE8;color:#4A3A2A;
+}
+.qty-input{
+  flex:1;text-align:center;font-family:'Fredoka One',cursive;font-size:28px;
+  color:#1A1A1A;background:transparent;border:none;outline:none;
+}
+.qty-presets{display:flex;gap:6px;margin-top:10px}
+.qty-preset{
+  font-size:11px;font-weight:900;padding:5px 12px;border-radius:100px;
+  border:1.5px solid #E8E0D8;background:white;color:#6A5A4A;cursor:pointer;
+}
+.qty-preset.active{border-color:#FFB830;background:#FFF8E0;color:#9A6800}
+
+/* Order summary */
+.order-summary{
+  background:linear-gradient(135deg,#F8FFF8,#F0FFF4);
+  border:2px solid #60E880;border-radius:16px;
+  padding:14px 16px;margin-bottom:14px;
+}
+.os-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+.os-label{font-size:12px;font-weight:700;color:#6A7A6A}
+.os-value{font-size:13px;font-weight:900;color:#2A3A2A}
+.os-total-row{
+  border-top:2px solid rgba(96,232,128,0.3);margin-top:8px;padding-top:10px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.os-total-label{font-family:'Fredoka One',cursive;font-size:16px;color:#1A3A1A}
+.os-total-value{font-family:'Fredoka One',cursive;font-size:20px;color:#20A040}
+
+/* Confirm btn */
+.confirm-btn{
+  width:calc(100% - 32px);margin:0 16px 16px;
+  background:linear-gradient(180deg,#48D870,#28B050);
+  border:2px solid #20A040;border-radius:16px;
+  padding:16px;text-align:center;cursor:pointer;
+  font-family:'Fredoka One',cursive;font-size:18px;color:white;
+  box-shadow:0 5px 0 #189030;
+}
+.confirm-btn.sell-mode{
+  background:linear-gradient(180deg,#FF6070,#E02030);
+  border-color:#B01020;
+  box-shadow:0 5px 0 #901020;
+}
+
+/* ── LEADERBOARD SCREEN ── */
+.lb-header{
+  position:relative;overflow:hidden;height:200px;
+}
+.lb-podium{
+  position:absolute;bottom:0;left:0;right:0;
+  display:flex;align-items:flex-end;justify-content:center;
+  gap:0;z-index:10;padding:0 20px;
+}
+.podium-spot{
+  display:flex;flex-direction:column;align-items:center;
+  gap:6px;
+}
+.ps-avatar{
+  border-radius:50%;border:3px solid;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;background:white;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+.ps-name{font-family:'Fredoka One',cursive;font-size:12px;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.3)}
+.ps-return{font-size:11px;font-weight:900;color:rgba(255,255,255,0.9)}
+.ps-block{border-radius:8px 8px 0 0;width:100%;display:flex;align-items:center;justify-content:center}
+.ps-rank{font-family:'Fredoka One',cursive;font-size:18px;color:white}
+
+/* 1st place */
+.p1{width:110px}
+.p1 .ps-avatar{width:66px;height:66px;border-color:#F5C518;box-shadow:0 0 20px rgba(245,197,24,0.5)}
+.p1 .ps-block{height:72px;background:linear-gradient(180deg,#FFD040,#CC9000);box-shadow:0 -4px 12px rgba(255,208,64,0.3)}
+/* 2nd place */
+.p2{width:90px}
+.p2 .ps-avatar{width:56px;height:56px;border-color:#C0C8D8;}
+.p2 .ps-block{height:52px;background:linear-gradient(180deg,#A8B8C8,#7888A0)}
+/* 3rd place */
+.p3{width:90px}
+.p3 .ps-avatar{width:56px;height:56px;border-color:#D4904A;}
+.p3 .ps-block{height:40px;background:linear-gradient(180deg,#D4904A,#A06030)}
+
+/* Leaderboard list */
+.lb-list-wrap{background:white;border-radius:28px 28px 0 0;padding:20px 18px;margin-top:-10px;position:relative;z-index:5}
+
+.lb-row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 0;border-bottom:1.5px solid #F8F4F0;
+}
+.lb-rank{
+  width:32px;height:32px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fredoka One',cursive;font-size:15px;flex-shrink:0;
+}
+.lb-rank.r1{background:linear-gradient(135deg,#FFD040,#FFB020);color:#7A4000;box-shadow:0 2px 0 #CC8000}
+.lb-rank.r2{background:linear-gradient(135deg,#C8D8E8,#A0B8CC);color:#3A5060}
+.lb-rank.r3{background:linear-gradient(135deg,#E0A860,#C07838);color:#6A3000}
+.lb-rank.other{background:#F0EDE8;color:#8A7A6A}
+.lb-avatar{width:40px;height:40px;border-radius:50%;background:#F8F4F0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:2px solid #F0EDE8}
+.lb-info{flex:1}
+.lb-username{font-family:'Fredoka One',cursive;font-size:15px;color:#1A1A1A}
+.lb-mascot-badge{font-size:11px;color:#8A7A6A;font-weight:700}
+.lb-return{text-align:right}
+.lb-pct{font-family:'Fredoka One',cursive;font-size:16px}
+.lb-pct.up{color:#20A040}
+.lb-pct.dn{color:#E03040}
+.lb-value{font-size:11px;font-weight:700;color:#A0908A}
+
+/* "You" highlight */
+.lb-row.you{background:linear-gradient(135deg,#FFF8E0,#FFF0D0);border-radius:14px;border:2px solid rgba(245,197,24,0.3);padding:12px 8px;margin:4px 0}
+.lb-row.you .lb-rank{background:linear-gradient(135deg,#FFD040,#FFB020);color:#7A4000}
+
+/* ── ANIMATIONS ── */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes cloudDrift{0%{transform:translateX(0)}100%{transform:translateX(14px)}}
+@keyframes priceFlash{0%{opacity:1}40%{opacity:0.3}100%{opacity:1}}
+@keyframes barGrow{from{height:0}to{height:var(--h)}}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes sparkle{0%,100%{opacity:0;transform:scale(0.5)}50%{opacity:1;transform:scale(1.3)}}
+@keyframes coinSpin{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
+@keyframes rankPulse{0%,100%{box-shadow:0 0 0 0 rgba(245,197,24,0.4)}50%{box-shadow:0 0 0 8px rgba(245,197,24,0)}}
+
+/* ── SIDE PANEL (design notes) ── */
+.side-panel{
+  width:300px;flex-shrink:0;
+  display:flex;flex-direction:column;gap:16px;
+}
+.note-card{
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:20px;padding:18px;
+}
+.note-title{font-family:'Fredoka One',cursive;font-size:18px;color:#FFB830;margin-bottom:10px}
+.note-item{
+  display:flex;gap:10px;align-items:flex-start;
+  margin-bottom:10px;
+}
+.note-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;
+}
+.note-text{font-size:12px;color:#8A6AB8;line-height:1.55;font-weight:700}
+.note-text strong{color:#C0A0E8}
+
+/* User flow note */
+.flow-step{
+  display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;
+}
+.flow-num{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fredoka One',cursive;font-size:14px;
+  background:linear-gradient(135deg,#FFD040,#FFB020);color:#7A4000;
+  box-shadow:0 2px 0 #CC8000;
+}
+.flow-text{font-size:12px;color:#8A6AB8;font-weight:700;line-height:1.5;padding-top:4px}
+.flow-text strong{color:#FFB830}
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="pg">
+  <div class="pg-eye">InvestQuest · Feature Design</div>
+  <div class="pg-title">⚔️ Paper Trading Arena</div>
+  <p class="pg-sub">Trade real IDX stocks with fake money. Compete on the leaderboard. Level up your mascot. Zero real risk — maximum learning.</p>
+</div>
+
+<!-- SCREEN TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="show('home')">🏠 Arena Home</button>
+  <button class="tab" onclick="show('picker')">🔍 Stock Picker</button>
+  <button class="tab" onclick="show('trade')">⚡ Trade Screen</button>
+  <button class="tab" onclick="show('leaderboard')">🏆 Leaderboard</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN 1 — ARENA HOME                             -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="screen active" id="scr-home">
+  <div class="phone">
+    <div class="notch"><div class="nd"></div><div class="nb"></div><div class="nd"></div></div>
+    <div class="status-bar"><span>9:41</span><span>▲▲▲ 🔋</span></div>
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#FFD040,#FF8C00);display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid #FFB830">🐂</div>
+        <div>
+          <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#1A1A1A">Budi's Arena</div>
+          <div style="font-size:10px;font-weight:900;color:#20A040;letter-spacing:1px">⚡ Week 3 Active</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <!-- Streak -->
+        <div style="background:#FFF3E0;border:2px solid #FF8830;border-radius:100px;padding:5px 10px;display:flex;align-items:center;gap:4px">
+          <span style="font-size:14px">🔥</span>
+          <span style="font-family:'Fredoka One',cursive;font-size:14px;color:#CC4400">12</span>
+        </div>
+        <!-- Bell -->
+        <div style="width:34px;height:34px;border-radius:50%;background:#F0EDE8;display:flex;align-items:center;justify-content:center;font-size:17px;position:relative">
+          🔔
+          <div style="position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:#FF5060;border:2px solid #F8F6F2;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:900;color:white">3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARENA BANNER with animated bg -->
+    <div class="arena-header">
+      <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 375 260" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="ab1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0F0820"/>
+            <stop offset="50%" stop-color="#1A0A3A"/>
+            <stop offset="100%" stop-color="#1A1030"/>
+          </linearGradient>
+        </defs>
+        <rect width="375" height="260" fill="url(#ab1)"/>
+        <!-- Grid lines (trading terminal vibe) -->
+        <line x1="0" y1="60" x2="375" y2="60" stroke="rgba(255,184,48,0.08)" stroke-width="1"/>
+        <line x1="0" y1="120" x2="375" y2="120" stroke="rgba(255,184,48,0.06)" stroke-width="1"/>
+        <line x1="0" y1="180" x2="375" y2="180" stroke="rgba(255,184,48,0.06)" stroke-width="1"/>
+        <line x1="62" y1="0" x2="62" y2="210" stroke="rgba(255,184,48,0.05)" stroke-width="1"/>
+        <line x1="125" y1="0" x2="125" y2="210" stroke="rgba(255,184,48,0.05)" stroke-width="1"/>
+        <line x1="187" y1="0" x2="187" y2="210" stroke="rgba(255,184,48,0.05)" stroke-width="1"/>
+        <line x1="250" y1="0" x2="250" y2="210" stroke="rgba(255,184,48,0.05)" stroke-width="1"/>
+        <line x1="312" y1="0" x2="312" y2="210" stroke="rgba(255,184,48,0.05)" stroke-width="1"/>
+        <!-- MAIN CHART LINE (portfolio performance) -->
+        <path d="M0,170 L30,155 L60,162 L90,140 L110,148 L140,118 L165,125 L190,100 L215,108 L245,82 L268,90 L295,65 L320,72 L345,50 L375,42"
+          fill="none" stroke="#00DC8C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Chart fill -->
+        <path d="M0,170 L30,155 L60,162 L90,140 L110,148 L140,118 L165,125 L190,100 L215,108 L245,82 L268,90 L295,65 L320,72 L345,50 L375,42 L375,210 L0,210 Z"
+          fill="url(#chartFill)" opacity="0.25"/>
+        <defs>
+          <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#00DC8C"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </linearGradient>
+        </defs>
+        <!-- Current dot with pulse -->
+        <circle cx="375" cy="42" r="5" fill="#00DC8C"/>
+        <circle cx="375" cy="42" r="10" fill="#00DC8C" opacity="0.2" style="animation:sparkle 1.5s ease-in-out infinite"/>
+        <!-- Stock tickers floating -->
+        <text x="20" y="28" font-size="10" fill="rgba(0,220,140,0.5)" font-family="'Courier New',monospace" font-weight="bold">BBCA +2.4%</text>
+        <text x="160" y="22" font-size="10" fill="rgba(255,184,48,0.5)" font-family="'Courier New',monospace" font-weight="bold">TLKM +1.1%</text>
+        <text x="280" y="30" font-size="10" fill="rgba(255,80,96,0.5)" font-family="'Courier New',monospace" font-weight="bold">GOTO -0.8%</text>
+        <!-- Stars decoration -->
+        <text x="28" y="100" font-size="14" fill="#F5C518" opacity="0.5" font-family="sans-serif" style="animation:sparkle 2s ease-in-out infinite 0.5s">★</text>
+        <text x="340" y="120" font-size="11" fill="#F5C518" opacity="0.4" font-family="sans-serif" style="animation:sparkle 2.5s ease-in-out infinite 1.2s">★</text>
+      </svg>
+
+      <!-- Portfolio overlay card on top of chart -->
+      <div class="portfolio-card">
+        <div style="font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#B0A090;margin-bottom:4px">Total Portofolio (Virtual)</div>
+        <div class="portfolio-main-value">Rp 12.480.500</div>
+        <div class="portfolio-change pnl-positive">
+          <span>▲</span>
+          <span>+Rp 2.480.500 (+24.8%)</span>
+          <span style="font-size:10px;color:#60B080">Minggu ini</span>
+        </div>
+
+        <div class="quick-stats">
+          <div class="qs-item">
+            <div class="qs-label">Saldo</div>
+            <div class="qs-value">Rp 4.2jt</div>
+          </div>
+          <div class="qs-item">
+            <div class="qs-label">Invested</div>
+            <div class="qs-value">Rp 8.3jt</div>
+          </div>
+          <div class="qs-item">
+            <div class="qs-label">Win Rate</div>
+            <div class="qs-value up">73%</div>
+          </div>
+          <div class="qs-item">
+            <div class="qs-label">Trades</div>
+            <div class="qs-value">24</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main scroll content -->
+    <div style="background:white;padding:14px 16px 0">
+
+      <!-- Rank banner -->
+      <div class="rank-banner">
+        <div class="rank-badge" style="animation:rankPulse 2s ease-in-out infinite">#7</div>
+        <div>
+          <div class="rank-info-label">Peringkatmu minggu ini</div>
+          <div class="rank-info-val">Top 7 dari 2.840 trader!</div>
+        </div>
+        <div class="rank-trend">
+          <div class="rank-trend-up">▲ Naik 12</div>
+          <div style="font-size:10px;font-weight:700;color:#B0A090">dari kemarin</div>
+        </div>
+      </div>
+
+      <!-- XP progress -->
+      <div style="background:#F8F8F8;border:2px solid #F0EDE8;border-radius:14px;padding:12px 14px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#B0A090">Progress Misi Minggu Ini</span>
+          <span style="font-size:12px;font-weight:900;color:#FFB830">4/5 selesai</span>
+        </div>
+        <div style="height:10px;background:#E8E0D8;border-radius:100px;overflow:hidden">
+          <div style="width:80%;height:100%;background:linear-gradient(90deg,#FFB830,#FFE060);border-radius:100px;box-shadow:inset 0 2px 0 rgba(255,255,255,0.4)"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px">
+          <span style="font-size:11px;font-weight:700;color:#8A7A6A">🎯 Beli 3 saham berbeda ✓</span>
+          <span style="font-size:11px;font-weight:900;color:#20A040">+150 XP</span>
+        </div>
+      </div>
+
+      <!-- Holdings -->
+      <div class="section-label">
+        📦 Saham Kamu
+        <span class="see-all" onclick="show('picker')">+ Beli Saham</span>
+      </div>
+
+      <div class="holding-row">
+        <div class="holding-logo" style="background:linear-gradient(135deg,#E8F4FF,#C8E8FF)">🏦</div>
+        <div class="holding-info">
+          <div class="holding-ticker">BBCA <span class="wl-tag">⭐ Watch</span></div>
+          <div class="holding-name">Bank Central Asia</div>
+          <div class="holding-shares">200 lot · Avg Rp 9.200</div>
+        </div>
+        <div class="holding-right">
+          <div class="holding-value">Rp 3.680.000</div>
+          <div class="holding-pnl up">▲ +Rp 240.000 (+7.0%)</div>
+        </div>
+      </div>
+
+      <div class="holding-row">
+        <div class="holding-logo" style="background:linear-gradient(135deg,#E8FFE8,#C8F0C8)">📡</div>
+        <div class="holding-info">
+          <div class="holding-ticker">TLKM</div>
+          <div class="holding-name">Telkom Indonesia</div>
+          <div class="holding-shares">500 lot · Avg Rp 3.420</div>
+        </div>
+        <div class="holding-right">
+          <div class="holding-value">Rp 1.750.000</div>
+          <div class="holding-pnl up">▲ +Rp 40.000 (+2.3%)</div>
+        </div>
+      </div>
+
+      <div class="holding-row">
+        <div class="holding-logo" style="background:linear-gradient(135deg,#FFF8E8,#FFE8C8)">🛒</div>
+        <div class="holding-info">
+          <div class="holding-ticker">GOTO</div>
+          <div class="holding-name">GoTo Gojek Tokopedia</div>
+          <div class="holding-shares">1000 lot · Avg Rp 98</div>
+        </div>
+        <div class="holding-right">
+          <div class="holding-value">Rp 920.000</div>
+          <div class="holding-pnl dn">▼ -Rp 80.000 (-8.0%)</div>
+        </div>
+      </div>
+
+    </div><!-- end main scroll -->
+
+    <!-- FAB -->
+    <div class="fab" onclick="show('picker')">
+      <span>⚡ Beli / Jual Saham</span>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bnav">
+      <div class="bnav-btn active">
+        <div class="bnav-icon">📊</div>
+        <div class="bnav-lbl">Arena</div>
+      </div>
+      <div class="bnav-btn" onclick="show('picker')">
+        <div class="bnav-icon">🔍</div>
+        <div class="bnav-lbl">Saham</div>
+      </div>
+      <div class="bnav-btn" onclick="show('leaderboard')">
+        <div class="bnav-icon">🏆</div>
+        <div class="bnav-lbl">Ranking</div>
+      </div>
+      <div class="bnav-btn">
+        <div class="bnav-icon">📚</div>
+        <div class="bnav-lbl">Belajar</div>
+      </div>
+      <div class="bnav-btn">
+        <div class="bnav-icon">👤</div>
+        <div class="bnav-lbl">Profil</div>
+      </div>
+    </div>
+
+  </div><!-- end phone -->
+
+  <!-- Side design notes -->
+  <div class="side-panel">
+    <div class="note-card">
+      <div class="note-title">📊 Arena Home Screen</div>
+      <div class="note-item"><div class="note-dot" style="background:#00DC8C"></div><div class="note-text"><strong>Real IDX data</strong> — prices update live via IDX API or Yahoo Finance. Users trade fake money against real prices.</div></div>
+      <div class="note-item"><div class="note-dot" style="background:#FFB830"></div><div class="note-text"><strong>Starting capital</strong> = Rp 10.000.000 virtual for all players. Resets weekly for fair competition.</div></div>
+      <div class="note-item"><div class="note-dot" style="background:#FF8C00"></div><div class="note-text"><strong>Weekly season format</strong> — compete Mon–Fri. Podium reward = bonus XP + mascot frame.</div></div>
+      <div class="note-item"><div class="note-dot" style="background:#8040C0"></div><div class="note-text"><strong>Mission system</strong> tied to lessons — "Buy 3 different sectors" teaches diversification in practice.</div></div>
+    </div>
+    <div class="note-card">
+      <div class="note-title">🔗 User Flow</div>
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-text"><strong>Weekly Reset</strong> — every Monday, all users start fresh with Rp 10jt. No carry-over prevents rich-get-richer.</div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-text"><strong>Trade</strong> — pick from 50 blue-chip IDX stocks. See simplified fundamentals (P/E, revenue, sector).</div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-text"><strong>Earn XP</strong> — completing weekly missions earns lesson XP, boosting mascot level regardless of profit.</div></div>
+      <div class="flow-step"><div class="flow-num">4</div><div class="flow-text"><strong>Friday leaderboard</strong> — top 10% earn Gold League status + premium badge for next week.</div></div>
+      <div class="flow-step"><div class="flow-num">5</div><div class="flow-text"><strong>Premium upsell</strong> — free users see 5 stocks. Premium unlocks 50+ stocks, AI insights, no ads.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN 2 — STOCK PICKER                           -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="screen" id="scr-picker">
+  <div class="phone">
+    <div class="notch"><div class="nd"></div><div class="nb"></div><div class="nd"></div></div>
+    <div class="status-bar"><span>9:41</span><span>▲▲▲ 🔋</span></div>
+
+    <div class="topbar">
+      <button class="back-btn" onclick="show('home')">←</button>
+      <div class="topbar-title">Pilih Saham</div>
+      <div style="width:36px;height:36px;border-radius:50%;background:#F0EDE8;display:flex;align-items:center;justify-content:center;font-size:16px">🔖</div>
+    </div>
+
+    <!-- Balance remaining -->
+    <div style="background:#F0FFF4;border-bottom:2px solid #60E880;padding:10px 16px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#60A870;margin-bottom:1px">Saldo Tersedia</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:20px;color:#1A5A1A">Rp 4.200.000</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:10px;font-weight:900;color:#80A890;margin-bottom:1px">Market</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="width:8px;height:8px;border-radius:50%;background:#20A040;box-shadow:0 0 6px rgba(32,160,64,0.6)"></div>
+          <span style="font-size:13px;font-weight:900;color:#20A040">BUKA · LIVE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" placeholder="Cari saham IDX... (BBCA, TLKM)">
+      <span style="font-size:14px;color:#C0B8B0">⌨</span>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="filter-row">
+      <div class="filter-chip fc-active">Semua</div>
+      <div class="filter-chip fc-inactive">⭐ Watchlist</div>
+      <div class="filter-chip fc-inactive">🏦 Perbankan</div>
+      <div class="filter-chip fc-inactive">📡 Telko</div>
+      <div class="filter-chip fc-inactive">🛒 Consumer</div>
+      <div class="filter-chip fc-inactive">⛽ Energi</div>
+      <div class="filter-chip fc-inactive">💊 Kesehatan</div>
+    </div>
+
+    <!-- Market Summary Banner -->
+    <div style="margin:0 16px 12px;background:linear-gradient(135deg,#F8FFF8,#F0FFF4);border:2px solid #60E880;border-radius:14px;padding:10px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#80A890;margin-bottom:2px">IHSG Hari Ini</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#1A5A1A">7.284,52 <span style="font-size:13px;color:#20A040">▲ +0.82%</span></div>
+        </div>
+        <div style="text-align:right;font-size:11px;color:#80A890">
+          <div style="font-weight:800">Vol: Rp 12,4T</div>
+          <div style="font-weight:700">28 Mar 2026</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Free tier notice -->
+    <div style="margin:0 16px 10px;background:linear-gradient(135deg,#FFF8E0,#FFF0D0);border:2px solid rgba(245,197,24,0.4);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px">🔒</span>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:900;color:#9A6800">Free: 5 saham tersedia</div>
+        <div style="font-size:11px;color:#C08A20;font-weight:700">Upgrade Premium → akses 50+ saham IDX</div>
+      </div>
+      <div style="background:#FFB830;border-radius:100px;padding:5px 12px;font-family:'Fredoka One',cursive;font-size:12px;color:#7A4000;white-space:nowrap;cursor:pointer;box-shadow:0 2px 0 #CC8000">Upgrade</div>
+    </div>
+
+    <!-- Sort header -->
+    <div style="padding:8px 16px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:11px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#B0A090">Saham</span>
+      <span style="font-size:11px;font-weight:900;color:#FFB830;cursor:pointer">% Harian ↕</span>
+    </div>
+
+    <!-- Stock list -->
+    <div style="overflow-y:auto;max-height:340px">
+
+      <!-- BBCA — Free -->
+      <div class="stock-row" onclick="show('trade')">
+        <div class="stock-logo" style="background:linear-gradient(135deg,#E8F4FF,#C8E8FF)">🏦</div>
+        <div class="stock-info">
+          <div class="stock-ticker">BBCA <span class="wl-tag">⭐</span></div>
+          <div class="stock-name">Bank Central Asia Tbk</div>
+          <div class="stock-market">Perbankan · LQ45</div>
+        </div>
+        <div class="stock-right">
+          <div class="stock-price">Rp 9.450</div>
+          <div class="stock-change chg-up">▲ +2.42%</div>
+        </div>
+      </div>
+
+      <div class="stock-row" onclick="show('trade')">
+        <div class="stock-logo" style="background:linear-gradient(135deg,#E8FFE8,#C8F0C8)">📡</div>
+        <div class="stock-info">
+          <div class="stock-ticker">TLKM</div>
+          <div class="stock-name">Telkom Indonesia Tbk</div>
+          <div class="stock-market">Telekomunikasi · LQ45</div>
+        </div>
+        <div class="stock-right">
+          <div class="stock-price">Rp 3.520</div>
+          <div class="stock-change chg-up">▲ +1.15%</div>
+        </div>
+      </div>
+
+      <div class="stock-row">
+        <div class="stock-logo" style="background:linear-gradient(135deg,#FFF8E8,#FFE8C8)">⛽</div>
+        <div class="stock-info">
+          <div class="stock-ticker">BMRI</div>
+          <div class="stock-name">Bank Mandiri Tbk</div>
+          <div class="stock-market">Perbankan · LQ45</div>
+        </div>
+        <div class="stock-right">
+          <div class="stock-price">Rp 5.825</div>
+          <div class="stock-change chg-up">▲ +0.87%</div>
+        </div>
+      </div>
+
+      <div class="stock-row">
+        <div class="stock-logo" style="background:linear-gradient(135deg,#FFE8FF,#F0C8F8)">🛒</div>
+        <div class="stock-info">
+          <div class="stock-ticker">GOTO</div>
+          <div class="stock-name">GoTo Gojek Tokopedia</div>
+          <div class="stock-market">Teknologi</div>
+        </div>
+        <div class="stock-right">
+          <div class="stock-price">Rp 92</div>
+          <div class="stock-change chg-dn">▼ -0.83%</div>
+        </div>
+      </div>
+
+      <div class="stock-row">
+        <div class="stock-logo" style="background:linear-gradient(135deg,#F0F8FF,#D0E8FF)">🍜</div>
+        <div class="stock-info">
+          <div class="stock-ticker">INDF</div>
+          <div class="stock-name">Indofood Sukses Makmur</div>
+          <div class="stock-market">Consumer · LQ45</div>
+        </div>
+        <div class="stock-right">
+          <div class="stock-price">Rp 6.250</div>
+          <div class="stock-change chg-up">▲ +0.40%</div>
+        </div>
+      </div>
+
+      <!-- LOCKED stocks (premium) -->
+      <div style="position:relative">
+        <div class="stock-row" style="opacity:0.4;filter:blur(2px);pointer-events:none">
+          <div class="stock-logo" style="background:#F0EDE8">⛏</div>
+          <div class="stock-info">
+            <div class="stock-ticker">ANTM</div>
+            <div class="stock-name">Aneka Tambang Tbk</div>
+            <div class="stock-market">Pertambangan · LQ45</div>
+          </div>
+          <div class="stock-right">
+            <div class="stock-price">Rp 1.680</div>
+            <div class="stock-change chg-up">▲ +3.07%</div>
+          </div>
+        </div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <div style="background:linear-gradient(135deg,#FFB830,#FFD040);border-radius:100px;padding:6px 16px;font-family:'Fredoka One',cursive;font-size:13px;color:#7A4000;box-shadow:0 3px 0 #CC8000;display:flex;align-items:center;gap:6px">
+            🔒 Premium
+          </div>
+        </div>
+      </div>
+
+      <div style="position:relative">
+        <div class="stock-row" style="opacity:0.4;filter:blur(2px);pointer-events:none">
+          <div class="stock-logo" style="background:#F0EDE8">🏗</div>
+          <div class="stock-info">
+            <div class="stock-ticker">WSKT</div>
+            <div class="stock-name">Waskita Karya Tbk</div>
+            <div class="stock-market">Konstruksi</div>
+          </div>
+          <div class="stock-right">
+            <div class="stock-price">Rp 178</div>
+            <div class="stock-change chg-dn">▼ -1.66%</div>
+          </div>
+        </div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <div style="background:linear-gradient(135deg,#FFB830,#FFD040);border-radius:100px;padding:6px 16px;font-family:'Fredoka One',cursive;font-size:13px;color:#7A4000;box-shadow:0 3px 0 #CC8000;display:flex;align-items:center;gap:6px">
+            🔒 Premium
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bnav">
+      <div class="bnav-btn" onclick="show('home')"><div class="bnav-icon">📊</div><div class="bnav-lbl">Arena</div></div>
+      <div class="bnav-btn active"><div class="bnav-icon">🔍</div><div class="bnav-lbl">Saham</div></div>
+      <div class="bnav-btn" onclick="show('leaderboard')"><div class="bnav-icon">🏆</div><div class="bnav-lbl">Ranking</div></div>
+      <div class="bnav-btn"><div class="bnav-icon">📚</div><div class="bnav-lbl">Belajar</div></div>
+      <div class="bnav-btn"><div class="bnav-icon">👤</div><div class="bnav-lbl">Profil</div></div>
+    </div>
+  </div>
+
+  <div class="side-panel">
+    <div class="note-card">
+      <div class="note-title">🔍 Stock Picker Design</div>
+      <div class="note-item"><div class="note-dot" style="background:#FFB830"></div><div class="note-text"><strong>Free tier = 5 stocks</strong> — specifically chosen to cover all major sectors so learning still works. BBCA, TLKM, BMRI, GOTO, INDF.</div></div>
+      <div class="note-item"><div class="note-dot" style="background:#00DC8C"></div><div class="note-text"><strong>Live IHSG banner</strong> — makes the app feel alive and connected to reality even before users trade.</div></div>
+      <div class="note-item"><div class="note-dot" style="background:#8040C0"></div><div class="note-text"><strong>Blurred premium stocks</strong> — tease what exists. Users can see there are more options, just can't access them. FOMO-driven upsell.</div></div>
+      <div class="note-item"><div class="note-dot" style="background:#FF5060"></div><div class="note-text"><strong>Sector filter chips</strong> — teach sector diversification passively. Users naturally want to spread across chips.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN 3 — TRADE EXECUTION                        -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="screen" id="scr-trade">
+  <div class="phone">
+    <div class="notch"><div class="nd"></div><div class="nb"></div><div class="nd"></div></div>
+    <div class="status-bar"><span>9:41</span><span>▲▲▲ 🔋</span></div>
+
+    <div class="topbar" style="background:#1A5A1A">
+      <button class="back-btn" onclick="show('picker')" style="background:rgba(255,255,255,0.15);color:white;border:none">←</button>
+      <div class="topbar-title" style="color:white">Trade BBCA</div>
+      <div style="background:rgba(255,255,255,0.15);border-radius:100px;padding:4px 10px;font-size:11px;font-weight:900;color:#80FF80">⭐ Watchlist</div>
+    </div>
+
+    <!-- Stock hero -->
+    <div style="background:linear-gradient(180deg,#1A5A1A,#0F3A0F);padding:16px 18px 20px">
+      <div class="stock-detail-hero">
+        <div class="sdh-logo" style="background:white">🏦</div>
+        <div style="flex:1">
+          <div class="sdh-ticker" style="color:white">BBCA</div>
+          <div class="sdh-name" style="color:rgba(255,255,255,0.7)">Bank Central Asia Tbk</div>
+        </div>
+        <div style="text-align:right">
+          <div class="sdh-price" style="color:white">Rp 9.450</div>
+          <div class="sdh-chg chg-up">▲ +225 (+2.42%)</div>
+        </div>
+      </div>
+
+      <!-- Mini chart (SVG sparkline) -->
+      <div style="background:rgba(255,255,255,0.08);border-radius:14px;padding:10px 12px">
+        <div class="chart-timeframes" style="margin-bottom:8px">
+          <button class="tf" style="background:rgba(255,255,255,0.9);color:#1A5A1A">1H</button>
+          <button class="tf active" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);font-size:11px">1D</button>
+          <button class="tf" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);font-size:11px">1W</button>
+          <button class="tf" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);font-size:11px">1M</button>
+        </div>
+        <svg viewBox="0 0 320 70" width="100%">
+          <path d="M0,55 L25,50 L50,52 L75,42 L100,45 L125,32 L150,36 L175,25 L200,28 L225,18 L250,22 L275,12 L300,15 L320,8"
+            fill="none" stroke="#60FF90" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M0,55 L25,50 L50,52 L75,42 L100,45 L125,32 L150,36 L175,25 L200,28 L225,18 L250,22 L275,12 L300,15 L320,8 L320,70 L0,70 Z"
+            fill="url(#mfill)" opacity="0.2"/>
+          <defs>
+            <linearGradient id="mfill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#60FF90"/><stop offset="100%" stop-color="transparent"/>
+            </linearGradient>
+          </defs>
+          <!-- Current price dot -->
+          <circle cx="320" cy="8" r="4" fill="#60FF90"/>
+          <circle cx="320" cy="8" r="8" fill="#60FF90" opacity="0.25"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Trade sheet -->
+    <div class="trade-sheet">
+
+      <!-- Fundamentals quick strip -->
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <div style="flex:1;text-align:center;background:#F8F8F8;border:1.5px solid #F0EDE8;border-radius:12px;padding:8px">
+          <div style="font-size:9px;font-weight:900;color:#B0A090;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">P/E</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#1A1A1A">15.8x</div>
+        </div>
+        <div style="flex:1;text-align:center;background:#F8F8F8;border:1.5px solid #F0EDE8;border-radius:12px;padding:8px">
+          <div style="font-size:9px;font-weight:900;color:#B0A090;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Dividen</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#20A040">3.2%</div>
+        </div>
+        <div style="flex:1;text-align:center;background:#F8F8F8;border:1.5px solid #F0EDE8;border-radius:12px;padding:8px">
+          <div style="font-size:9px;font-weight:900;color:#B0A090;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Sektor</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:12px;color:#1A1A1A">Banking</div>
+        </div>
+        <div style="flex:1;text-align:center;background:#FFF8E0;border:1.5px solid rgba(245,197,24,0.3);border-radius:12px;padding:8px">
+          <div style="font-size:9px;font-weight:900;color:#9A8040;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Rating</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#C89000">A+</div>
+        </div>
+      </div>
+
+      <!-- Buy/Sell toggle -->
+      <div class="trade-toggle">
+        <button class="tt-btn tt-buy active" id="buyBtn" onclick="setMode('buy')">🟢 Beli</button>
+        <button class="tt-btn tt-sell" id="sellBtn" onclick="setMode('sell')">🔴 Jual</button>
+      </div>
+
+      <!-- Quantity -->
+      <div class="qty-row">
+        <div class="qty-label">Jumlah Lot (1 lot = 100 lembar)</div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <input class="qty-input" value="10" id="qtyInput" type="number" min="1" max="100">
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+        <div class="qty-presets">
+          <div class="qty-preset" onclick="setQty(1)">1 lot</div>
+          <div class="qty-preset active" onclick="setQty(10)">10 lot</div>
+          <div class="qty-preset" onclick="setQty(25)">25 lot</div>
+          <div class="qty-preset" onclick="setQty(50)">50% Saldo</div>
+        </div>
+      </div>
+
+      <!-- Order summary -->
+      <div class="order-summary">
+        <div class="os-row">
+          <div class="os-label">Harga per lot</div>
+          <div class="os-value">Rp 945.000</div>
+        </div>
+        <div class="os-row">
+          <div class="os-label">Jumlah lot</div>
+          <div class="os-value" id="qtyDisplay">10 lot</div>
+        </div>
+        <div class="os-row">
+          <div class="os-label">Biaya (0% virtual)</div>
+          <div class="os-value" style="color:#20A040">GRATIS</div>
+        </div>
+        <div class="os-total-row">
+          <div class="os-total-label">Total Beli</div>
+          <div class="os-total-value" id="totalDisplay">Rp 9.450.000</div>
+        </div>
+      </div>
+
+      <!-- Saldo warning -->
+      <div style="background:#FFF8E0;border:1.5px solid rgba(245,197,24,0.3);border-radius:12px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px">
+        <span>💡</span>
+        <span style="font-size:12px;font-weight:700;color:#9A7A20">Saldo tersisa: <strong>Rp 4.200.000</strong> — Sisakan saldo untuk diversifikasi!</span>
+      </div>
+
+    </div>
+
+    <!-- Confirm button -->
+    <div class="confirm-btn" id="confirmBtn" onclick="confirmTrade()">
+      ✅ Konfirmasi Beli 10 lot BBCA
+    </div>
+
+    <div style="text-align:center;padding:8px 16px 16px;font-size:11px;font-weight:800;color:#B0A090">
+      Ini adalah simulasi. Uang virtual — tidak ada risiko nyata! 🎮
+    </div>
+
+  </div>
+
+  <div class="side-panel">
+    <div class="note-card">
+      <div class="note-title">⚡ Trade Screen Design</div>
+      <div class="note-item"><div class="note-dot" style="background:#00DC8C"></div><div class="note-text"><strong>Dark green header</strong> = buy mode signal. Turns red in sell mode. Color-coded UX reduces cognitive load.</div></div>
+      <div class="note-item"><div class="note-dot" style="background:#FFB830"></div><div class="note-text"><strong>Fundamental quick strip</strong> — P/E, dividend yield, sector, and AI rating shown inline. Teaches while user trades.</div></div>
+      <div class="note-item"><div class="note-dot" style="background:#8040C0"></div><div class="note-text"><strong>0% virtual fees</strong> shown explicitly — removes the "but I lose money to fees" anxiety beginners have.</div></div>
+      <div class="note-item"><div class="note-dot" style="background:#FF6060"></div><div class="note-text"><strong>Saldo warning</strong> — nudges diversification. "Sisakan untuk diversifikasi!" teaches portfolio theory passively.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCREEN 4 — LEADERBOARD                            -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="screen" id="scr-leaderboard">
+  <div class="phone">
+    <div class="notch"><div class="nd"></div><div class="nb"></div><div class="nd"></div></div>
+    <div class="status-bar"><span>9:41</span><span>▲▲▲ 🔋</span></div>
+
+    <div class="topbar">
+      <button class="back-btn" onclick="show('home')">←</button>
+      <div class="topbar-title">🏆 Arena Ranking</div>
+      <div style="background:#FFF8E0;border:2px solid rgba(245,197,24,0.3);border-radius:100px;padding:4px 12px;font-size:11px;font-weight:900;color:#C89000">Minggu 12</div>
+    </div>
+
+    <!-- Podium header -->
+    <div class="lb-header">
+      <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 375 200" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="lbg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1A0A3A"/>
+            <stop offset="100%" stop-color="#0F0820"/>
+          </linearGradient>
+        </defs>
+        <rect width="375" height="200" fill="url(#lbg)"/>
+        <!-- Confetti dots -->
+        <circle cx="40" cy="30" r="4" fill="#FFD040" opacity="0.6" style="animation:sparkle 2s infinite 0s"/>
+        <circle cx="80" cy="20" r="3" fill="#FF6090" opacity="0.5" style="animation:sparkle 2.3s infinite 0.4s"/>
+        <circle cx="160" cy="25" r="4" fill="#60E890" opacity="0.5" style="animation:sparkle 1.8s infinite 0.8s"/>
+        <circle cx="250" cy="18" r="3" fill="#FFD040" opacity="0.6" style="animation:sparkle 2.5s infinite 1.2s"/>
+        <circle cx="320" cy="30" r="4" fill="#FF6090" opacity="0.4" style="animation:sparkle 2.1s infinite 0.6s"/>
+        <circle cx="360" cy="20" r="3" fill="#60E890" opacity="0.5" style="animation:sparkle 1.9s infinite 1s"/>
+        <circle cx="110" cy="45" r="3" fill="#FFD040" opacity="0.4" style="animation:sparkle 2.4s infinite 1.5s"/>
+        <circle cx="280" cy="50" r="4" fill="#B0A0FF" opacity="0.5" style="animation:sparkle 2.2s infinite 0.2s"/>
+        <!-- Stars decoration -->
+        <text x="30" y="75" font-size="20" fill="#FFD040" opacity="0.6" font-family="sans-serif" style="animation:sparkle 2s infinite 0.3s">★</text>
+        <text x="330" y="80" font-size="16" fill="#FFD040" opacity="0.5" font-family="sans-serif" style="animation:sparkle 2.5s infinite 1s">★</text>
+        <text x="180" y="15" font-size="12" fill="#FFD040" opacity="0.4" font-family="sans-serif" style="animation:sparkle 1.8s infinite 0.7s">★</text>
+        <!-- Trophy glow -->
+        <ellipse cx="187" cy="190" rx="120" ry="30" fill="#FFD040" opacity="0.08"/>
+      </svg>
+
+      <!-- 3-person podium -->
+      <div class="lb-podium">
+        <!-- 2nd place -->
+        <div class="podium-spot p2">
+          <div class="ps-avatar" style="width:56px;height:56px;border-color:#C0C8D8">🦬</div>
+          <div class="ps-name">AriRahmat</div>
+          <div class="ps-return" style="font-size:10px">+21.3%</div>
+          <div class="ps-block" style="height:52px;background:linear-gradient(180deg,#A8B8C8,#7888A0);width:100%;border-radius:8px 8px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
+            <div style="font-size:20px">🥈</div>
+            <div class="ps-rank">2</div>
+          </div>
+        </div>
+
+        <!-- 1st place -->
+        <div class="podium-spot p1">
+          <div style="animation:float 2.5s ease-in-out infinite;display:flex;flex-direction:column;align-items:center;gap:6px">
+            <div style="font-size:22px" class="sparkle">👑</div>
+            <div class="ps-avatar" style="width:66px;height:66px;border-color:#F5C518;box-shadow:0 0 20px rgba(245,197,24,0.5)">🦊</div>
+            <div class="ps-name">SitiNurillah</div>
+            <div class="ps-return">+31.8%</div>
+          </div>
+          <div class="ps-block" style="height:72px;background:linear-gradient(180deg,#FFD040,#CC9000);width:100%;border-radius:8px 8px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div style="font-size:22px">🥇</div>
+            <div class="ps-rank">1</div>
+          </div>
+        </div>
+
+        <!-- 3rd place -->
+        <div class="podium-spot p3">
+          <div class="ps-avatar" style="width:56px;height:56px;border-color:#D4904A">🐂</div>
+          <div class="ps-name">BambangS</div>
+          <div class="ps-return" style="font-size:10px">+18.5%</div>
+          <div class="ps-block" style="height:40px;background:linear-gradient(180deg,#D4904A,#A06030);width:100%;border-radius:8px 8px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div style="font-size:18px">🥉</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- end lb-header -->
+
+    <!-- League toggle -->
+    <div style="background:white;display:flex;gap:8px;padding:14px 16px 10px;border-bottom:2px solid #F0EDE8">
+      <div style="flex:1;background:linear-gradient(135deg,#FFD040,#FFB020);border-radius:12px;padding:8px;text-align:center;box-shadow:0 3px 0 #CC8000;cursor:pointer">
+        <div style="font-size:11px;font-weight:900;color:#7A4000">🏆 Liga Emas</div>
+        <div style="font-size:10px;font-weight:700;color:#9A6000">Top 10%</div>
+      </div>
+      <div style="flex:1;background:#F0EDE8;border-radius:12px;padding:8px;text-align:center;cursor:pointer">
+        <div style="font-size:11px;font-weight:900;color:#6A5A4A">🥈 Liga Perak</div>
+        <div style="font-size:10px;font-weight:700;color:#8A7A6A">10%–30%</div>
+      </div>
+      <div style="flex:1;background:#F0EDE8;border-radius:12px;padding:8px;text-align:center;cursor:pointer">
+        <div style="font-size:11px;font-weight:900;color:#6A5A4A">🥉 Liga Perunggu</div>
+        <div style="font-size:10px;font-weight:700;color:#8A7A6A">30%+</div>
+      </div>
+    </div>
+
+    <!-- LB list -->
+    <div class="lb-list-wrap" style="padding-top:14px">
+
+      <!-- Timer to end of week -->
+      <div style="background:linear-gradient(135deg,#FFF0F0,#FFE8E8);border:2px solid rgba(255,80,96,0.25);border-radius:14px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:22px">⏰</span>
+        <div>
+          <div style="font-size:11px;font-weight:900;color:#9A3A3A;letter-spacing:1px;text-transform:uppercase">Season ends in</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#E03040">2d 14h 32m</div>
+        </div>
+        <div style="margin-left:auto;font-size:12px;font-weight:900;color:#9A3A3A;text-align:right">
+          <div>Top 3 win</div>
+          <div style="color:#FFB830">+500 XP 🎁</div>
+        </div>
+      </div>
+
+      <!-- Rankings -->
+      <div class="section-label" style="margin-bottom:12px">
+        📊 Semua Trader
+        <span style="font-size:11px;font-weight:700;color:#B0A090">2.840 peserta</span>
+      </div>
+
+      <div class="lb-row">
+        <div class="lb-rank r1">1</div>
+        <div class="lb-avatar">🦊</div>
+        <div class="lb-info">
+          <div class="lb-username">SitiNurillah</div>
+          <div class="lb-mascot-badge">🦊 Vixen · Gold Tier</div>
+        </div>
+        <div class="lb-return">
+          <div class="lb-pct up">+31.8%</div>
+          <div class="lb-value">Rp 13.180.000</div>
+        </div>
+      </div>
+
+      <div class="lb-row">
+        <div class="lb-rank r2">2</div>
+        <div class="lb-avatar">🦬</div>
+        <div class="lb-info">
+          <div class="lb-username">AriRahmat</div>
+          <div class="lb-mascot-badge">🦬 Toro · Silver Tier</div>
+        </div>
+        <div class="lb-return">
+          <div class="lb-pct up">+21.3%</div>
+          <div class="lb-value">Rp 12.130.000</div>
+        </div>
+      </div>
+
+      <div class="lb-row">
+        <div class="lb-rank r3">3</div>
+        <div class="lb-avatar">🐂</div>
+        <div class="lb-info">
+          <div class="lb-username">BambangSurya</div>
+          <div class="lb-mascot-badge">🐂 Penny · Bronze Tier</div>
+        </div>
+        <div class="lb-return">
+          <div class="lb-pct up">+18.5%</div>
+          <div class="lb-value">Rp 11.850.000</div>
+        </div>
+      </div>
+
+      <div class="lb-row">
+        <div class="lb-rank other">4</div>
+        <div class="lb-avatar">🦁</div>
+        <div class="lb-info">
+          <div class="lb-username">DewiRahayu</div>
+          <div class="lb-mascot-badge">🦁 Mane · Platinum</div>
+        </div>
+        <div class="lb-return">
+          <div class="lb-pct up">+15.2%</div>
+          <div class="lb-value">Rp 11.520.000</div>
+        </div>
+      </div>
+
+      <div class="lb-row">
+        <div class="lb-rank other">5</div>
+        <div class="lb-avatar">🐂</div>
+        <div class="lb-info">
+          <div class="lb-username">RidwanF</div>
+          <div class="lb-mascot-badge">🐂 Penny · Bronze</div>
+        </div>
+        <div class="lb-return">
+          <div class="lb-pct up">+12.7%</div>
+          <div class="lb-value">Rp 11.270.000</div>
+        </div>
+      </div>
+
+      <div class="lb-row">
+        <div class="lb-rank other">6</div>
+        <div class="lb-avatar">🦬</div>
+        <div class="lb-info">
+          <div class="lb-username">NovitaAP</div>
+          <div class="lb-mascot-badge">🦬 Toro · Silver</div>
+        </div>
+        <div class="lb-return">
+          <div class="lb-pct up">+9.8%</div>
+          <div class="lb-value">Rp 10.980.000</div>
+        </div>
+      </div>
+
+      <!-- YOU (highlighted) -->
+      <div class="lb-row you">
+        <div class="lb-rank" style="background:linear-gradient(135deg,#FFD040,#FFB020);color:#7A4000;font-family:'Fredoka One',cursive;font-size:15px;width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center">7</div>
+        <div class="lb-avatar" style="border:2px solid #FFB830;background:#FFF8E0">🐂</div>
+        <div class="lb-info">
+          <div class="lb-username" style="color:#C89000">Kamu ← <span style="font-size:11px;background:#FFB830;color:#7A4000;border-radius:6px;padding:1px 6px">YOU</span></div>
+          <div class="lb-mascot-badge">🐂 Penny · Bronze</div>
+        </div>
+        <div class="lb-return">
+          <div class="lb-pct up">+24.8%</div>
+          <div class="lb-value">Rp 12.480.000</div>
+        </div>
+      </div>
+
+      <div class="lb-row">
+        <div class="lb-rank other">8</div>
+        <div class="lb-avatar">🦊</div>
+        <div class="lb-info">
+          <div class="lb-username">HendraK</div>
+          <div class="lb-mascot-badge">🦊 Vixen · Gold</div>
+        </div>
+        <div class="lb-return">
+          <div class="lb-pct up">+22.1%</div>
+          <div class="lb-value">Rp 12.210.000</div>
+        </div>
+      </div>
+
+    </div><!-- end lb list wrap -->
+
+    <div class="bnav">
+      <div class="bnav-btn" onclick="show('home')"><div class="bnav-icon">📊</div><div class="bnav-lbl">Arena</div></div>
+      <div class="bnav-btn" onclick="show('picker')"><div class="bnav-icon">🔍</div><div class="bnav-lbl">Saham</div></div>
+      <div class="bnav-btn active"><div class="bnav-icon">🏆</div><div class="bnav-lbl">Ranking</div></div>
+      <div class="bnav-btn"><div class="bnav-icon">📚</div><div class="bnav-lbl">Belajar</div></div>
+      <div class="bnav-btn"><div class="bnav-icon">👤</div><div class="bnav-lbl">Profil</div></div>
+    </div>
+  </div>
+
+  <div class="side-panel">
+    <div class="note-card">
+      <div class="note-title">🏆 Leaderboard Design</div>
+      <div class="note-item"><div class="note-dot" style="background:#FFD040"></div><div class="note-text"><strong>3-tier league system</strong> (Gold/Silver/Bronze) — prevents beginners from feeling hopeless against veterans. Everyone competes in their league.</div></div>
+      <div class="note-item"><div class="note-dot" style="background:#FF6090"></div><div class="note-text"><strong>Countdown timer</strong> — creates urgency. Users who see "2 days left" will open the app to improve their rank.</div></div>
+      <div class="note-item"><div class="note-dot" style="background:#00DC8C"></div><div class="note-text"><strong>Mascot visible on leaderboard</strong> — Vixen at #1 signals "Gold-tier mascots win". Junior users aspire to both rank AND mascot upgrade simultaneously.</div></div>
+      <div class="note-item"><div class="note-dot" style="background:#8040C0"></div><div class="note-text"><strong>"YOU" highlight</strong> — anchoring. Users immediately see themselves, which is more motivating than scrolling to find themselves.</div></div>
+    </div>
+    <div class="note-card">
+      <div class="note-title">💰 Monetization Hook</div>
+      <div class="note-item"><div class="note-dot" style="background:#FFB830"></div><div class="note-text"><strong>Free users</strong> can only see 5 stocks and trade in Bronze League. Premium = all 50 stocks + Gold League access + AI insights.</div></div>
+      <div class="note-item"><div class="note-dot" style="background:#00DC8C"></div><div class="note-text"><strong>Season rewards</strong> — top 3 earn cosmetic mascot frames. Premium-exclusive frames available for purchase (Rp 15K each).</div></div>
+      <div class="note-item"><div class="note-dot" style="background:#FF6090"></div><div class="note-text"><strong>Share results</strong> — auto-generate IG story card showing rank + portfolio chart. Organic acquisition loop.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SUCCESS / TRADE CONFIRM OVERLAY                    -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="tradeSuccess" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px">
+  <div style="background:white;border-radius:28px;padding:32px 28px;text-align:center;max-width:320px;width:90%;animation:slideUp 0.3s ease">
+    <div style="font-size:60px;animation:float 1.5s ease-in-out infinite">🎉</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:28px;color:#1A1A1A;margin:12px 0 4px">Trade Berhasil!</div>
+    <div style="font-size:14px;font-weight:700;color:#6A5A4A;margin-bottom:16px">Kamu beli 10 lot BBCA @ Rp 9.450</div>
+    <div style="background:#E8FFF0;border:2px solid #60E880;border-radius:14px;padding:14px;margin-bottom:16px">
+      <div style="font-size:12px;font-weight:900;color:#60A870;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">XP Earned</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:36px;color:#20A040">+25 XP</div>
+      <div style="font-size:12px;color:#60A870;font-weight:700">Misi: "Beli saham perbankan" ✓</div>
+    </div>
+    <button onclick="hideSuccess()" style="width:100%;padding:14px;background:linear-gradient(180deg,#48D870,#28B050);border:2px solid #20A040;border-radius:14px;font-family:'Fredoka One',cursive;font-size:17px;color:white;box-shadow:0 4px 0 #189030;cursor:pointer">
+      Lanjut Trading! 📈
+    </button>
+  </div>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('scr-' + id).classList.add('active');
+  const tabs = ['home','picker','trade','leaderboard'];
+  const tabIdx = tabs.indexOf(id);
+  document.querySelectorAll('.tab')[tabIdx].classList.add('active');
+}
+
+let tradeMode = 'buy';
+function setMode(mode) {
+  tradeMode = mode;
+  const buyBtn = document.getElementById('buyBtn');
+  const sellBtn = document.getElementById('sellBtn');
+  const header = document.querySelector('#scr-trade .topbar');
+  const confirm = document.getElementById('confirmBtn');
+  if (mode === 'buy') {
+    buyBtn.classList.add('active');
+    sellBtn.classList.remove('active');
+    header.style.background = '#1A5A1A';
+    confirm.classList.remove('sell-mode');
+    confirm.textContent = '✅ Konfirmasi Beli ' + document.getElementById('qtyInput').value + ' lot BBCA';
+  } else {
+    sellBtn.classList.add('active');
+    buyBtn.classList.remove('active');
+    header.style.background = '#5A1A1A';
+    confirm.classList.add('sell-mode');
+    confirm.textContent = '🔴 Konfirmasi Jual ' + document.getElementById('qtyInput').value + ' lot BBCA';
+  }
+}
+
+function changeQty(delta) {
+  const inp = document.getElementById('qtyInput');
+  const val = Math.max(1, Math.min(100, parseInt(inp.value) + delta));
+  inp.value = val;
+  updateOrder(val);
+}
+
+function setQty(val) {
+  document.getElementById('qtyInput').value = val;
+  updateOrder(val);
+  document.querySelectorAll('.qty-preset').forEach(p => p.classList.remove('active'));
+}
+
+function updateOrder(qty) {
+  const price = 945000;
+  const total = qty * price;
+  document.getElementById('qtyDisplay').textContent = qty + ' lot';
+  document.getElementById('totalDisplay').textContent = 'Rp ' + total.toLocaleString('id-ID');
+  const action = tradeMode === 'buy' ? 'Beli' : 'Jual';
+  document.getElementById('confirmBtn').textContent = (tradeMode === 'buy' ? '✅' : '🔴') + ' Konfirmasi ' + action + ' ' + qty + ' lot BBCA';
+}
+
+function confirmTrade() {
+  const success = document.getElementById('tradeSuccess');
+  success.style.display = 'flex';
+}
+
+function hideSuccess() {
+  document.getElementById('tradeSuccess').style.display = 'none';
+  show('home');
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>InvestQuest — Monetization Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0F0820;--bg2:#1A0A3A;--bg3:#251050;
+  --gold:#FFB830;--gold2:#FFE060;--gold3:#CC8000;
+  --teal:#00DC8C;--teal2:#A0FFD8;
+  --blue:#4080FF;--purple:#9060E0;
+  --red:#FF5060;--orange:#FF8030;
+  --cream:#F0E8D8;--muted:#5A3A8A;
+  --border:rgba(255,255,255,0.07);
+  --mono:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--cream);font-family:'Nunito',sans-serif;min-height:100vh;padding:0 0 80px}
+
+/* ── HERO ── */
+.hero{
+  text-align:center;padding:60px 24px 40px;
+  background:linear-gradient(180deg,#1A0840 0%,var(--bg) 100%);
+  border-bottom:1px solid var(--border);position:relative;overflow:hidden;
+}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(255,184,48,0.07) 0%,transparent 70%);pointer-events:none}
+.hero-eye{font-size:11px;font-weight:900;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.hero-title{font-family:'Fredoka One',cursive;font-size:52px;background:linear-gradient(135deg,var(--gold2),var(--gold),#FF8C00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;letter-spacing:2px;margin-bottom:12px}
+.hero-sub{font-size:15px;color:var(--muted);max-width:600px;margin:0 auto 24px;line-height:1.7}
+.hero-tags{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.hero-tag{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:100px;border:1.5px solid}
+.tag-gold{color:var(--gold);border-color:rgba(255,184,48,0.35);background:rgba(255,184,48,0.08)}
+.tag-teal{color:var(--teal);border-color:rgba(0,220,140,0.35);background:rgba(0,220,140,0.08)}
+.tag-blue{color:#80B0FF;border-color:rgba(64,128,255,0.35);background:rgba(64,128,255,0.08)}
+
+/* ── LAYOUT ── */
+.container{max-width:1200px;margin:0 auto;padding:40px 24px}
+.section-title{font-family:'Fredoka One',cursive;font-size:28px;color:var(--gold);margin-bottom:6px}
+.section-sub{font-size:13px;color:var(--muted);margin-bottom:24px;font-weight:700}
+.divider{border:none;border-top:1px solid var(--border);margin:40px 0}
+
+/* ── AI AGENT CALLOUT ── */
+.agent-callout{
+  background:linear-gradient(135deg,rgba(64,128,255,0.1),rgba(144,96,224,0.08));
+  border:1.5px solid rgba(64,128,255,0.25);border-radius:16px;
+  padding:16px 20px;margin-bottom:32px;
+  display:flex;gap:14px;align-items:flex-start;
+}
+.agent-callout-icon{font-size:24px;flex-shrink:0;margin-top:2px}
+.agent-callout-text{font-size:13px;color:#A0B8E8;line-height:1.7;font-weight:700}
+.agent-callout-text strong{color:#80B0FF}
+.code-tag{font-family:var(--mono);font-size:11px;background:rgba(64,128,255,0.15);padding:2px 7px;border-radius:5px;color:#80B0FF}
+
+/* ── PHASE CARDS ── */
+.phases{display:flex;flex-direction:column;gap:20px}
+.phase-card{
+  background:var(--bg2);border-radius:20px;
+  border:1.5px solid var(--border);
+  overflow:hidden;
+}
+.phase-header{
+  display:flex;align-items:center;gap:14px;
+  padding:18px 22px;border-bottom:1px solid var(--border);
+  cursor:pointer;
+}
+.phase-num{
+  width:44px;height:44px;border-radius:14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fredoka One',cursive;font-size:20px;
+}
+.phase-title{font-family:'Fredoka One',cursive;font-size:20px}
+.phase-timeline{
+  margin-left:auto;font-size:11px;font-weight:900;letter-spacing:1.5px;
+  text-transform:uppercase;padding:5px 12px;border-radius:100px;
+}
+.phase-body{padding:20px 22px}
+.phase-toggle{font-size:16px;margin-left:8px;transition:transform .2s;color:var(--muted)}
+.phase-header.open .phase-toggle{transform:rotate(180deg)}
+
+/* Phase colors */
+.p1 .phase-num{background:linear-gradient(135deg,#3A2010,#6A4020);color:#FF8030}
+.p1 .phase-title{color:#FF8030}
+.p1 .phase-timeline{background:rgba(255,128,48,0.1);color:#FF8030;border:1px solid rgba(255,128,48,0.25)}
+.p1{border-color:rgba(255,128,48,0.2)}
+
+.p2 .phase-num{background:linear-gradient(135deg,#102840,#204080);color:#4080FF}
+.p2 .phase-title{color:var(--blue)}
+.p2 .phase-timeline{background:rgba(64,128,255,0.1);color:var(--blue);border:1px solid rgba(64,128,255,0.25)}
+.p2{border-color:rgba(64,128,255,0.2)}
+
+.p3 .phase-num{background:linear-gradient(135deg,#102A18,#204838);color:var(--teal)}
+.p3 .phase-title{color:var(--teal)}
+.p3 .phase-timeline{background:rgba(0,220,140,0.08);color:var(--teal);border:1px solid rgba(0,220,140,0.2)}
+.p3{border-color:rgba(0,220,140,0.2)}
+
+.p4 .phase-num{background:linear-gradient(135deg,#2A1040,#481870);color:var(--purple)}
+.p4 .phase-title{color:var(--purple)}
+.p4 .phase-timeline{background:rgba(144,96,224,0.1);color:var(--purple);border:1px solid rgba(144,96,224,0.25)}
+.p4{border-color:rgba(144,96,224,0.2)}
+
+.p5 .phase-num{background:linear-gradient(135deg,#2A1000,#4A2000);color:var(--gold)}
+.p5 .phase-title{color:var(--gold)}
+.p5 .phase-timeline{background:rgba(255,184,48,0.1);color:var(--gold);border:1px solid rgba(255,184,48,0.25)}
+.p5{border-color:rgba(255,184,48,0.2)}
+
+/* ── TASK LIST ── */
+.tasks{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.task{
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;
+  padding:12px 14px;display:flex;gap:12px;align-items:flex-start;
+}
+.task-id{
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  color:var(--muted);flex-shrink:0;margin-top:2px;
+  background:rgba(255,255,255,0.05);padding:2px 7px;border-radius:5px;
+  white-space:nowrap;
+}
+.task-body{flex:1}
+.task-name{font-size:13px;font-weight:900;color:var(--cream);margin-bottom:3px}
+.task-desc{font-size:12px;color:var(--muted);line-height:1.55;font-weight:700}
+.task-meta{display:flex;gap:8px;margin-top:7px;flex-wrap:wrap}
+.task-tag{font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;letter-spacing:0.5px}
+.tt-dev{background:rgba(64,128,255,0.12);color:#80B0FF}
+.tt-design{background:rgba(144,96,224,0.12);color:#B090E0}
+.tt-content{background:rgba(0,220,140,0.1);color:#60E8A8}
+.tt-marketing{background:rgba(255,128,48,0.12);color:#FFA060}
+.tt-legal{background:rgba(255,80,96,0.12);color:#FF9090}
+.tt-data{background:rgba(255,184,48,0.1);color:#FFD080}
+.task-priority{font-size:10px;font-weight:900;padding:2px 8px;border-radius:5px}
+.prio-critical{background:rgba(255,80,96,0.15);color:#FF8090}
+.prio-high{background:rgba(255,128,48,0.12);color:#FFA060}
+.prio-medium{background:rgba(255,184,48,0.1);color:#FFD080}
+.prio-low{background:rgba(0,220,140,0.08);color:#80DCA8}
+
+/* ── SUCCESS CRITERIA ── */
+.criteria{
+  background:rgba(0,220,140,0.04);border:1px solid rgba(0,220,140,0.15);
+  border-radius:12px;padding:14px 16px;margin-top:14px;
+}
+.criteria-title{font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+.criterion{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.criterion:last-child{margin-bottom:0}
+.crit-check{font-size:13px;flex-shrink:0;margin-top:1px}
+.crit-text{font-family:var(--mono);font-size:11px;color:#80C8A8;line-height:1.5}
+.crit-text .val{color:var(--teal2);font-weight:700}
+
+/* ── DEPENDENCIES ── */
+.deps{
+  background:rgba(64,128,255,0.04);border:1px solid rgba(64,128,255,0.15);
+  border-radius:12px;padding:14px 16px;margin-top:10px;
+}
+.deps-title{font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#80B0FF;margin-bottom:10px}
+.dep-item{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.dep-item:last-child{margin-bottom:0}
+.dep-arrow{color:var(--muted);font-family:var(--mono);font-size:12px}
+.dep-text{font-size:11px;font-weight:700;color:#A0C0E8}
+.dep-code{font-family:var(--mono);font-size:10px;background:rgba(64,128,255,0.12);padding:1px 6px;border-radius:4px;color:#80B0FF}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:24px}
+.kpi-card{
+  background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;
+  padding:16px;
+}
+.kpi-label{font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.kpi-value{font-family:'Fredoka One',cursive;font-size:28px;line-height:1;margin-bottom:3px}
+.kpi-sub{font-size:11px;font-weight:700;color:var(--muted)}
+.kpi-card.k-gold{border-color:rgba(255,184,48,0.25)} .kpi-card.k-gold .kpi-value{color:var(--gold)}
+.kpi-card.k-teal{border-color:rgba(0,220,140,0.2)} .kpi-card.k-teal .kpi-value{color:var(--teal)}
+.kpi-card.k-blue{border-color:rgba(64,128,255,0.25)} .kpi-card.k-blue .kpi-value{color:#80B0FF}
+.kpi-card.k-orange{border-color:rgba(255,128,48,0.25)} .kpi-card.k-orange .kpi-value{color:#FFA060}
+.kpi-card.k-purple{border-color:rgba(144,96,224,0.25)} .kpi-card.k-purple .kpi-value{color:#C090FF}
+
+/* ── REVENUE MODEL TABLE ── */
+.rev-table{width:100%;border-collapse:collapse;margin-bottom:24px}
+.rev-table th{text-align:left;font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--border)}
+.rev-table td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700}
+.rev-table tr:hover td{background:rgba(255,255,255,0.02)}
+.rev-table tr:last-child td{border-bottom:none}
+.stream-name{font-family:'Fredoka One',cursive;font-size:15px;color:var(--cream)}
+.stream-tier{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:5px;white-space:nowrap}
+.tier-free{background:rgba(255,255,255,0.05);color:#8A7A9A}
+.tier-premium{background:rgba(255,184,48,0.1);color:var(--gold)}
+.tier-enterprise{background:rgba(144,96,224,0.12);color:#C090FF}
+.stream-price{font-family:'Fredoka One',cursive;font-size:17px;color:var(--gold)}
+.stream-mrr{font-family:var(--mono);font-size:12px;color:var(--teal)}
+.stream-timing{font-size:11px;color:var(--muted);font-weight:800}
+
+/* ── TECH STACK ── */
+.tech-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:20px}
+.tech-item{
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;
+  padding:12px 14px;
+}
+.tech-category{font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.tech-name{font-family:var(--mono);font-size:12px;font-weight:700;color:#C0B0E0}
+.tech-note{font-size:11px;color:var(--muted);margin-top:3px;font-weight:700}
+
+/* ── AGENT PROTOCOL BOX ── */
+.agent-protocol{
+  background:linear-gradient(135deg,rgba(64,128,255,0.06),rgba(0,220,140,0.04));
+  border:1.5px solid rgba(64,128,255,0.2);border-radius:16px;
+  padding:20px 22px;margin-bottom:24px;
+}
+.ap-title{font-family:'Fredoka One',cursive;font-size:20px;color:#80B0FF;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ap-section{margin-bottom:14px}
+.ap-section-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:8px;text-transform:uppercase}
+.ap-code{
+  background:rgba(0,0,0,0.4);border:1px solid rgba(64,128,255,0.15);border-radius:10px;
+  padding:12px 14px;font-family:var(--mono);font-size:11px;line-height:1.7;
+  color:#A0C0F0;overflow-x:auto;
+}
+.c-key{color:#80B0FF}
+.c-val{color:#80E8B0}
+.c-str{color:#FFD080}
+.c-num{color:#FF9090}
+.c-comment{color:#4A5A7A}
+
+/* ── RISK TABLE ── */
+.risk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:24px}
+.risk-card{background:var(--bg2);border-radius:14px;padding:16px;border:1.5px solid}
+.risk-high{border-color:rgba(255,80,96,0.25)}
+.risk-medium{border-color:rgba(255,128,48,0.25)}
+.risk-low{border-color:rgba(0,220,140,0.2)}
+.risk-label{font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.risk-high .risk-label{color:#FF8090}
+.risk-medium .risk-label{color:#FFA060}
+.risk-low .risk-label{color:#80DCA8}
+.risk-name{font-family:'Fredoka One',cursive;font-size:16px;color:var(--cream);margin-bottom:4px}
+.risk-desc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:8px;font-weight:700}
+.risk-mitigation{font-size:11px;font-weight:800;padding:4px 10px;border-radius:7px;display:inline-block}
+.risk-high .risk-mitigation{background:rgba(255,80,96,0.1);color:#FF9090}
+.risk-medium .risk-mitigation{background:rgba(255,128,48,0.1);color:#FFC080}
+.risk-low .risk-mitigation{background:rgba(0,220,140,0.08);color:#80DCA8}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eye">AkademiWeal · Monetization Roadmap</div>
+  <div class="hero-title">💰 Revenue Plan v1.0</div>
+  <p class="hero-sub">A structured, AI Agent-executable roadmap from Paper Trading Arena launch to Rp 500 juta/month ARR. Every task has an ID, priority, success criteria, and dependency map.</p>
+  <div class="hero-tags">
+    <div class="hero-tag tag-gold">🤖 AI Agent Ready</div>
+    <div class="hero-tag tag-teal">5 Phases · 18 Months</div>
+    <div class="hero-tag tag-blue">IDX Market Focus</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- AI AGENT PROTOCOL -->
+  <div class="agent-protocol">
+    <div class="ap-title">🤖 AI Agent Execution Protocol</div>
+    <div class="ap-section">
+      <div class="ap-section-label">How to read this plan</div>
+      <div class="ap-code">
+<span class="c-comment">// Each task follows this schema. Agent reads task_id, checks deps_required,</span>
+<span class="c-comment">// executes, then validates against success_criteria before marking done.</span>
+
+<span class="c-key">TASK</span> = {
+  <span class="c-key">task_id</span>: <span class="c-str">"P1-T01"</span>,              <span class="c-comment">// Phase-TaskNumber</span>
+  <span class="c-key">name</span>: <span class="c-str">"string"</span>,
+  <span class="c-key">priority</span>: <span class="c-str">"CRITICAL | HIGH | MEDIUM | LOW"</span>,
+  <span class="c-key">owner</span>: <span class="c-str">"DEV | DESIGN | CONTENT | MARKETING | LEGAL"</span>,
+  <span class="c-key">effort_days</span>: <span class="c-num">number</span>,
+  <span class="c-key">deps_required</span>: [<span class="c-str">"task_id"</span>],      <span class="c-comment">// Must be DONE before starting</span>
+  <span class="c-key">success_criteria</span>: [<span class="c-str">"measurable string"</span>],
+  <span class="c-key">status</span>: <span class="c-str">"TODO | IN_PROGRESS | DONE | BLOCKED"</span>
+}
+
+<span class="c-comment">// Agent rule: NEVER start a task if deps_required contains any status != "DONE"</span>
+<span class="c-comment">// Agent rule: Mark DONE only if ALL success_criteria pass</span>
+<span class="c-comment">// Agent rule: If BLOCKED, log reason and escalate to human</span>
+      </div>
+    </div>
+    <div class="ap-section">
+      <div class="ap-section-label">Phase execution order — strict sequence</div>
+      <div class="ap-code">
+<span class="c-key">PHASES</span> = [
+  <span class="c-str">"P1_FOUNDATION"</span>,   <span class="c-comment">// Month 1-2:  Build Arena core + free tier</span>
+  <span class="c-str">"P2_LAUNCH"</span>,        <span class="c-comment">// Month 3-4:  Public launch + first 1K users</span>
+  <span class="c-str">"P3_MONETIZE"</span>,      <span class="c-comment">// Month 5-7:  Premium tier + first revenue</span>
+  <span class="c-str">"P4_SCALE"</span>,         <span class="c-comment">// Month 8-12: Growth + partnerships</span>
+  <span class="c-str">"P5_ENTERPRISE"</span>    <span class="c-comment">// Month 13-18: B2B + Stock School launch</span>
+]
+
+<span class="c-comment">// DO NOT skip phases. Each phase gates the next.</span>
+<span class="c-comment">// Phases within same number CAN run in parallel unless deps say otherwise.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- NORTH STAR KPIs -->
+  <div class="section-title">🎯 North Star Metrics</div>
+  <div class="section-sub">These are the numbers the AI Agent checks at end of each phase. If not met, do not advance.</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card k-gold">
+      <div class="kpi-label">Target ARR · Month 18</div>
+      <div class="kpi-value">Rp 6B</div>
+      <div class="kpi-sub">~Rp 500jt/month</div>
+    </div>
+    <div class="kpi-card k-teal">
+      <div class="kpi-label">Premium Subscribers</div>
+      <div class="kpi-value">10.000</div>
+      <div class="kpi-sub">@ Rp 49K/month</div>
+    </div>
+    <div class="kpi-card k-blue">
+      <div class="kpi-label">MAU Target</div>
+      <div class="kpi-value">100K</div>
+      <div class="kpi-sub">Monthly Active Users</div>
+    </div>
+    <div class="kpi-card k-orange">
+      <div class="kpi-label">DAU/MAU Ratio</div>
+      <div class="kpi-value">&gt;35%</div>
+      <div class="kpi-sub">Arena drives daily opens</div>
+    </div>
+    <div class="kpi-card k-purple">
+      <div class="kpi-label">Free → Premium CVR</div>
+      <div class="kpi-value">&gt;8%</div>
+      <div class="kpi-sub">Industry avg is 3-5%</div>
+    </div>
+    <div class="kpi-card k-gold">
+      <div class="kpi-label">Avg Revenue/User</div>
+      <div class="kpi-value">Rp 62K</div>
+      <div class="kpi-sub">Blended ARPU/month</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- REVENUE MODEL -->
+  <div class="section-title">💵 Revenue Streams</div>
+  <div class="section-sub">All monetization layers, from launch through scale. Agent activates each stream at the correct phase.</div>
+
+  <table class="rev-table">
+    <thead>
+      <tr>
+        <th>Stream</th>
+        <th>Tier</th>
+        <th>Price</th>
+        <th>Est. MRR @ 10K users</th>
+        <th>Launch Phase</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><div class="stream-name">Weal Premium (Monthly)</div><div style="font-size:11px;color:var(--muted);margin-top:2px;font-weight:700">50+ stocks, AI insights, Gold League, no ads</div></td>
+        <td><span class="stream-tier tier-premium">⭐ Premium</span></td>
+        <td><span class="stream-price">Rp 49.000/mo</span></td>
+        <td><span class="stream-mrr">Rp 245jt/mo @ 5K subs</span></td>
+        <td><span class="stream-timing">📦 Phase 3</span></td>
+      </tr>
+      <tr>
+        <td><div class="stream-name">Weal Premium (Annual)</div><div style="font-size:11px;color:var(--muted);margin-top:2px;font-weight:700">2 months free — reduces churn, improves LTV</div></td>
+        <td><span class="stream-tier tier-premium">⭐ Premium</span></td>
+        <td><span class="stream-price">Rp 399.000/yr</span></td>
+        <td><span class="stream-mrr">+Rp 80jt/mo @ 2.4K annual</span></td>
+        <td><span class="stream-timing">📦 Phase 3</span></td>
+      </tr>
+      <tr>
+        <td><div class="stream-name">Mascot Cosmetic Shop</div><div style="font-size:11px;color:var(--muted);margin-top:2px;font-weight:700">Exclusive frames, backgrounds, trophy effects</div></td>
+        <td><span class="stream-tier tier-free">🎮 IAP · All Users</span></td>
+        <td><span class="stream-price">Rp 15K–45K</span></td>
+        <td><span class="stream-mrr">Rp 30jt/mo @ 2K purchases</span></td>
+        <td><span class="stream-timing">📦 Phase 3</span></td>
+      </tr>
+      <tr>
+        <td><div class="stream-name">Stock School (Weekly Deep Dive)</div><div style="font-size:11px;color:var(--muted);margin-top:2px;font-weight:700">1 real IDX stock analyzed in-depth per week, for Premium only</div></td>
+        <td><span class="stream-tier tier-premium">⭐ Premium Bonus</span></td>
+        <td><span class="stream-price">Bundled w/ Premium</span></td>
+        <td><span class="stream-mrr">Increases CVR by ~2%</span></td>
+        <td><span class="stream-timing">📦 Phase 4</span></td>
+      </tr>
+      <tr>
+        <td><div class="stream-name">Weal for Schools (B2B)</div><div style="font-size:11px;color:var(--muted);margin-top:2px;font-weight:700">Class license for universities, high schools, teacher dashboard</div></td>
+        <td><span class="stream-tier tier-enterprise">🏫 Enterprise</span></td>
+        <td><span class="stream-price">Rp 2jt–15jt/school/yr</span></td>
+        <td><span class="stream-mrr">Rp 100jt/mo @ 10 schools</span></td>
+        <td><span class="stream-timing">📦 Phase 5</span></td>
+      </tr>
+      <tr>
+        <td><div class="stream-name">Sponsored Challenges</div><div style="font-size:11px;color:var(--muted);margin-top:2px;font-weight:700">Ajaib / Stockbit sponsor a weekly Arena event (ethical, no investment advice)</div></td>
+        <td><span class="stream-tier tier-enterprise">🤝 Partnership</span></td>
+        <td><span class="stream-price">Rp 50jt–200jt/campaign</span></td>
+        <td><span class="stream-mrr">Rp 50jt/mo avg</span></td>
+        <td><span class="stream-timing">📦 Phase 5</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr class="divider">
+
+  <!-- PHASES -->
+  <div class="section-title">🗺 Execution Phases</div>
+  <div class="section-sub">Each phase has tasks with IDs, owners, and success criteria. AI Agent executes in order.</div>
+
+  <div class="phases">
+
+    <!-- ══════════════ PHASE 1 ══════════════ -->
+    <div class="phase-card p1">
+      <div class="phase-header" onclick="toggle(this)">
+        <div class="phase-num">P1</div>
+        <div>
+          <div class="phase-title">Foundation — Build the Arena</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;font-weight:700">Core paper trading mechanics + free tier</div>
+        </div>
+        <div class="phase-timeline">Month 1–2</div>
+        <div class="phase-toggle">▼</div>
+      </div>
+      <div class="phase-body" style="display:none">
+
+        <div class="tasks">
+
+          <div class="task">
+            <div class="task-id">P1-T01</div>
+            <div class="task-body">
+              <div class="task-name">Integrate IDX real-time price feed</div>
+              <div class="task-desc">Connect to Yahoo Finance API or IDX official data feed. Display live OHLCV for at least 50 IDX blue-chip stocks (LQ45 universe). Update interval: 5 minutes during market hours (09:00–15:00 WIB Mon-Fri).</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-priority prio-critical">🔴 CRITICAL</span>
+                <span class="task-tag tt-data">Effort: 5d</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P1-T02</div>
+            <div class="task-body">
+              <div class="task-name">Build virtual portfolio engine</div>
+              <div class="task-desc">Each user gets Rp 10.000.000 virtual capital on Monday 00:00 WIB. Track: holdings (lot qty, avg buy price, current value), cash balance, realized P&L, unrealized P&L, trade history. Reset every Monday. No carry-over.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-priority prio-critical">🔴 CRITICAL</span>
+                <span class="task-tag tt-data">Effort: 7d</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P1-T03</div>
+            <div class="task-body">
+              <div class="task-name">Implement buy/sell trade execution flow</div>
+              <div class="task-desc">Market order only (no limit orders in v1 — reduces complexity). Validate: lot quantity ≥ 1, total cost ≤ cash balance, market is open. Show confirmation modal with order summary before executing. Success toast + XP animation on confirm.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-priority prio-critical">🔴 CRITICAL</span>
+                <span class="task-tag tt-data">Effort: 4d</span>
+                <span class="task-tag tt-design">Deps: P1-T01, P1-T02</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P1-T04</div>
+            <div class="task-body">
+              <div class="task-name">Weekly leaderboard computation</div>
+              <div class="task-desc">Calculate leaderboard by: (portfolio_value + cash_balance) / 10_000_000 - 1 = return_pct. Run compute job every 15 min during market hours. Snapshot final value Friday 15:30 WIB for season winner. Assign league: Top 10% = Gold, 10-30% = Silver, rest = Bronze.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-priority prio-high">🟠 HIGH</span>
+                <span class="task-tag tt-data">Effort: 3d</span>
+                <span class="task-tag tt-design">Deps: P1-T02</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P1-T05</div>
+            <div class="task-body">
+              <div class="task-name">Arena UI implementation (4 screens)</div>
+              <div class="task-desc">Build all 4 screens per the design: (1) Arena Home with portfolio chart, (2) Stock Picker with search + filter, (3) Trade Execution with buy/sell toggle, (4) Leaderboard with 3-tier podium. Match InvestQuest v2 visual system.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-tag tt-design">DESIGN</span>
+                <span class="task-priority prio-critical">🔴 CRITICAL</span>
+                <span class="task-tag tt-data">Effort: 8d</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P1-T06</div>
+            <div class="task-body">
+              <div class="task-name">Mission system — link Arena to lesson XP</div>
+              <div class="task-desc">Define 5 weekly missions that bridge lessons to trading. Examples: "Beli saham perbankan" (+25 XP), "Miliki 3 sektor berbeda" (+50 XP), "Jual saham dengan profit" (+30 XP). Missions auto-reset weekly. Completing all 5 = +100 bonus XP.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-tag tt-content">CONTENT</span>
+                <span class="task-priority prio-high">🟠 HIGH</span>
+                <span class="task-tag tt-data">Effort: 3d</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P1-T07</div>
+            <div class="task-body">
+              <div class="task-name">OJK compliance review — paper trading disclaimer</div>
+              <div class="task-desc">Consult with legal advisor to confirm paper trading (virtual money) does not require WPPE license. Add visible disclaimer on every trade screen: "Ini adalah simulasi. Uang virtual. Bukan rekomendasi investasi." Must be on-screen, not just in T&C.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-legal">LEGAL</span>
+                <span class="task-priority prio-critical">🔴 CRITICAL</span>
+                <span class="task-tag tt-data">Effort: 5d</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="criteria">
+          <div class="criteria-title">✅ Phase 1 Success Criteria — All must pass before Phase 2</div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">P1-T07 legal clearance received and documented. Status = <span class="val">DONE</span>.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Price feed latency &lt; <span class="val">5 minutes</span> during market hours for all 50 stocks.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Trade execution error rate &lt; <span class="val">0.1%</span> in internal testing (100 test trades).</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">All 4 Arena screens render correctly on iOS and Android (test both).</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Weekly reset tested: portfolio resets to exactly <span class="val">Rp 10.000.000</span> on Monday 00:00 WIB.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Disclaimer text visible on trade screen without scrolling.</div></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════ PHASE 2 ══════════════ -->
+    <div class="phase-card p2">
+      <div class="phase-header" onclick="toggle(this)">
+        <div class="phase-num">P2</div>
+        <div>
+          <div class="phase-title">Launch — Get First 1K Active Users</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;font-weight:700">Public launch, community, viral loop</div>
+        </div>
+        <div class="phase-timeline">Month 3–4</div>
+        <div class="phase-toggle">▼</div>
+      </div>
+      <div class="phase-body" style="display:none">
+        <div class="deps">
+          <div class="deps-title">📦 Phase Gate — requires ALL Phase 1 criteria DONE</div>
+          <div class="dep-item"><span class="dep-arrow">→</span><div class="dep-text">All <span class="dep-code">P1-T01</span> through <span class="dep-code">P1-T07</span> status = <span class="dep-code">DONE</span></div></div>
+          <div class="dep-item"><span class="dep-arrow">→</span><div class="dep-text">Legal clearance document stored in project repo at <span class="dep-code">/docs/legal/okj-clearance.pdf</span></div></div>
+        </div>
+
+        <div class="tasks">
+
+          <div class="task">
+            <div class="task-id">P2-T01</div>
+            <div class="task-body">
+              <div class="task-name">Shareable result card — "Season Report"</div>
+              <div class="task-desc">Auto-generate a PNG shareable card every Friday 16:00 WIB showing: user rank, return %, mascot, best stock pick, weekly chart. Format: Instagram Story (1080×1920). One-tap share to IG, WA, Twitter. This is the primary organic acquisition loop.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-tag tt-design">DESIGN</span>
+                <span class="task-priority prio-critical">🔴 CRITICAL</span>
+                <span class="task-tag tt-data">Effort: 5d</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P2-T02</div>
+            <div class="task-body">
+              <div class="task-name">Referral system — "Ajak Teman" program</div>
+              <div class="task-desc">Each user gets unique referral code. Referred user gets +Rp 1.000.000 bonus virtual capital on first Arena season. Referrer gets +100 XP per successful referral. Track: referral_code, referred_user_id, join_date, first_trade_date. Cap: max 20 referrals per user (prevent abuse).</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-tag tt-marketing">MARKETING</span>
+                <span class="task-priority prio-high">🟠 HIGH</span>
+                <span class="task-tag tt-data">Effort: 4d</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P2-T03</div>
+            <div class="task-body">
+              <div class="task-name">TikTok + Instagram content calendar — 12 weeks</div>
+              <div class="task-desc">Create 12 weeks of content: 3x/week TikTok (edu + Arena result reveals), 1x/week IG carousel. Hook format: "Gue cuma modal 10jt, hasilnya..." + show Arena portfolio. Do NOT script as investment advice. Script as education + game. Target: 500 followers by end Month 4.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-content">CONTENT</span>
+                <span class="task-tag tt-marketing">MARKETING</span>
+                <span class="task-priority prio-high">🟠 HIGH</span>
+                <span class="task-tag tt-data">Effort: 10d ongoing</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P2-T04</div>
+            <div class="task-body">
+              <div class="task-name">WhatsApp community launch — "Arena Weal"</div>
+              <div class="task-desc">Create WA community (max 5000 members). Publish Friday leaderboard screenshot every week. Share weekly mission reveal every Monday. This drives free daily engagement. Appoint 3 volunteer moderators from top 10 leaderboard users.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-marketing">MARKETING</span>
+                <span class="task-tag tt-content">CONTENT</span>
+                <span class="task-priority prio-medium">🟡 MEDIUM</span>
+                <span class="task-tag tt-data">Effort: 2d setup + ongoing</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P2-T05</div>
+            <div class="task-body">
+              <div class="task-name">Onboarding flow — 3-step Arena intro</div>
+              <div class="task-desc">New users who haven't used Arena see a 3-screen intro: (1) "Apa itu Paper Trading?" — mascot explains, (2) "Kamu dapat Rp 10jt virtual!" — animated coin shower, (3) "Pilih saham pertamamu" — direct to stock picker. Skip-able after screen 1. Completion rate target: &gt;70%.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-tag tt-design">DESIGN</span>
+                <span class="task-priority prio-high">🟠 HIGH</span>
+                <span class="task-tag tt-data">Effort: 3d</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P2-T06</div>
+            <div class="task-body">
+              <div class="task-name">Push notification strategy — Arena triggers</div>
+              <div class="task-desc">Send notifications for: (1) Monday 08:45 WIB — "Season baru dimulai! Invest sekarang 🚀", (2) Friday 14:00 WIB — "1 jam lagi season tutup! Rankmu: #[X]", (3) When user drops 2+ ranks — "[Name] naik ke atas kamu! Balik serang 💪". Opt-out rate target: &lt;15%.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-tag tt-content">CONTENT</span>
+                <span class="task-priority prio-high">🟠 HIGH</span>
+                <span class="task-tag tt-data">Effort: 3d</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="criteria">
+          <div class="criteria-title">✅ Phase 2 Success Criteria</div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Arena MAU ≥ <span class="val">1.000 users</span> by end of Month 4.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Arena DAU/MAU ≥ <span class="val">25%</span> (users return at least 1-2x per week).</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Referral program accounts for ≥ <span class="val">30%</span> of new signups.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Shareable card shared ≥ <span class="val">200 times</span> in first 4 weeks (track via share event).</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Arena onboarding completion rate ≥ <span class="val">70%</span>.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Push notification opt-out rate &lt; <span class="val">15%</span>.</div></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════ PHASE 3 ══════════════ -->
+    <div class="phase-card p3">
+      <div class="phase-header" onclick="toggle(this)">
+        <div class="phase-num">P3</div>
+        <div>
+          <div class="phase-title">Monetize — Launch Premium Tier</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;font-weight:700">First revenue, convert top users, cosmetic shop</div>
+        </div>
+        <div class="phase-timeline">Month 5–7</div>
+        <div class="phase-toggle">▼</div>
+      </div>
+      <div class="phase-body" style="display:none">
+        <div class="deps">
+          <div class="deps-title">📦 Phase Gate</div>
+          <div class="dep-item"><span class="dep-arrow">→</span><div class="dep-text">P2 success criteria <span class="dep-code">ALL PASS</span> (MAU ≥ 1K, DAU/MAU ≥ 25%)</div></div>
+        </div>
+
+        <div class="tasks">
+
+          <div class="task">
+            <div class="task-id">P3-T01</div>
+            <div class="task-body">
+              <div class="task-name">Integrate payment gateway — Midtrans</div>
+              <div class="task-desc">Integrate Midtrans for subscription billing. Support: GoPay, OVO, QRIS, VA (BCA/Mandiri/BNI), credit card. Subscription plans: Monthly Rp 49.000, Annual Rp 399.000. Auto-renewal with reminder 3 days before. Cancellation = access until period end, no refunds.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-tag tt-legal">LEGAL</span>
+                <span class="task-priority prio-critical">🔴 CRITICAL</span>
+                <span class="task-tag tt-data">Effort: 7d</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P3-T02</div>
+            <div class="task-body">
+              <div class="task-name">Premium feature gate implementation</div>
+              <div class="task-desc">Gate these features behind Premium: (1) stock access beyond 5 free stocks, (2) Gold League access (free users in Bronze only), (3) AI insight badge on stock cards, (4) export trade history CSV, (5) custom portfolio chart color themes. Show upgrade prompt with feature preview when free user tries to access gated content.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-priority prio-critical">🔴 CRITICAL</span>
+                <span class="task-tag tt-data">Effort: 4d</span>
+                <span class="task-tag tt-design">Deps: P3-T01</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P3-T03</div>
+            <div class="task-body">
+              <div class="task-name">Upgrade paywall — FOMO-optimized design</div>
+              <div class="task-desc">Paywall triggers at 3 moments: (1) when free user clicks a locked stock, (2) Friday leaderboard — "Top 3 this week were all Premium" callout, (3) after 3rd trade. Paywall content: show what Premium users earned vs free users this week. Show real (anonymized) return data. A/B test: monthly-first vs annual-first.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-design">DESIGN</span>
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-priority prio-high">🟠 HIGH</span>
+                <span class="task-tag tt-data">Effort: 4d</span>
+                <span class="task-tag tt-design">Deps: P3-T02</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P3-T04</div>
+            <div class="task-body">
+              <div class="task-name">Mascot cosmetic shop — IAP v1</div>
+              <div class="task-desc">Build in-app shop with: Season trophy frames (Rp 15K each), exclusive mascot outfits (Rp 25K each), portfolio chart themes (Rp 15K each), profile backgrounds (Rp 20K). All cosmetic-only, zero gameplay advantage. Premium users get 20% discount. Midtrans one-time payment. Items are permanent (never expire).</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-tag tt-design">DESIGN</span>
+                <span class="task-priority prio-medium">🟡 MEDIUM</span>
+                <span class="task-tag tt-data">Effort: 6d</span>
+                <span class="task-tag tt-design">Deps: P3-T01</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P3-T05</div>
+            <div class="task-body">
+              <div class="task-name">Email/WA drip campaign — "7 days to upgrade"</div>
+              <div class="task-desc">Trigger for users who've played 2+ seasons without upgrading. Day 1: "Kamu udah main 2 season — saham apa yang kamu mau explore tapi belum bisa?". Day 3: Show a real Premium stock (ANTM/BBRI) performance last week with blur over detail. Day 7: "48-jam offer: Premium Rp 39K bulan pertama". Measure: open rate target 35%, CVR target 5%.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-marketing">MARKETING</span>
+                <span class="task-tag tt-content">CONTENT</span>
+                <span class="task-priority prio-high">🟠 HIGH</span>
+                <span class="task-tag tt-data">Effort: 5d</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="criteria">
+          <div class="criteria-title">✅ Phase 3 Success Criteria</div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">First 30 days post-launch: ≥ <span class="val">100 paid subscribers</span>. MRR ≥ <span class="val">Rp 4.900.000</span>.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Free-to-Premium CVR ≥ <span class="val">5%</span> of MAU (measure in Month 7).</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Monthly churn rate &lt; <span class="val">8%</span>. (Industry benchmark for B2C edtech in SEA).</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Cosmetic shop GMV ≥ <span class="val">Rp 3.000.000</span> in first 30 days.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Payment success rate ≥ <span class="val">95%</span> (Midtrans benchmark).</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Drip campaign CVR ≥ <span class="val">5%</span> on Day 7 offer.</div></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════ PHASE 4 ══════════════ -->
+    <div class="phase-card p4">
+      <div class="phase-header" onclick="toggle(this)">
+        <div class="phase-num">P4</div>
+        <div>
+          <div class="phase-title">Scale — 5K Premium Subscribers</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;font-weight:700">Stock School, paid ads, AI insights, retention loops</div>
+        </div>
+        <div class="phase-timeline">Month 8–12</div>
+        <div class="phase-toggle">▼</div>
+      </div>
+      <div class="phase-body" style="display:none">
+        <div class="deps">
+          <div class="deps-title">📦 Phase Gate</div>
+          <div class="dep-item"><span class="dep-arrow">→</span><div class="dep-text">MRR ≥ <span class="dep-code">Rp 4.900.000</span> (from P3 criteria)</div></div>
+          <div class="dep-item"><span class="dep-arrow">→</span><div class="dep-text">Churn &lt; <span class="dep-code">8%</span> for 2 consecutive months</div></div>
+        </div>
+
+        <div class="tasks">
+
+          <div class="task">
+            <div class="task-id">P4-T01</div>
+            <div class="task-body">
+              <div class="task-name">Stock School — weekly deep-dive content system</div>
+              <div class="task-desc">Every Monday, publish a "Stock of the Week" for Premium users: fundamental analysis (revenue, profit, P/E, ROE), technical summary (support/resistance, trend), 3 things beginners need to know, Penny mascot explains in simple language. NOT a buy/sell recommendation. Format: 5-screen in-app story. Linked to Arena — that stock becomes a "Featured" pick for the week.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-content">CONTENT</span>
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-priority prio-critical">🔴 CRITICAL</span>
+                <span class="task-tag tt-data">Effort: 10d build + 2h/week ongoing</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P4-T02</div>
+            <div class="task-body">
+              <div class="task-name">AI insight tags on stock cards (Claude API)</div>
+              <div class="task-desc">Use Claude API to generate a 2-sentence plain-language insight for each of the 50 stocks, updated weekly. Format: "BBCA minggu ini: Laba Q3 naik 12% dari tahun lalu 📈. Harga masih di bawah rata-rata 52 minggu, menarik untuk dipelajari." Store as cached text. NOT a recommendation. Label clearly: "🤖 AI Summary · Bukan rekomendasi".</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-tag tt-content">CONTENT</span>
+                <span class="task-priority prio-high">🟠 HIGH</span>
+                <span class="task-tag tt-data">Effort: 5d</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P4-T03</div>
+            <div class="task-body">
+              <div class="task-name">Paid acquisition — Meta + TikTok ads</div>
+              <div class="task-desc">Budget: Rp 10jt/month testing budget. Target: 18-28 yo, interest in investing/saham/keuangan, Indonesia. Creative angle: "Cobain trading tanpa ruang — gratis!". Measure: CAC target ≤ Rp 15.000 per install (free), ≤ Rp 150.000 per paid conversion. Pause if CAC &gt; 2× LTV. LTV calculation: avg_months_subscribed × Rp 49.000.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-marketing">MARKETING</span>
+                <span class="task-priority prio-high">🟠 HIGH</span>
+                <span class="task-tag tt-data">Effort: 3d setup + ongoing</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P4-T04</div>
+            <div class="task-body">
+              <div class="task-name">Annual subscription push — "Hemat 2 bulan" campaign</div>
+              <div class="task-desc">At month 6 of a monthly subscriber's tenure, send: "Kamu udah 6 bulan di Weal! Switch ke annual, hemat 2 bulan = Rp 98.000." In-app banner + WA message. Target: 30% of monthly subs convert to annual. Annual subs counted as 1 churn event, 12 months cashflow. Track: monthly_to_annual_cvr metric.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-marketing">MARKETING</span>
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-priority prio-high">🟠 HIGH</span>
+                <span class="task-tag tt-data">Effort: 3d</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P4-T05</div>
+            <div class="task-body">
+              <div class="task-name">Friend challenge system — "Tantang Teman"</div>
+              <div class="task-desc">Allow user to challenge a specific friend to a 1-week private Arena duel. Same Rp 10jt starting capital, same stock universe. Winner gets +200 XP and a trophy frame. Loser gets "Better luck next season 💪" + +50 XP for participating. Share challenge link: "Budi nantangin kamu main saham — kalau berani!" + deep link to app.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-tag tt-design">DESIGN</span>
+                <span class="task-priority prio-medium">🟡 MEDIUM</span>
+                <span class="task-tag tt-data">Effort: 6d</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="criteria">
+          <div class="criteria-title">✅ Phase 4 Success Criteria</div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Premium subscribers ≥ <span class="val">3.000</span> by end of Month 12.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">MRR ≥ <span class="val">Rp 147.000.000</span> (Rp 49K × 3K subs).</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Stock School published weekly, ≥ <span class="val">4 consecutive weeks</span> without missing.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">CAC from paid ads ≤ <span class="val">Rp 150.000</span> per paid conversion.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">MAU ≥ <span class="val">30.000</span> total users (free + paid).</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Monthly-to-annual conversion rate ≥ <span class="val">20%</span>.</div></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════ PHASE 5 ══════════════ -->
+    <div class="phase-card p5">
+      <div class="phase-header" onclick="toggle(this)">
+        <div class="phase-num">P5</div>
+        <div>
+          <div class="phase-title">Enterprise — B2B + Rp 500jt/Month ARR</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;font-weight:700">Schools, corporate, sponsored events, Series A ready</div>
+        </div>
+        <div class="phase-timeline">Month 13–18</div>
+        <div class="phase-toggle">▼</div>
+      </div>
+      <div class="phase-body" style="display:none">
+        <div class="deps">
+          <div class="deps-title">📦 Phase Gate</div>
+          <div class="dep-item"><span class="dep-arrow">→</span><div class="dep-text">Premium subs ≥ <span class="dep-code">3.000</span> (from P4)</div></div>
+          <div class="dep-item"><span class="dep-arrow">→</span><div class="dep-text">MRR ≥ <span class="dep-code">Rp 147jt</span> for 2 consecutive months</div></div>
+          <div class="dep-item"><span class="dep-arrow">→</span><div class="dep-text">Churn &lt; <span class="dep-code">6%</span> for 3 consecutive months</div></div>
+        </div>
+
+        <div class="tasks">
+
+          <div class="task">
+            <div class="task-id">P5-T01</div>
+            <div class="task-body">
+              <div class="task-name">Weal for Schools — teacher + class dashboard</div>
+              <div class="task-desc">Build admin panel for teachers: create class, invite students via code, see all student portfolio performance, set custom weekly missions per class, export reports. Pricing: Rp 2jt/class/year (≤30 students), Rp 15jt/school/year (unlimited classes). Target: 5 pilot schools by end Month 15. Partner with universities (FEB UI, FEB UGM) for validation.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-dev">DEV</span>
+                <span class="task-tag tt-marketing">MARKETING</span>
+                <span class="task-priority prio-high">🟠 HIGH</span>
+                <span class="task-tag tt-data">Effort: 15d</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P5-T02</div>
+            <div class="task-body">
+              <div class="task-name">Sponsored Arena Events — broker partnerships</div>
+              <div class="task-desc">Pitch to: Ajaib, Stockbit, Bibit, IPOT. Offer: co-branded 1-week Arena event "Ajaib vs Weal Challenge" — logo on leaderboard, custom missions, sponsor funds the winner prize (real money, not from Weal). Pricing: Rp 50jt–200jt/campaign. Key constraint: sponsor cannot dictate stock recommendations — only event branding. 1 sponsor/month max to avoid clutter.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-marketing">MARKETING</span>
+                <span class="task-tag tt-legal">LEGAL</span>
+                <span class="task-priority prio-high">🟠 HIGH</span>
+                <span class="task-tag tt-data">Effort: 10d negotiation + 3d integration</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-id">P5-T03</div>
+            <div class="task-body">
+              <div class="task-name">Fundraising deck — Series A preparation</div>
+              <div class="task-desc">Prepare investor deck: TAM (18M+ Indonesian investors, growing), product (Arena engagement metrics), revenue (MRR trajectory), unit economics (LTV/CAC), roadmap (SEA expansion). Target: pre-seed or seed from Indonesian VC (Intudo, Alpha JWC, East Ventures). Prepare for due diligence: 6 months of financials, user cohort data, churn analysis.</div>
+              <div class="task-meta">
+                <span class="task-tag tt-marketing">MARKETING</span>
+                <span class="task-priority prio-medium">🟡 MEDIUM</span>
+                <span class="task-tag tt-data">Effort: 10d</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="criteria">
+          <div class="criteria-title">✅ Phase 5 Success Criteria — North Star Achieved</div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Total premium subscribers ≥ <span class="val">10.000</span>.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Monthly ARR ≥ <span class="val">Rp 500.000.000</span> (blended all streams).</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">B2B schools signed: ≥ <span class="val">10 institutions</span>.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">At least <span class="val">1 sponsor partnership</span> executed successfully.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">MAU ≥ <span class="val">100.000</span> across all features.</div></div>
+          <div class="criterion"><div class="crit-check">☐</div><div class="crit-text">Churn ≤ <span class="val">5%</span>/month for 3 consecutive months.</div></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- end phases -->
+
+  <hr class="divider">
+
+  <!-- RISK REGISTER -->
+  <div class="section-title">⚠️ Risk Register</div>
+  <div class="section-sub">AI Agent must check this register before executing any task in the flagged phases. Log risk if triggered.</div>
+
+  <div class="risk-grid">
+    <div class="risk-card risk-high">
+      <div class="risk-label">🔴 HIGH RISK</div>
+      <div class="risk-name">OJK Regulatory Shift</div>
+      <div class="risk-desc">OJK issues new ruling that classifies paper trading summaries as investment advice requiring WPPE license.</div>
+      <div class="risk-mitigation">Mitigation: Quarterly legal review. Maintain explicit "BUKAN REKOMENDASI" label on all stock content.</div>
+    </div>
+    <div class="risk-card risk-high">
+      <div class="risk-label">🔴 HIGH RISK</div>
+      <div class="risk-name">Data API Cost Spike</div>
+      <div class="risk-desc">Yahoo Finance or data provider changes pricing/terms, increasing COGS significantly at scale.</div>
+      <div class="risk-mitigation">Mitigation: P1 — evaluate IDX official API. Build abstraction layer so provider can be swapped.</div>
+    </div>
+    <div class="risk-card risk-medium">
+      <div class="risk-label">🟠 MEDIUM RISK</div>
+      <div class="risk-name">High Churn Post-Premium</div>
+      <div class="risk-desc">Users subscribe for 1 month to try, then cancel. MRR grows slowly despite high signups.</div>
+      <div class="risk-mitigation">Mitigation: Annual plan discount (P3-T01), Stock School content lock (P4-T01), friend challenge retention (P4-T05).</div>
+    </div>
+    <div class="risk-card risk-medium">
+      <div class="risk-label">🟠 MEDIUM RISK</div>
+      <div class="risk-name">Copycat Competitor</div>
+      <div class="risk-desc">Stockbit or Bibit launches their own paper trading with gamification using their existing user base.</div>
+      <div class="risk-mitigation">Mitigation: Moat = mascot evolution + educational curriculum, not just trading. Hard to replicate quickly.</div>
+    </div>
+    <div class="risk-card risk-low">
+      <div class="risk-label">🟢 LOW RISK</div>
+      <div class="risk-name">Market Crash Drops Engagement</div>
+      <div class="risk-desc">IHSG crashes (as in April 2025 -15%) — users see losses and stop playing Arena.</div>
+      <div class="risk-mitigation">Mitigation: Weekly reset = losses don't persist. Historical data shows IDX Arena activity increased during April 2025 volatility.</div>
+    </div>
+    <div class="risk-card risk-low">
+      <div class="risk-label">🟢 LOW RISK</div>
+      <div class="risk-name">Payment Friction (Indonesia)</div>
+      <div class="risk-desc">Users want to subscribe but don't have credit cards. QRIS/GoPay penetration gap.</div>
+      <div class="risk-mitigation">Mitigation: Midtrans supports QRIS, GoPay, OVO, VA — covers 95%+ of Indonesian digital payment methods.</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- TECH STACK -->
+  <div class="section-title">⚙️ Recommended Tech Stack for Arena</div>
+  <div class="section-sub">AI Agent uses this to select libraries and services when implementing tasks.</div>
+
+  <div class="tech-grid">
+    <div class="tech-item">
+      <div class="tech-category">Price Feed</div>
+      <div class="tech-name">Yahoo Finance API</div>
+      <div class="tech-note">v1 — free tier. Upgrade to IDX official at 10K users.</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-category">Database</div>
+      <div class="tech-name">Supabase (Postgres)</div>
+      <div class="tech-note">Real-time leaderboard via Supabase Realtime.</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-category">Payments</div>
+      <div class="tech-name">Midtrans</div>
+      <div class="tech-note">GoPay, QRIS, VA, CC. Snaptoken for in-app.</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-category">AI Insights</div>
+      <div class="tech-name">Claude API (Sonnet)</div>
+      <div class="tech-note">Weekly stock summaries. Cache 7 days. ~$0.01/stock.</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-category">Push Notifications</div>
+      <div class="tech-name">Firebase FCM</div>
+      <div class="tech-note">Arena triggers (Monday launch, Friday close).</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-category">Analytics</div>
+      <div class="tech-name">Mixpanel + Amplitude</div>
+      <div class="tech-note">Track DAU, funnel CVR, feature adoption.</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-category">Share Cards</div>
+      <div class="tech-name">html2canvas / Puppeteer</div>
+      <div class="tech-note">Generate PNG result cards server-side.</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-category">Email / WA</div>
+      <div class="tech-name">WhatsApp Business API</div>
+      <div class="tech-note">Drip campaigns. Use Wati.io or Fonnte.com.</div>
+    </div>
+  </div>
+
+</div><!-- end container -->
+
+<script>
+function toggle(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('.phase-toggle');
+  const isOpen = header.classList.contains('open');
+  if (isOpen) {
+    body.style.display = 'none';
+    header.classList.remove('open');
+  } else {
+    body.style.display = 'block';
+    header.classList.add('open');
+    // Auto-open animation
+    body.style.animation = 'slideUp 0.25s ease';
+  }
+}
+
+// Auto-open Phase 1 on load
+window.addEventListener('load', () => {
+  document.querySelector('.phase-header').click();
+});
+</script>
+
+</body>
+</html>
