@@ -1,214 +1,263 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { fetchStockBars, fetchAllBars, fetchSimDates, fetchOrImportBars, placeArenaOrder } from '../api/arena'
-import { BottomNav } from '../components/BottomNav'
 import { OjkDisclaimer } from '../components/OjkDisclaimer'
 
-// ── Chart ─────────────────────────────────────────────────────────────────
+// ── EMA / RSI helpers ──────────────────────────────────────────────────────
 
-function IntradayChart({ bars, allBars, simIdx, simMode }) {
-  const [tooltipIdx, setTooltipIdx] = useState(null)
+function calcEMA(data, n) {
+  const k = 2 / (n + 1)
+  let e = data[0], result = []
+  for (let i = 0; i < data.length; i++) {
+    e = i === 0 ? data[0] : data[i] * k + e * (1 - k)
+    result.push(e)
+  }
+  return result
+}
 
-  // In simulation mode show growing slice of allBars, else show live bars.
-  const display = simMode !== 'idle' && allBars.length > 0
-    ? allBars.slice(0, simIdx + 1)
-    : bars
+function calcRSI(closes, period = 14) {
+  if (closes.length < period + 1) return 50
+  const slice = closes.slice(-period - 1)
+  let g = 0, l = 0
+  for (let i = 1; i < slice.length; i++) {
+    const d = slice[i] - slice[i - 1]
+    d > 0 ? (g += d) : (l -= d)
+  }
+  const rs = l === 0 ? Infinity : g / l
+  return parseFloat((100 - 100 / (1 + rs)).toFixed(1))
+}
 
-  // Clear tooltip when simulation advances so it doesn't linger on old position
-  useEffect(() => { setTooltipIdx(null) }, [display.length])
+// ── Canvas chart component ─────────────────────────────────────────────────
 
-  if (display.length < 2) {
-    const isSimLoading = simMode === 'loading'
-    return (
-      <div style={{ height: 140, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-        <p style={{ fontSize: 20 }}>{isSimLoading ? '⌛' : '⏳'}</p>
-        <p style={{ fontSize: 12, color: 'var(--arena-text-muted)' }}>
-          {isSimLoading ? 'Mengambil data simulasi…' : 'Menunggu data intraday pasar…'}
-        </p>
-        {!isSimLoading && <p style={{ fontSize: 11, color: 'var(--arena-text-dim)' }}>Data tersedia saat pasar buka (09:00 WIB)</p>}
-      </div>
-    )
+function CandleChart({ bars, chartType, showEma, showVolume }) {
+  const mainRef = useRef(null)
+  const volRef  = useRef(null)
+  const [tooltip, setTooltip] = useState(null)
+
+  const closes = bars.map(b => b.close)
+  const ema9   = closes.length > 1 ? calcEMA(closes, 9)  : []
+  const ema21  = closes.length > 1 ? calcEMA(closes, 21) : []
+  const ema50  = closes.length > 1 ? calcEMA(closes, 50) : []
+
+  useEffect(() => {
+    const canvas = mainRef.current
+    if (!canvas || bars.length < 2) return
+
+    const dpr  = window.devicePixelRatio || 1
+    const cssW = canvas.offsetWidth
+    const cssH = 220
+    canvas.width  = cssW * dpr
+    canvas.height = cssH * dpr
+    const ctx = canvas.getContext('2d')
+    ctx.scale(dpr, dpr)
+
+    const pad = { l: 8, r: 52, t: 10, b: 26 }
+    const cw  = cssW - pad.l - pad.r
+    const ch  = cssH - pad.t - pad.b
+
+    const allPrices = bars.flatMap(b => [b.high, b.low])
+    if (showEma && ema9.length) allPrices.push(...ema9, ...ema21, ...ema50)
+    const rawMin = Math.min(...allPrices)
+    const rawMax = Math.max(...allPrices)
+    const spread = rawMax - rawMin || rawMax * 0.01
+    const minP = rawMin - spread * 0.05
+    const maxP = rawMax + spread * 0.05
+
+    const py  = v => pad.t + (1 - (v - minP) / (maxP - minP)) * ch
+    const gap = cw / bars.length
+    const barW = Math.max(2, gap * 0.7)
+
+    // Grid lines + price labels
+    ctx.strokeStyle = '#21262d'
+    ctx.lineWidth   = 1
+    for (let i = 0; i <= 4; i++) {
+      const y = pad.t + i * (ch / 4)
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(cssW - pad.r, y); ctx.stroke()
+      const val = maxP - (i / 4) * (maxP - minP)
+      ctx.fillStyle  = '#8b949e'
+      ctx.font       = '11px sans-serif'
+      ctx.textAlign  = 'left'
+      ctx.fillText(Math.round(val).toLocaleString('id-ID'), cssW - pad.r + 4, y + 4)
+    }
+
+    if (chartType === 'bar') {
+      bars.forEach((b, i) => {
+        const x    = pad.l + i * gap + gap / 2
+        const isUp = b.close >= b.open
+        const col  = isUp ? '#3fb950' : '#f85149'
+        ctx.strokeStyle = col; ctx.lineWidth = 1.5
+        ctx.beginPath(); ctx.moveTo(x, py(b.high)); ctx.lineTo(x, py(b.low)); ctx.stroke()
+        const bodyTop = py(Math.max(b.open, b.close))
+        const bodyBot = py(Math.min(b.open, b.close))
+        const bh      = Math.max(2, bodyBot - bodyTop)
+        ctx.fillStyle = col
+        ctx.fillRect(x - barW / 2, bodyTop, barW, bh)
+        if (!isUp) {
+          ctx.strokeStyle = '#f85149'; ctx.lineWidth = 1
+          ctx.strokeRect(x - barW / 2, bodyTop, barW, bh)
+        }
+      })
+    } else {
+      // Line chart
+      ctx.strokeStyle = '#c9d1d9'; ctx.lineWidth = 2
+      ctx.beginPath()
+      bars.forEach((b, i) => {
+        const x = pad.l + i * gap + gap / 2
+        i === 0 ? ctx.moveTo(x, py(b.close)) : ctx.lineTo(x, py(b.close))
+      })
+      ctx.stroke()
+      // Fill gradient
+      ctx.fillStyle = 'rgba(88,166,255,0.07)'
+      ctx.beginPath()
+      bars.forEach((b, i) => {
+        const x = pad.l + i * gap + gap / 2
+        i === 0 ? ctx.moveTo(x, py(b.close)) : ctx.lineTo(x, py(b.close))
+      })
+      const lastX = pad.l + (bars.length - 1) * gap + gap / 2
+      ctx.lineTo(lastX, cssH - pad.b)
+      ctx.lineTo(pad.l + gap / 2, cssH - pad.b)
+      ctx.closePath(); ctx.fill()
+    }
+
+    // EMA lines
+    if (showEma && ema9.length > 1) {
+      [[ema9, '#f0e050'], [ema21, '#58a6ff'], [ema50, '#ff7b54']].forEach(([arr, col]) => {
+        ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.setLineDash([])
+        ctx.beginPath()
+        arr.forEach((v, i) => {
+          const x = pad.l + i * gap + gap / 2
+          i === 0 ? ctx.moveTo(x, py(v)) : ctx.lineTo(x, py(v))
+        })
+        ctx.stroke()
+      })
+    }
+
+    // X-axis time labels
+    const n     = bars.length
+    const xIdxs = [0, Math.floor(n / 4), Math.floor(n / 2), Math.floor(3 * n / 4), n - 1]
+    ctx.fillStyle = '#8b949e'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'
+    xIdxs.forEach(i => {
+      if (i < bars.length) {
+        const x = pad.l + i * gap + gap / 2
+        const t = bars[i].bar_time?.slice(11, 16) ?? ''
+        ctx.fillText(t, x, cssH - 4)
+      }
+    })
+  }, [bars, chartType, showEma]) // eslint-disable-line
+
+  // Volume canvas
+  useEffect(() => {
+    const canvas = volRef.current
+    if (!canvas || !showVolume || bars.length < 1) return
+    const dpr  = window.devicePixelRatio || 1
+    const cssW = canvas.offsetWidth
+    const cssH = 60
+    canvas.width  = cssW * dpr
+    canvas.height = cssH * dpr
+    const ctx = canvas.getContext('2d')
+    ctx.scale(dpr, dpr)
+    ctx.clearRect(0, 0, cssW, cssH)
+
+    const pad  = { l: 8, r: 52, t: 6, b: 14 }
+    const cw   = cssW - pad.l - pad.r
+    const ch   = cssH - pad.t - pad.b
+    const gap  = cw / bars.length
+    const barW = Math.max(2, gap * 0.7)
+    const maxV = Math.max(...bars.map(b => b.volume || 0))
+
+    bars.forEach((b, i) => {
+      const x  = pad.l + i * gap + gap / 2
+      const bh = Math.max(2, ((b.volume || 0) / (maxV || 1)) * ch)
+      const col = b.close >= b.open ? 'rgba(63,185,80,.7)' : 'rgba(248,81,73,.7)'
+      ctx.fillStyle = col
+      ctx.fillRect(x - barW / 2, cssH - pad.b - bh, barW, bh)
+    })
+
+    if (maxV > 0) {
+      const maxK = (maxV / 1000).toFixed(0) + 'K'
+      ctx.fillStyle = '#8b949e'; ctx.font = '10px sans-serif'; ctx.textAlign = 'left'
+      ctx.fillText(maxK, cssW - pad.r + 4, pad.t + 10)
+    }
+  }, [bars, showVolume])
+
+  function handleMouseMove(e) {
+    const canvas = mainRef.current
+    if (!canvas || bars.length < 1) return
+    const rect = canvas.getBoundingClientRect()
+    const cssX = e.clientX - rect.left
+    const pad  = { l: 8, r: 52 }
+    const cw   = rect.width - pad.l - pad.r
+    const gap  = cw / bars.length
+    const idx  = Math.floor((cssX - pad.l) / gap)
+    if (idx >= 0 && idx < bars.length) {
+      setTooltip({ x: Math.min(cssX + 10, rect.width - 130), y: e.clientY - rect.top - 10, idx })
+    }
   }
 
-  const closes  = display.map(b => b.close)
-  const minP    = Math.min(...closes)
-  const maxP    = Math.max(...closes)
-  const pad     = (maxP - minP) * 0.1 || maxP * 0.005
-  const lo      = minP - pad
-  const hi      = maxP + pad
-  const range   = hi - lo || 1
-  const W = 300
-  const H = 120
-
-  const pts = closes.map((p, i) => {
-    const x = closes.length < 2 ? W / 2 : (i / (closes.length - 1)) * W
-    const y = H - ((p - lo) / range) * H
-    return [x, y]
-  })
-
-  const linePts  = pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
-  const lastX    = pts[pts.length - 1][0]
-  const areaPath = `M0,${pts[0][1].toFixed(1)} L${linePts} L${lastX.toFixed(1)},${H} L0,${H} Z`
-
-  const up        = closes[closes.length - 1] >= closes[0]
-  const lineColor = up ? 'var(--arena-accent)' : 'var(--arena-sell)'
-  const [cx, cy]  = pts[pts.length - 1]
-
-  const midP = Math.round((maxP + minP) / 2)
-  const fmt  = v => Number(v).toLocaleString('id-ID')
-  const yPct = p => (1 - (p - lo) / range) * 100
-
-  const yTicks = [
-    { price: maxP, pct: yPct(maxP) },
-    { price: midP, pct: yPct(midP) },
-    { price: minP, pct: yPct(minP) },
-  ]
-
-  const labelW = 44
-
-  // Pointer handlers — work for both mouse and touch
-  function handleMove(e) {
-    const rect     = e.currentTarget.getBoundingClientRect()
-    const clientX  = e.touches ? e.touches[0].clientX : e.clientX
-    const ratio    = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
-    setTooltipIdx(Math.round(ratio * (display.length - 1)))
-  }
-
-  const ti     = tooltipIdx
-  const tipBar = ti !== null ? display[ti] : null
-  // x position of crosshair as % of chart-area width (SVG viewBox 0–W maps 1:1 to 0–100%)
-  const tipXPct = ti !== null ? (pts[ti][0] / W) * 100 : 0
+  const tipBar = tooltip !== null ? bars[tooltip.idx] : null
 
   return (
-    <div style={{ display: 'flex', height: H, alignItems: 'stretch' }}>
-
-      {/* Y-axis label column */}
-      <div style={{ position: 'relative', width: labelW, flexShrink: 0 }}>
-        {yTicks.map(({ price, pct }, i) => (
-          <span key={i} style={{
-            position: 'absolute', right: 4,
-            top: `${pct}%`, transform: 'translateY(-50%)',
-            fontSize: 11, fontWeight: 700,
-            color: 'rgba(160,210,185,0.8)',
-            lineHeight: 1, whiteSpace: 'nowrap',
-          }}>
-            {fmt(price)}
-          </span>
-        ))}
-      </div>
-
-      {/* Chart area — interactive */}
-      <div
-        style={{ position: 'relative', flex: 1, overflow: 'hidden', touchAction: 'none', cursor: 'crosshair' }}
-        onMouseMove={handleMove}
-        onMouseLeave={() => setTooltipIdx(null)}
-        onTouchStart={handleMove}
-        onTouchMove={handleMove}
-        onTouchEnd={() => setTooltipIdx(null)}
-      >
-        {/* Horizontal grid lines */}
-        {yTicks.map(({ price, pct }, i) => (
-          <div key={i} style={{
-            position: 'absolute', left: 0, right: 0,
-            top: `${pct}%`,
-            borderTop: '1px dashed rgba(255,255,255,0.07)',
-            pointerEvents: 'none',
-          }} />
-        ))}
-
-        <svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ display: 'block' }}>
-          <defs>
-            <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   stopColor={lineColor} stopOpacity="0.35" />
-              <stop offset="100%" stopColor={lineColor} stopOpacity="0"    />
-            </linearGradient>
-          </defs>
-          <path d={areaPath} fill="url(#fill)" />
-          <polyline points={linePts} stroke={lineColor} strokeWidth="2.5" fill="none" strokeLinejoin="round" strokeLinecap="round" />
-
-          {/* Live trailing dot — hidden while tooltip is active */}
-          {ti === null && (
-            <>
-              <circle cx={cx.toFixed(1)} cy={cy.toFixed(1)} r="5"  fill={lineColor} />
-              <circle cx={cx.toFixed(1)} cy={cy.toFixed(1)} r="10" fill={lineColor} opacity="0.2" />
-            </>
-          )}
-
-          {/* Crosshair vertical line + dot */}
-          {ti !== null && pts[ti] && (
-            <>
-              <line
-                x1={pts[ti][0].toFixed(1)} y1="0"
-                x2={pts[ti][0].toFixed(1)} y2={H}
-                stroke="rgba(255,255,255,0.3)" strokeWidth="1" strokeDasharray="3,3"
-              />
-              <circle
-                cx={pts[ti][0].toFixed(1)} cy={pts[ti][1].toFixed(1)}
-                r="5" fill="white" stroke={lineColor} strokeWidth="2"
-              />
-            </>
-          )}
-        </svg>
-
-        {/* OHLC tooltip bubble */}
+    <div style={{ padding: '0 14px 4px' }}>
+      <div style={{ position: 'relative', width: '100%' }}>
+        <canvas
+          ref={mainRef}
+          style={{ display: 'block', width: '100%', height: 220 }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={() => setTooltip(null)}
+        />
         {tipBar && (
           <div style={{
-            position: 'absolute', top: 4, pointerEvents: 'none', zIndex: 10,
-            // Flip to left side when crosshair is in the right 55% of the chart
-            left:  tipXPct <= 55 ? `calc(${tipXPct}% + 8px)` : undefined,
-            right: tipXPct >  55 ? `calc(${100 - tipXPct}% + 8px)` : undefined,
-            background: 'rgba(6,18,10,0.94)',
-            border: '1px solid rgba(74,222,128,0.45)',
-            borderRadius: 9, padding: '7px 10px',
-            minWidth: 118,
-            boxShadow: '0 4px 16px rgba(0,0,0,0.45)',
+            position: 'absolute', left: tooltip.x, top: tooltip.y,
+            background: '#1c2128', border: '0.5px solid #30363d', borderRadius: 6,
+            padding: '6px 10px', fontSize: 11, color: '#e6edf3', pointerEvents: 'none',
+            whiteSpace: 'nowrap', zIndex: 10,
           }}>
-            <p style={{ fontSize: 11, color: 'var(--arena-accent)', fontWeight: 800, marginBottom: 3 }}>
-              {tipBar.bar_time?.slice(11, 16)} WIB
-            </p>
-            <p style={{ fontSize: 15, fontWeight: 900, color: 'white', fontFamily: "'Fredoka One',cursive", marginBottom: 4, lineHeight: 1 }}>
-              Rp {fmt(tipBar.close)}
-            </p>
-            <div style={{ display: 'flex', gap: 7 }}>
-              <span style={{ fontSize: 10, color: '#A0D0C0' }}>O {fmt(tipBar.open)}</span>
-              <span style={{ fontSize: 10, color: 'var(--arena-accent)' }}>H {fmt(tipBar.high)}</span>
-              <span style={{ fontSize: 10, color: 'var(--arena-sell)' }}>L {fmt(tipBar.low)}</span>
-            </div>
+            O <b>{tipBar.open?.toLocaleString('id-ID')}</b>{' '}
+            H <b style={{ color: '#3fb950' }}>{tipBar.high?.toLocaleString('id-ID')}</b>{' '}
+            L <b style={{ color: '#f85149' }}>{tipBar.low?.toLocaleString('id-ID')}</b>{' '}
+            C <b>{tipBar.close?.toLocaleString('id-ID')}</b>
+            {tipBar.volume > 0 && <><br />Vol <b>{((tipBar.volume || 0) / 1000).toFixed(0)}K</b></>}
           </div>
         )}
       </div>
-
+      {showEma && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '2px 0 4px', fontSize: 11, color: '#8b949e' }}>
+          {[['#f0e050', 'EMA 9'], ['#58a6ff', 'EMA 21'], ['#ff7b54', 'EMA 50']].map(([c, l]) => (
+            <span key={l}>
+              <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: c, marginRight: 3 }} />
+              {l}
+            </span>
+          ))}
+        </div>
+      )}
+      {showVolume && (
+        <canvas ref={volRef} style={{ display: 'block', width: '100%', height: 60 }} />
+      )}
     </div>
   )
 }
 
-// ── Simulation controls ───────────────────────────────────────────────────
+// ── Simulation speeds ──────────────────────────────────────────────────────
 
 const SPEEDS = [
-  { label: '1×',   ms: 60_000, hint: '1 mnt/bar' },
-  { label: '5×',   ms: 12_000, hint: '12 dtk/bar' },
-  { label: '10×',  ms:  6_000, hint: '6 dtk/bar'  },
-  { label: '100×', ms:    600, hint: '0.6 dtk/bar' },
+  { label: '1×',   ms: 60_000 },
+  { label: '5×',   ms: 12_000 },
+  { label: '10×',  ms:  6_000 },
+  { label: '100×', ms:    600 },
 ]
 
-// Returns the bar index whose time best matches current WIB clock,
-// if the market is open. Returns 0 if outside market hours.
 function findStartIndex(allBars) {
   if (!allBars.length) return 0
-  // Always derive WIB from UTC epoch (safe regardless of browser timezone)
-  const wib = new Date(Date.now() + 7 * 3_600_000)
-  const day       = wib.getUTCDay()   // 0=Sun … 6=Sat
+  const wib       = new Date(Date.now() + 7 * 3_600_000)
+  const day       = wib.getUTCDay()
   const h         = wib.getUTCHours()
   const m         = wib.getUTCMinutes()
   const totalMins = h * 60 + m
-  // Treat the full trading day window (09:00–16:00 WIB) as "in market"
-  // so users just after the 15:00 close still get positioned at current time.
-  const inMarket  = day >= 1 && day <= 5 &&
-    totalMins >= 9 * 60 && totalMins < 16 * 60
+  const inMarket  = day >= 1 && day <= 5 && totalMins >= 9 * 60 && totalMins < 16 * 60
   if (!inMarket) return 0
   let bestIdx = 0
   for (let i = 0; i < allBars.length; i++) {
-    const bt      = allBars[i].bar_time ?? '' // "2026-04-02T09:00:00" WIB
+    const bt      = allBars[i].bar_time ?? ''
     const barMins = parseInt(bt.slice(11, 13), 10) * 60 + parseInt(bt.slice(14, 16), 10)
     if (barMins <= totalMins) bestIdx = i
     else break
@@ -216,228 +265,7 @@ function findStartIndex(allBars) {
   return bestIdx
 }
 
-function SimControls({ simMode, simIdx, allBars, speedIdx, simStartTime, simDate, simDates, dateStatus, fetchPct, fetchStep, onSimDateChange, onStart, onPause, onResume, onStop, onSpeedChange }) {
-  const total     = allBars.length
-  const progress  = total > 1 ? (simIdx / (total - 1)) * 100 : 0
-  const simTime   = allBars[simIdx]?.bar_time?.slice(11, 16) ?? '—'
-  const firstTime = allBars[0]?.bar_time?.slice(11, 16)      ?? '09:00'
-  const lastTime  = allBars[total - 1]?.bar_time?.slice(11, 16) ?? '15:00'
-
-  const dateLabel = simDate
-    ? new Date(simDate + 'T00:00:00+07:00').toLocaleDateString('id-ID', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-      })
-    : '—'
-
-  if (simMode === 'idle') {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-
-        {/* Date picker card */}
-        <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 10, padding: '10px 12px', border: '1px solid var(--arena-border)' }}>
-          <p style={{ fontSize: 10, color: 'var(--arena-text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>
-            📅 Pilih Data Simulasi
-          </p>
-
-          {/* Free date input */}
-          <input
-            type="date"
-            value={simDate}
-            max={new Date(Date.now() - 86400000).toISOString().slice(0, 10)}
-            onChange={e => onSimDateChange(e.target.value)}
-            style={{
-              width: '100%', padding: '7px 10px', borderRadius: 8, fontSize: 13,
-              background: 'rgba(255,255,255,0.08)', color: '#E8F4EE',
-              border: '1px solid var(--arena-border)', marginBottom: 8,
-              colorScheme: 'dark',
-            }}
-          />
-
-          {simDates.length > 0 && (
-            /* Scrollable date chips (quick access to dates already in DB) */
-            <div className="scrollbar-none" style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
-              {simDates.map(d => {
-                const chipLabel = new Date(d + 'T00:00:00+07:00').toLocaleDateString('id-ID', {
-                  weekday: 'short', day: 'numeric', month: 'short',
-                })
-                const selected = d === simDate
-                return (
-                  <button key={d} type="button" onClick={() => onSimDateChange(d)}
-                    style={{
-                      flexShrink: 0, padding: '6px 12px', borderRadius: 20, cursor: 'pointer',
-                      border: `1.5px solid ${selected ? 'rgba(74,222,128,0.6)' : 'rgba(255,255,255,0.15)'}`,
-                      background: selected ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.05)',
-                      color: selected ? 'var(--arena-accent)' : 'var(--arena-text-muted)',
-                      fontSize: 12, fontWeight: selected ? 800 : 600,
-                      whiteSpace: 'nowrap',
-                    }}>
-                    {chipLabel}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-
-          {simDate && dateStatus === 'ok' && (
-            <p style={{ fontSize: 11, color: 'var(--arena-accent)', fontWeight: 700, marginTop: 7 }}>{dateLabel}</p>
-          )}
-
-          {dateStatus === 'weekend' && (
-            <p style={{ fontSize: 11, color: 'var(--arena-sell)', fontWeight: 700, marginTop: 7 }}>
-              🚫 Pasar tutup hari itu (libur weekend)
-            </p>
-          )}
-
-          {dateStatus === 'error' && (
-            <p style={{ fontSize: 11, color: 'var(--arena-sell)', fontWeight: 700, marginTop: 7 }}>
-              ⚠️ Data tidak tersedia untuk tanggal ini. Coba tanggal lain.
-            </p>
-          )}
-
-          {/* Fetch progress bar */}
-          {(dateStatus === 'fetching' || fetchPct > 0) && dateStatus !== 'weekend' && (
-            <div style={{ marginTop: 8 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--arena-text-muted)', marginBottom: 4 }}>
-                <span>{fetchStep}</span>
-                <span>{fetchPct}%</span>
-              </div>
-              <div style={{ height: 6, background: 'var(--arena-border)', borderRadius: 3, overflow: 'hidden' }}>
-                <div style={{
-                  width: `${fetchPct}%`, height: '100%',
-                  background: fetchPct === 100
-                    ? 'var(--arena-accent)'
-                    : 'linear-gradient(90deg, #28A060, var(--arena-accent))',
-                  borderRadius: 3, transition: 'width 0.5s ease',
-                }} />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Start button */}
-        <button
-          type="button"
-          onClick={onStart}
-          disabled={!simDate || dateStatus !== 'ok'}
-          style={{
-            width: '100%', padding: '13px', borderRadius: 12,
-            background: (simDate && dateStatus === 'ok') ? 'var(--arena-accent-dim)' : 'rgba(255,255,255,0.05)',
-            color: (simDate && dateStatus === 'ok') ? 'var(--arena-accent)' : 'var(--arena-text-dim)',
-            border: `1.5px solid ${(simDate && dateStatus === 'ok') ? 'var(--arena-accent-border)' : 'var(--arena-border)'}`,
-            fontFamily: "'Fredoka One',cursive", fontSize: 16,
-            cursor: (simDate && dateStatus === 'ok') ? 'pointer' : 'not-allowed',
-            letterSpacing: '0.5px',
-          }}
-        >
-          {dateStatus === 'fetching' ? '⏳ Mengambil data…' : '▶ Mulai Simulasi'}
-        </button>
-      </div>
-    )
-  }
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {/* Progress bar */}
-      <div style={{ position: 'relative' }}>
-        <div style={{ height: 10, background: 'var(--arena-border)', borderRadius: 5, overflow: 'hidden' }}>
-          <div style={{
-            width: `${progress}%`, height: '100%',
-            background: 'linear-gradient(90deg,#28A060,var(--arena-accent))',
-            borderRadius: 5, transition: 'width 0.15s linear',
-          }} />
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5 }}>
-          <span style={{ fontSize: 11, color: 'var(--arena-text-dim)' }}>{firstTime}</span>
-          <span style={{ fontSize: 12, fontWeight: 900, color: 'var(--arena-accent)', fontFamily: "'Fredoka One',cursive" }}>
-            {simTime} WIB
-          </span>
-          <span style={{ fontSize: 11, color: 'var(--arena-text-dim)' }}>{lastTime}</span>
-        </div>
-      </div>
-
-      {/* Buttons row */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        {/* Play / Pause */}
-        {simMode === 'playing' ? (
-          <button type="button" onClick={onPause}
-            style={{ ...simBtn, background: 'rgba(255,255,255,0.12)', color: 'white', flex: 1 }}>
-            ⏸ Jeda
-          </button>
-        ) : simMode === 'paused' ? (
-          <button type="button" onClick={onResume}
-            style={{ ...simBtn, background: 'rgba(74,222,128,0.2)', color: 'var(--arena-accent)', flex: 1 }}>
-            ▶ Lanjut
-          </button>
-        ) : (
-          <button type="button" onClick={onStart}
-            style={{ ...simBtn, background: 'rgba(74,222,128,0.2)', color: 'var(--arena-accent)', flex: 1 }}>
-            ↺ Ulangi
-          </button>
-        )}
-
-        {/* Stop */}
-        <button type="button" onClick={onStop}
-          style={{ ...simBtn, background: 'rgba(255,255,255,0.07)', color: 'var(--arena-text-muted)', flex: 1 }}>
-          ⏹ Stop
-        </button>
-
-        {/* Speed selector */}
-        <div style={{ display: 'flex', gap: 4, flexDirection: 'column', alignItems: 'flex-end' }}>
-          <div style={{ display: 'flex', gap: 4 }}>
-            {SPEEDS.map((s, i) => (
-              <button key={s.label} type="button" onClick={() => onSpeedChange(i)}
-                style={{
-                  minHeight: 44, padding: '0 10px', borderRadius: 8,
-                  fontSize: 12, fontWeight: 800, cursor: 'pointer',
-                  background: speedIdx === i ? 'rgba(74,222,128,0.25)' : 'rgba(255,255,255,0.07)',
-                  color: speedIdx === i ? 'var(--arena-accent)' : 'var(--arena-text-muted)',
-                  border: `1px solid ${speedIdx === i ? 'var(--arena-accent-border)' : 'var(--arena-border)'}`,
-                }}>
-                {s.label}
-              </button>
-            ))}
-          </div>
-          <span style={{ fontSize: 11, color: 'var(--arena-text-dim)' }}>{SPEEDS[speedIdx].hint}</span>
-        </div>
-      </div>
-
-      {/* Data date + bar counter */}
-      <div style={{ textAlign: 'center' }}>
-        <p style={{ fontSize: 11, color: 'var(--arena-text-dim)' }}>
-          Simulasi berdasarkan data <span style={{ color: 'var(--arena-text-muted)', fontWeight: 700 }}>{dateLabel}</span>
-        </p>
-        <p style={{ fontSize: 11, color: 'var(--arena-text-dim)', marginTop: 2 }}>
-          {simMode === 'done'
-            ? 'Simulasi selesai'
-            : simStartTime
-              ? `Mulai ${simStartTime} WIB · Bar ${simIdx + 1} / ${total}`
-              : `Bar ${simIdx + 1} / ${total}`}
-        </p>
-      </div>
-    </div>
-  )
-}
-
-const simBtn = {
-  padding: '9px 0', borderRadius: 10, fontSize: 14, fontWeight: 700,
-  cursor: 'pointer', border: '1px solid var(--arena-border)',
-  fontFamily: "'Fredoka One',cursive",
-}
-
-// ── OHLC pill ─────────────────────────────────────────────────────────────
-
-function OHLCStat({ label, value, color }) {
-  return (
-    <div style={{ textAlign: 'center' }}>
-      <p style={{ fontSize: 11, color: '#5A8070', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 2 }}>{label}</p>
-      <p style={{ fontSize: 12, fontWeight: 900, color: color ?? 'white', fontFamily: "'Fredoka One',cursive" }}>
-        {value != null ? Number(value).toLocaleString('id-ID') : '—'}
-      </p>
-    </div>
-  )
-}
-
-// ── Trade bottom sheet ────────────────────────────────────────────────────
+// ── Trade bottom sheet ─────────────────────────────────────────────────────
 
 function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, holding, currentPrice }) {
   const [orderType, setOrderType]   = useState(initialOrderType)
@@ -447,7 +275,6 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
   const [result, setResult]         = useState(null)
   const [error, setError]           = useState(null)
 
-  // Reset state every time the sheet opens
   useEffect(() => {
     if (open) {
       setOrderType(initialOrderType)
@@ -459,7 +286,6 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
     }
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Keep limit price in sync when switching buy ↔ sell
   useEffect(() => {
     if (open && !result) {
       const p = currentPrice ?? stock?.price_close
@@ -509,13 +335,7 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 100 }}
-      />
-
-      {/* Sheet panel */}
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 100 }} />
       <div style={{
         position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
         width: '100%', maxWidth: 448, zIndex: 101,
@@ -523,13 +343,9 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
         maxHeight: '88vh', display: 'flex', flexDirection: 'column',
         animation: 'slide-up 0.3s cubic-bezier(0.2, 0.85, 0.25, 1) forwards',
       }}>
-
-        {/* Drag handle */}
         <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px', flexShrink: 0 }}>
           <div style={{ width: 40, height: 4, borderRadius: 2, background: '#E0D8D0' }} />
         </div>
-
-        {/* Header */}
         <div style={{ padding: '6px 16px 12px', borderBottom: '1px solid #F0EDE8', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
           <div>
             <p style={{ fontSize: 20, fontWeight: 900, color: '#1A2030', fontFamily: "'Fredoka One',cursive", lineHeight: 1 }}>{code}</p>
@@ -548,11 +364,8 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
           </div>
         </div>
 
-        {/* Scrollable form */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 32 }}>
-
           {result ? (
-            /* ── Success state ── */
             <>
               <div style={{
                 borderRadius: 18, padding: '28px 20px', textAlign: 'center',
@@ -586,9 +399,7 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
               </button>
             </>
           ) : (
-            /* ── Form ── */
             <>
-              {/* Buy / Sell toggle */}
               <div style={{ display: 'flex', background: '#F0EDE8', borderRadius: 12, padding: 4, gap: 4 }}>
                 {['buy', 'sell'].map(type => (
                   <button key={type} type="button" onClick={() => setOrderType(type)}
@@ -607,7 +418,6 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
                 ))}
               </div>
 
-              {/* Sell warning */}
               {orderType === 'sell' && !holding && (
                 <div style={{ background: '#FFF8E8', border: '1.5px solid #FFD060', borderRadius: 12, padding: '10px 14px' }}>
                   <p style={{ fontSize: 12, color: '#8A6000', fontWeight: 700 }}>
@@ -616,7 +426,6 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
                 </div>
               )}
 
-              {/* Lots */}
               <div>
                 <p style={{ fontSize: 11, fontWeight: 700, color: '#6A6060', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   Jumlah Lot <span style={{ fontWeight: 400, color: '#A09080' }}>(1 lot = 100 lembar)</span>
@@ -647,7 +456,6 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
                 </div>
               </div>
 
-              {/* Limit price */}
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                   <p style={{ fontSize: 11, fontWeight: 700, color: '#6A6060', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -679,7 +487,6 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
                 )}
               </div>
 
-              {/* Order summary */}
               {parsedLimitPrice > 0 && (
                 <div style={{ background: '#F8F6F2', borderRadius: 14, padding: '14px', border: '1px solid #EDE8E0' }}>
                   <p style={{ fontSize: 10, fontWeight: 700, color: '#8A8080', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>
@@ -698,17 +505,14 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
                 </div>
               )}
 
-              {/* Disclaimer */}
               <OjkDisclaimer compact />
 
-              {/* Error */}
               {error && (
                 <div style={{ background: '#FFF0F0', border: '1.5px solid #FFB0B0', borderRadius: 12, padding: '10px 14px' }}>
                   <p style={{ fontSize: 13, color: '#E03040', fontWeight: 700 }}>{error}</p>
                 </div>
               )}
 
-              {/* Submit */}
               <button type="button" onClick={handleSubmit} disabled={!canSubmit}
                 style={{
                   width: '100%', padding: '15px', borderRadius: 14,
@@ -732,14 +536,14 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
   )
 }
 
-// ── Debrief ───────────────────────────────────────────────────────────────
+// ── Debrief sheet ──────────────────────────────────────────────────────────
 
 function lessonHint(changePct) {
-  if (changePct > 3)  return { zone: 'Zone 5', topic: 'Momentum & Breakout',       desc: 'Harga naik kuat hari ini — sinyal momentum bullish. Volume yang tinggi mengonfirmasi kekuatan gerakan ini.' }
+  if (changePct > 3)  return { zone: 'Zone 5', topic: 'Momentum & Breakout',          desc: 'Harga naik kuat hari ini — sinyal momentum bullish. Volume yang tinggi mengonfirmasi kekuatan gerakan ini.' }
   if (changePct < -3) return { zone: 'Zone 3', topic: 'Manajemen Risiko & Stop Loss', desc: 'Harga turun signifikan. Investor yang memasang stop loss terlindungi dari kerugian yang lebih dalam.' }
   if (Math.abs(changePct) <= 1) return { zone: 'Zone 4', topic: 'Support & Resistance', desc: 'Harga bergerak sideways — ciri khas fase konsolidasi di antara level support dan resistance.' }
-  if (changePct > 0)  return { zone: 'Zone 4', topic: 'Analisis Tren Naik',        desc: 'Kenaikan moderat. Perhatikan apakah harga menutup di atas moving average — tanda tren naik yang sehat.' }
-  return               { zone: 'Zone 4', topic: 'Analisis Tren Turun',             desc: 'Penurunan moderat. Harga menutup di bawah support bisa menjadi sinyal pelemahan tren.' }
+  if (changePct > 0)  return { zone: 'Zone 4', topic: 'Analisis Tren Naik',           desc: 'Kenaikan moderat. Perhatikan apakah harga menutup di atas moving average — tanda tren naik yang sehat.' }
+  return               { zone: 'Zone 4', topic: 'Analisis Tren Turun',                desc: 'Penurunan moderat. Harga menutup di bawah support bisa menjadi sinyal pelemahan tren.' }
 }
 
 function DebriefSheet({ open, onClose, onRestart, code, allBars, simDate, navigate }) {
@@ -758,18 +562,17 @@ function DebriefSheet({ open, onClose, onRestart, code, allBars, simDate, naviga
     ? new Date(simDate + 'T00:00:00+07:00').toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
     : ''
 
-  // Mini sparkline
-  const closes = allBars.map(b => b.close)
-  const minC = Math.min(...closes), maxC = Math.max(...closes)
-  const rangeC = maxC - minC || 1
+  const closes  = allBars.map(b => b.close)
+  const minC    = Math.min(...closes), maxC = Math.max(...closes)
+  const rangeC  = maxC - minC || 1
   const W = 280, H = 48
   const pts = closes.map((p, i) => {
     const x = closes.length < 2 ? W / 2 : (i / (closes.length - 1)) * W
     const y = H - ((p - minC) / rangeC) * H
     return `${x.toFixed(1)},${y.toFixed(1)}`
   }).join(' ')
-  const lastX = closes.length > 1 ? ((closes.length - 1) / (closes.length - 1)) * W : W / 2
-  const areaPath = `M0,${H - ((closes[0] - minC) / rangeC) * H} L${pts} L${lastX},${H} L0,${H} Z`
+  const lastX     = closes.length > 1 ? ((closes.length - 1) / (closes.length - 1)) * W : W / 2
+  const areaPath  = `M0,${H - ((closes[0] - minC) / rangeC) * H} L${pts} L${lastX},${H} L0,${H} Z`
   const lineColor = up ? 'var(--arena-accent)' : 'var(--arena-sell)'
 
   return (
@@ -783,15 +586,11 @@ function DebriefSheet({ open, onClose, onRestart, code, allBars, simDate, naviga
         animation: 'slide-up 0.3s cubic-bezier(0.2,0.85,0.25,1) forwards',
         border: '1px solid rgba(74,222,128,0.2)',
       }}>
-
-        {/* Handle */}
         <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px', flexShrink: 0 }}>
           <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)' }} />
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 32px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-
-          {/* Title */}
           <div>
             <p style={{ fontFamily: "'Fredoka One',cursive", fontSize: 20, color: 'var(--arena-accent)', margin: 0 }}>
               🏁 Sesi Selesai
@@ -799,7 +598,6 @@ function DebriefSheet({ open, onClose, onRestart, code, allBars, simDate, naviga
             <p style={{ fontSize: 11, color: 'var(--arena-text-muted)', marginTop: 2 }}>{code} · {dateLabel}</p>
           </div>
 
-          {/* Sparkline */}
           <div style={{ borderRadius: 10, overflow: 'hidden', background: 'rgba(0,0,0,0.3)', height: H + 4 }}>
             <svg width="100%" height={H + 4} viewBox={`0 0 ${W} ${H + 4}`} preserveAspectRatio="none" style={{ display: 'block' }}>
               <defs>
@@ -813,7 +611,6 @@ function DebriefSheet({ open, onClose, onRestart, code, allBars, simDate, naviga
             </svg>
           </div>
 
-          {/* Price stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 8 }}>
             {[
               { label: 'Harga Buka',  value: `Rp ${fmt(openPrice)}`,  color: 'white' },
@@ -828,7 +625,6 @@ function DebriefSheet({ open, onClose, onRestart, code, allBars, simDate, naviga
             ))}
           </div>
 
-          {/* Change summary */}
           <div style={{
             borderRadius: 12, padding: '12px 16px', textAlign: 'center',
             background: up ? 'rgba(74,222,128,0.12)' : 'rgba(248,113,113,0.12)',
@@ -842,7 +638,6 @@ function DebriefSheet({ open, onClose, onRestart, code, allBars, simDate, naviga
             </p>
           </div>
 
-          {/* Lesson hint */}
           <div style={{ background: 'rgba(74,222,128,0.07)', borderLeft: '3px solid var(--arena-accent)', borderRadius: '0 12px 12px 0', padding: '12px 14px' }}>
             <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'var(--arena-accent)', marginBottom: 4 }}>
               📚 Konsep yang berlaku hari ini · {hint.zone}
@@ -851,45 +646,35 @@ function DebriefSheet({ open, onClose, onRestart, code, allBars, simDate, naviga
             <p style={{ fontSize: 11, color: '#A0C8B0', lineHeight: 1.6 }}>{hint.desc}</p>
           </div>
 
-          {/* CTAs */}
-          <button
-            type="button"
-            onClick={() => navigate(`/stocks/${code.toLowerCase()}`)}
+          <button type="button" onClick={() => navigate(`/stocks/${code.toLowerCase()}`)}
             style={{
               width: '100%', padding: '13px 16px', borderRadius: 14, cursor: 'pointer',
               background: 'linear-gradient(135deg,#1A5A30,#0E3A1A)',
               border: '1.5px solid var(--arena-accent-border)',
               fontFamily: "'Fredoka One',cursive", fontSize: 15, color: 'var(--arena-accent)',
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}
-          >
+            }}>
             <span>Baca analisis AI {code} di Feed</span>
             <span>→</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => navigate(`/lesson?level=${parseInt(hint.zone.replace(/\D/g, ''), 10) || 4}`)}
+          <button type="button" onClick={() => navigate(`/lesson?level=${parseInt(hint.zone.replace(/\D/g, ''), 10) || 4}`)}
             style={{
               width: '100%', padding: '13px 16px', borderRadius: 14, cursor: 'pointer',
               background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.15)',
               fontFamily: "'Fredoka One',cursive", fontSize: 14, color: '#C8E8D8',
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}
-          >
+            }}>
             <span>📚 Pelajari: {hint.topic}</span>
             <span>→</span>
           </button>
 
-          <button
-            type="button"
-            onClick={onRestart}
+          <button type="button" onClick={onRestart}
             style={{
               width: '100%', padding: '10px', borderRadius: 12, cursor: 'pointer',
               background: 'transparent', border: '1px solid var(--arena-border)',
               fontSize: 13, fontWeight: 700, color: '#5A8070',
-            }}
-          >
+            }}>
             Pilih tanggal lain
           </button>
         </div>
@@ -898,23 +683,105 @@ function DebriefSheet({ open, onClose, onRestart, code, allBars, simDate, naviga
   )
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────
+// ── Bandarmology panel ─────────────────────────────────────────────────────
+
+function BandPanel({ code, simIdx }) {
+  // Seeded fake data based on stock code + bar index
+  function seed(s) { let x = s; return () => { x = Math.sin(x) * 10000; return x - Math.floor(x) } }
+  const hashCode = (code ?? '').split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) & 0xffffff, 1)
+  const rng      = seed(hashCode + (simIdx || 0) * 0.1)
+
+  const netFlow   = ((rng() - 0.45) * 6).toFixed(1)
+  const netUp     = parseFloat(netFlow) >= 0
+  const brokers   = ['YU (UBS)', 'CS (CIMB)', 'BK (JP Morgan)', 'DH (Deutsche)', 'ZP (Kim Eng)']
+  const broker    = brokers[Math.floor(rng() * brokers.length)]
+  const isAccum   = rng() > 0.42
+  const buyPct    = Math.round(40 + rng() * 40)
+  const sellPct   = 100 - buyPct
+
+  return (
+    <div style={{ background: '#161b22', border: '0.5px solid #30363d', borderRadius: 8, margin: '6px 14px', padding: '10px 12px' }}>
+      <div style={{ fontSize: 11, color: '#bc8cff', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 8 }}>
+        Bandarmology — aliran dana besar
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+        {[
+          { label: 'Net Foreign Flow', value: `${netUp ? '+' : ''}Rp ${Math.abs(netFlow)}M`, color: netUp ? '#3fb950' : '#f85149' },
+          { label: 'Broker dominan',   value: broker,                                         color: '#bc8cff' },
+          { label: 'Akumulasi/Distribusi', value: isAccum ? 'Akumulasi' : 'Distribusi',      color: isAccum ? '#3fb950' : '#f85149' },
+          { label: 'Big hand signal',  value: `Beli ${buyPct}%`,                              color: '#3fb950' },
+        ].map(({ label, value, color }) => (
+          <div key={label} style={{ background: '#0d1117', borderRadius: 6, padding: 8, border: '0.5px solid #21262d' }}>
+            <div style={{ fontSize: 10, color: '#8b949e', marginBottom: 3 }}>{label}</div>
+            <div style={{ fontSize: 14, fontWeight: 500, color }}>{value}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ marginTop: 8 }}>
+        <div style={{ fontSize: 11, color: '#8b949e', marginBottom: 3 }}>Tekanan Beli vs Jual</div>
+        <div style={{ display: 'flex', height: 7, borderRadius: 4, overflow: 'hidden', margin: '6px 0 3px' }}>
+          <div style={{ width: `${buyPct}%`, background: '#3fb950' }} />
+          <div style={{ width: `${sellPct}%`, background: '#f85149' }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
+          <span style={{ color: '#3fb950' }}>Beli {buyPct}%</span>
+          <span style={{ color: '#f85149' }}>Jual {sellPct}%</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── RSI panel ──────────────────────────────────────────────────────────────
+
+function RsiPanel({ rsiValue }) {
+  const rsi     = rsiValue ?? 50
+  const rsiColor = rsi < 30 ? '#f85149' : rsi > 70 ? '#3fb950' : '#e3b341'
+  return (
+    <div style={{ background: '#161b22', border: '0.5px solid #30363d', borderRadius: 8, margin: '4px 14px 6px', padding: '10px 12px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: 11, color: '#e3b341', textTransform: 'uppercase', letterSpacing: '0.6px' }}>RSI (14)</span>
+        <span style={{ fontSize: 15, fontWeight: 500, color: '#e3b341' }}>{rsi}</span>
+      </div>
+      <div style={{ background: '#21262d', borderRadius: 4, height: 9, position: 'relative', margin: '5px 0' }}>
+        <div style={{ height: 9, borderRadius: 4, width: `${rsi}%`, background: rsiColor, transition: 'width .4s' }} />
+        <div style={{ position: 'absolute', left: '30%', top: 0, height: 9, width: '0.5px', background: '#f85149', opacity: 0.6 }} />
+        <div style={{ position: 'absolute', left: '70%', top: 0, height: 9, width: '0.5px', background: '#3fb950', opacity: 0.6 }} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#8b949e' }}>
+        <span style={{ color: '#f85149' }}>Oversold 30</span>
+        <span>Netral</span>
+        <span style={{ color: '#3fb950' }}>Overbought 70</span>
+      </div>
+    </div>
+  )
+}
+
+// ── Main page ──────────────────────────────────────────────────────────────
 
 export function ArenaStock() {
   const { code } = useParams()
-  const location = useLocation()
-  const navigate = useNavigate()
+  const location  = useLocation()
+  const navigate  = useNavigate()
 
   const passedStock   = location.state?.stock   ?? null
   const passedHolding = location.state?.holding ?? null
+  const passedCash    = location.state?.cash    ?? null
   const codeUpper     = code?.toUpperCase() ?? ''
 
-  // ── Live bars (real-time, limited to current clock) ──────────────────
-  const [bars, setBars]             = useState([])
+  // ── Chart display state ───────────────────────────────────────────────
+  const [chartType, setChartType] = useState('line')
+  const [showEma,   setShowEma]   = useState(true)
+  const [showVol,   setShowVol]   = useState(true)
+  const [showBand,  setShowBand]  = useState(false)
+  const [showRsi,   setShowRsi]   = useState(false)
+
+  // ── Live bars ─────────────────────────────────────────────────────────
+  const [bars, setBars]               = useState([])
   const [currentPrice, setCurrentPrice] = useState(passedStock?.price_close ?? null)
-  const [prevPrice, setPrevPrice]   = useState(null)
+  const [prevPrice, setPrevPrice]     = useState(null)
   const [loadingBars, setLoadingBars] = useState(true)
-  const [replayDate, setReplayDate] = useState('')
+  const [replayDate, setReplayDate]   = useState('')
   const liveAbortRef = useRef(null)
 
   const fetchLiveBars = useCallback(() => {
@@ -938,38 +805,33 @@ export function ArenaStock() {
     return () => { clearInterval(id); liveAbortRef.current?.abort() }
   }, [fetchLiveBars])
 
-  // Fetch available simulation dates from DB
+  // ── Simulation dates ──────────────────────────────────────────────────
+  const [simDates, setSimDates]       = useState([])
+  const [simDate, setSimDate]         = useState('')
+  const [dateStatus, setDateStatus]   = useState('ok')
+  const [fetchPct, setFetchPct]       = useState(0)
+  const [fetchStep, setFetchStep]     = useState('')
+
   useEffect(() => {
     fetchSimDates(codeUpper)
       .then(res => {
         const dates = res?.dates ?? []
         setSimDates(dates)
-        if (dates.length > 0) setSimDate(dates[0]) // default to newest
+        if (dates.length > 0) setSimDate(dates[0])
       })
       .catch(() => {})
   }, [codeUpper]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Trade sheet state ────────────────────────────────────────────────
-  const [tradeSheet, setTradeSheet] = useState({ open: false, orderType: 'buy' })
-
-  // ── Simulation state ─────────────────────────────────────────────────
-  const [simDates, setSimDates] = useState([])          // available dates from DB, newest first
-  const [simDate, setSimDate]   = useState('')          // YYYY-MM-DD selected by user
-  const [dateStatus, setDateStatus] = useState('ok')   // ok | weekend | fetching | error
-  const [fetchPct, setFetchPct]     = useState(0)
-  const [fetchStep, setFetchStep]   = useState('')
-  const [simMode, setSimMode]   = useState('idle')   // idle | loading | playing | paused | done
-  const [allBars, setAllBars]   = useState([])
-  const [simIdx, setSimIdx]     = useState(0)
-  const [speedIdx, setSpeedIdx] = useState(0)        // default 1×
+  // ── Simulation engine ─────────────────────────────────────────────────
+  const [simMode, setSimMode]         = useState('idle')
+  const [allBars, setAllBars]         = useState([])
+  const [simIdx, setSimIdx]           = useState(0)
+  const [speedIdx, setSpeedIdx]       = useState(3) // default 100×
   const [simStartTime, setSimStartTime] = useState('')
-  const simTimerRef             = useRef(null)
+  const simTimerRef = useRef(null)
 
   function clearSimTimer() {
-    if (simTimerRef.current) {
-      clearInterval(simTimerRef.current)
-      simTimerRef.current = null
-    }
+    if (simTimerRef.current) { clearInterval(simTimerRef.current); simTimerRef.current = null }
   }
 
   function startTicking(fromIdx, barsData) {
@@ -991,25 +853,13 @@ export function ArenaStock() {
   async function handleDatePick(dateStr) {
     if (!dateStr) return
     setSimDate(dateStr)
-
-    // Weekend check (JS Date day: 0=Sun, 6=Sat)
     const dow = new Date(dateStr + 'T12:00:00+07:00').getDay()
-    if (dow === 0 || dow === 6) {
-      setDateStatus('weekend')
-      return
-    }
+    if (dow === 0 || dow === 6) { setDateStatus('weekend'); return }
+    if (simDates.includes(dateStr)) { setDateStatus('ok'); return }
 
-    // Already in DB — use directly
-    if (simDates.includes(dateStr)) {
-      setDateStatus('ok')
-      return
-    }
-
-    // Need to fetch from Yahoo Finance — animate progress
     setDateStatus('fetching')
     setFetchPct(5)
     setFetchStep('Menghubungi Yahoo Finance…')
-
     const STEPS = [
       { pct: 30, label: 'Menghubungi Yahoo Finance…' },
       { pct: 65, label: 'Mengunduh data historis…' },
@@ -1027,16 +877,13 @@ export function ArenaStock() {
     try {
       await fetchOrImportBars(codeUpper, dateStr)
       clearInterval(timer)
-      setFetchPct(100)
-      setFetchStep('Selesai!')
-      // Add date to chips list so it shows in future
+      setFetchPct(100); setFetchStep('Selesai!')
       setSimDates(prev => [...new Set([dateStr, ...prev])].sort((a, b) => b.localeCompare(a)))
       setDateStatus('ok')
       setTimeout(() => { setFetchPct(0); setFetchStep('') }, 1500)
     } catch {
       clearInterval(timer)
-      setFetchPct(0)
-      setFetchStep('')
+      setFetchPct(0); setFetchStep('')
       setDateStatus('error')
     }
   }
@@ -1047,12 +894,9 @@ export function ArenaStock() {
     setSimIdx(0)
     setSimStartTime('')
     try {
-      const data = await fetchAllBars(codeUpper, simDate)
-      const full = data?.bars ?? []
-      if (full.length === 0) {
-        setSimMode('idle')
-        return
-      }
+      const data     = await fetchAllBars(codeUpper, simDate)
+      const full     = data?.bars ?? []
+      if (full.length === 0) { setSimMode('idle'); return }
       const startIdx = findStartIndex(full)
       setAllBars(full)
       setSimMode('playing')
@@ -1064,33 +908,15 @@ export function ArenaStock() {
     }
   }
 
-  function handlePause() {
-    clearSimTimer()
-    setSimMode('paused')
-  }
-
-  function handleResume() {
-    setSimMode('playing')
-    startTicking(simIdx, allBars)
-  }
-
-  function handleStop() {
-    clearSimTimer()
-    setSimMode('idle')
-    setSimIdx(0)
-    setAllBars([])
-    setSimStartTime('')
-  }
+  function handlePause()  { clearSimTimer(); setSimMode('paused') }
+  function handleResume() { setSimMode('playing'); startTicking(simIdx, allBars) }
+  function handleStop()   { clearSimTimer(); setSimMode('idle'); setSimIdx(0); setAllBars([]); setSimStartTime('') }
 
   function handleSpeedChange(idx) {
     setSpeedIdx(idx)
-    if (simMode === 'playing') {
-      clearSimTimer()
-      startTicking(simIdx, allBars)
-    }
+    if (simMode === 'playing') { clearSimTimer(); startTicking(simIdx, allBars) }
   }
 
-  // Restart ticking with updated speed when speedIdx changes while playing
   useEffect(() => {
     if (simMode === 'playing' && allBars.length > 0) {
       clearSimTimer()
@@ -1101,11 +927,13 @@ export function ArenaStock() {
 
   useEffect(() => () => clearSimTimer(), [])
 
-  // ── Derived display values ────────────────────────────────────────────
+  // ── Trade sheet ───────────────────────────────────────────────────────
+  const [tradeSheet, setTradeSheet] = useState({ open: false, orderType: 'buy' })
+
+  // ── Derived values ────────────────────────────────────────────────────
   const inSim        = simMode !== 'idle'
   const displayBars  = inSim && allBars.length > 0 ? allBars.slice(0, simIdx + 1) : bars
   const displayPrice = inSim && allBars[simIdx] ? allBars[simIdx].close : currentPrice
-  const priceFlash   = !inSim && prevPrice != null && prevPrice !== currentPrice
 
   const openPrice = displayBars.length > 0 ? displayBars[0].open  : null
   const dayHigh   = displayBars.length > 0 ? Math.max(...displayBars.map(b => b.high)) : null
@@ -1117,261 +945,388 @@ export function ArenaStock() {
     : (passedStock?.price_change_pct ?? null)
   const up = (changePct ?? 0) >= 0
 
-  // Live P&L for holding card — updates with simulation price
-  const holdingPnl    = passedHolding && displayPrice != null
+  const holdingPnl = passedHolding && displayPrice != null
     ? (displayPrice - passedHolding.avg_price_per_share) * passedHolding.lots * 100
     : passedHolding?.pnl ?? 0
-  const holdingPnlPct = passedHolding?.avg_price_per_share > 0 && displayPrice != null
-    ? (displayPrice - passedHolding.avg_price_per_share) / passedHolding.avg_price_per_share * 100
-    : passedHolding?.pnl_pct ?? 0
 
-  const replayLabel = replayDate
-    ? new Date(replayDate + 'T00:00:00+07:00').toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
-    : null
+  const closes   = displayBars.map(b => b.close)
+  const rsiValue = closes.length > 1 ? calcRSI(closes) : 50
 
-  // ── Skeleton loading state ────────────────────────────────────────────
+  // Sim badge date label
+  const simDateLabel = simDate
+    ? new Date(simDate + 'T00:00:00+07:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+    : ''
+
+  // Bar counter
+  const totalBars    = inSim ? allBars.length : displayBars.length
+  const currentBarNo = inSim ? simIdx + 1 : displayBars.length
+
+  // Scrub progress
+  const scrubPct = totalBars > 1 ? ((simIdx / (totalBars - 1)) * 100) : 0
+  const simTime  = allBars[simIdx]?.bar_time?.slice(11, 16) ?? '—'
+  const firstTime = allBars[0]?.bar_time?.slice(11, 16)    ?? '09:00'
+
+  // Sisa kas display
+  const sisaKas = passedCash != null
+    ? (passedCash >= 1_000_000 ? (passedCash / 1_000_000).toFixed(1) + 'jt' : passedCash.toLocaleString('id-ID'))
+    : '—'
+
+  // ── Skeleton ─────────────────────────────────────────────────────────
   if (loadingBars && bars.length === 0) {
     return (
-      <div className="flex min-h-svh flex-col bg-white">
-        <div style={{ background: 'linear-gradient(135deg,var(--arena-bg-deep),var(--arena-bg-mid))', padding: '14px 16px 20px' }}>
+      <div style={{ background: '#0d1117', minHeight: '100svh', color: '#e6edf3' }}>
+        <div style={{ padding: '10px 14px', borderBottom: '0.5px solid #30363d', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <button type="button" onClick={() => navigate('/arena')}
-            style={{ fontSize: 12, color: 'var(--arena-accent)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, padding: 0, marginBottom: 16 }}>
+            style={{ color: '#58a6ff', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             ← Arena
           </button>
-          {/* Title skeleton */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div className="skeleton-dark" style={{ width: 80, height: 28 }} />
-              <div className="skeleton-dark" style={{ width: 140, height: 14 }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
-              <div className="skeleton-dark" style={{ width: 100, height: 28 }} />
-              <div className="skeleton-dark" style={{ width: 60, height: 14 }} />
-            </div>
-          </div>
-          {/* Chart skeleton */}
-          <div className="skeleton-dark" style={{ height: 120, borderRadius: 10, margin: '0 -16px' }} />
-          {/* OHLC skeleton */}
-          <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: 12, gap: 8 }}>
-            {[1,2,3,4].map(i => <div key={i} className="skeleton-dark" style={{ height: 36, flex: 1, borderRadius: 8 }} />)}
-          </div>
-          {/* Controls skeleton */}
-          <div className="skeleton-dark" style={{ height: 44, borderRadius: 12, marginTop: 14 }} />
+          <span style={{ fontSize: 11, color: '#8b949e' }}>Memuat…</span>
         </div>
-        <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div className="skeleton" style={{ height: 72, borderRadius: 14 }} />
-          <div className="skeleton" style={{ height: 56, borderRadius: 12 }} />
-          <div className="skeleton" style={{ height: 80, borderRadius: 12 }} />
+        <div style={{ padding: '12px 14px' }}>
+          <div style={{ height: 22, width: 80, background: '#21262d', borderRadius: 4, marginBottom: 6 }} />
+          <div style={{ height: 14, width: 160, background: '#21262d', borderRadius: 4, marginBottom: 16 }} />
+          <div style={{ height: 220, background: '#161b22', borderRadius: 8 }} />
         </div>
-        <BottomNav />
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-svh flex-col bg-white">
+    <div style={{ background: '#0d1117', minHeight: '100svh', color: '#e6edf3', maxWidth: 448, margin: '0 auto', fontFamily: 'system-ui, sans-serif' }}>
 
-      {/* ── Dark chart header ──────────────────────────────────────── */}
-      <div style={{ background: 'linear-gradient(135deg,var(--arena-bg-deep),var(--arena-bg-mid))', padding: '14px 16px 0', color: 'white' }}>
+      {/* ── Top bar ─────────────────────────────────────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: '0.5px solid #30363d' }}>
+        <button type="button" onClick={() => navigate('/arena')}
+          style={{ color: '#58a6ff', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+          ← Arena
+        </button>
 
-        {/* Nav row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-          <button type="button" onClick={() => navigate('/arena')}
-            style={{ fontSize: 12, color: 'var(--arena-accent)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, padding: 0 }}>
-            ← Arena
-          </button>
-          {replayLabel && !inSim && (
-            <span style={{ fontSize: 10, color: 'var(--arena-accent)', background: 'var(--arena-accent-dim)', border: '1px solid rgba(74,222,128,0.3)', borderRadius: 6, padding: '2px 8px', fontWeight: 700 }}>
-              ⏱ REPLAY {replayLabel}
-            </span>
-          )}
-          {inSim && (() => {
-            const dl = simDate
-              ? new Date(simDate + 'T00:00:00+07:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
-              : ''
-            return (
-              <span style={{ fontSize: 10, color: '#FFD060', background: 'rgba(255,208,96,0.15)', border: '1px solid rgba(255,208,96,0.35)', borderRadius: 6, padding: '2px 8px', fontWeight: 800 }}>
-                {simMode === 'loading' ? '⌛ Memuat…'
-                  : simMode === 'done'    ? `✅ Selesai · ${dl}`
-                  : `▶ SIMULASI · ${dl}`}
-              </span>
-            )
-          })()}
-          {loadingBars && !inSim && (
-            <span style={{ fontSize: 10, color: 'var(--arena-text-muted)' }}>memuat…</span>
-          )}
+        {inSim && simMode !== 'loading' ? (
+          <div style={{ background: '#1f2d1f', border: '0.5px solid #3fb950', color: '#3fb950', borderRadius: 20, padding: '3px 10px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#3fb950', display: 'inline-block', animation: 'blink 1.4s infinite' }} />
+            SIMULASI · {simDateLabel}
+          </div>
+        ) : (
+          <div style={{ fontSize: 12, color: '#8b949e' }}>{codeUpper}</div>
+        )}
+
+        <div style={{ fontSize: 11, color: '#8b949e' }}>
+          {inSim ? `Bar ${currentBarNo}/${totalBars}` : `${displayBars.length} bar`}
         </div>
+      </div>
 
-        {/* Title + price */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+      {/* ── Stock header ─────────────────────────────────────────────── */}
+      <div style={{ padding: '12px 14px 8px', borderBottom: '0.5px solid #21262d' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <p style={{ fontSize: 26, fontWeight: 900, fontFamily: "'Fredoka One',cursive", color: 'white', lineHeight: 1, marginBottom: 2 }}>
-              {codeUpper}
-            </p>
-            <p style={{ fontSize: 12, color: 'var(--arena-text-muted)' }}>{passedStock?.name ?? ''}</p>
+            <h2 style={{ fontSize: 22, fontWeight: 600, margin: 0 }}>{codeUpper}</h2>
+            <p style={{ color: '#8b949e', fontSize: 12, marginTop: 2 }}>{passedStock?.name ?? ''}</p>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <p style={{
-              fontSize: 24, fontWeight: 900, fontFamily: "'Fredoka One',cursive", lineHeight: 1,
-              color: priceFlash ? (up ? 'var(--arena-accent)' : 'var(--arena-sell)') : 'white',
-              transition: 'color 0.4s',
-            }}>
+            <div style={{ fontSize: 24, fontWeight: 600 }}>
               {displayPrice ? `Rp ${Number(displayPrice).toLocaleString('id-ID')}` : '—'}
-            </p>
+            </div>
             {changePct != null && (
-              <p style={{ fontSize: 13, fontWeight: 800, color: up ? 'var(--arena-accent)' : 'var(--arena-sell)', marginTop: 3 }}>
+              <div style={{ fontSize: 13, marginTop: 2, color: up ? '#3fb950' : '#f85149' }}>
                 {changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%
-              </p>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Chart */}
-        <div style={{ borderRadius: '10px 10px 0 0', overflow: 'hidden', background: 'rgba(0,0,0,0.25)', margin: '0 -16px' }}>
-          <IntradayChart bars={bars} allBars={allBars} simIdx={simIdx} simMode={simMode} />
-        </div>
-
-        {/* Time axis */}
-        {displayBars.length > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 16px 8px' }}>
-            <span style={{ fontSize: 11, color: 'var(--arena-text-dim)' }}>{displayBars[0].bar_time?.slice(11, 16)} WIB</span>
-            <span style={{ fontSize: 11, color: 'var(--arena-accent)', fontWeight: 700 }}>
-              {displayBars[displayBars.length - 1].bar_time?.slice(11, 16)} WIB · {displayBars.length} bar
-            </span>
-          </div>
-        )}
-
-        {/* OHLC row */}
-        {lastBar && (
-          <div style={{
-            display: 'flex', justifyContent: 'space-around',
-            background: 'rgba(0,0,0,0.2)',
-            margin: '0 -16px', padding: '10px 16px',
-            borderBottom: '1px solid rgba(255,255,255,0.07)',
-          }}>
-            <OHLCStat label="Open"   value={openPrice} />
-            <OHLCStat label="High"   value={dayHigh}   color="var(--arena-accent)" />
-            <OHLCStat label="Low"    value={dayLow}    color="var(--arena-sell)" />
-            <OHLCStat label="Volume" value={lastBar.volume} color="#A0D0C0" />
-          </div>
-        )}
-
-        {/* Simulation controls (inside dark header so they feel like a playback panel) */}
-        <div style={{ padding: '12px 0 16px' }}>
-          <SimControls
-            simMode={simMode}
-            simIdx={simIdx}
-            allBars={allBars}
-            speedIdx={speedIdx}
-            simStartTime={simStartTime}
-            simDate={simDate}
-            simDates={simDates}
-            dateStatus={dateStatus}
-            fetchPct={fetchPct}
-            fetchStep={fetchStep}
-            onSimDateChange={handleDatePick}
-            onStart={handleStart}
-            onPause={handlePause}
-            onResume={handleResume}
-            onStop={handleStop}
-            onSpeedChange={handleSpeedChange}
-          />
-        </div>
-      </div>
-
-      {/* ── Body ──────────────────────────────────────────────────── */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', paddingBottom: 120 }}>
-
-        {/* Holding card */}
-        {passedHolding ? (
-          <div style={{ background: '#E8FFF0', border: '1.5px solid #B0EFC0', borderRadius: 14, padding: '12px 16px', marginBottom: 14 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: '#1A7040', marginBottom: 6 }}>📦 Kamu punya saham ini</p>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <div>
-                <p style={{ fontSize: 14, fontWeight: 900, color: '#1A2030' }}>{passedHolding.lots} lot · {(passedHolding.lots * 100).toLocaleString('id-ID')} lembar</p>
-                <p style={{ fontSize: 11, color: 'var(--arena-text-dim)' }}>avg Rp {passedHolding.avg_price_per_share.toLocaleString('id-ID')}</p>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <p style={{ fontSize: 14, fontWeight: 900, color: holdingPnl >= 0 ? '#20A040' : '#E03040' }}>
-                  {holdingPnl >= 0 ? '+' : ''}Rp {Math.abs(holdingPnl).toLocaleString('id-ID')}
-                </p>
-                <p style={{ fontSize: 11, fontWeight: 700, color: holdingPnlPct >= 0 ? '#20A040' : '#E03040' }}>
-                  {holdingPnlPct >= 0 ? '+' : ''}{holdingPnlPct.toFixed(2)}%
-                </p>
+        {/* OHLCV strip */}
+        <div style={{ display: 'flex', marginTop: 10, border: '0.5px solid #21262d', borderRadius: 8, overflow: 'hidden' }}>
+          {[
+            { label: 'Open',  value: openPrice,                        color: '#e6edf3' },
+            { label: 'High',  value: dayHigh,                          color: '#3fb950' },
+            { label: 'Low',   value: dayLow,                           color: '#f85149' },
+            { label: 'Close', value: lastBar?.close,                   color: '#e6edf3' },
+            { label: 'Vol',   value: lastBar?.volume > 0 ? `${((lastBar.volume || 0) / 1000).toFixed(0)}K` : '—', color: '#e6edf3', raw: true },
+          ].map(({ label, value, color, raw }, idx, arr) => (
+            <div key={label} style={{ flex: 1, textAlign: 'center', padding: '6px 4px', borderRight: idx < arr.length - 1 ? '0.5px solid #21262d' : 'none' }}>
+              <div style={{ fontSize: 10, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{label}</div>
+              <div style={{ fontSize: 13, fontWeight: 500, marginTop: 2, color }}>
+                {raw ? value : (value != null ? Number(value).toLocaleString('id-ID') : '—')}
               </div>
             </div>
-          </div>
-        ) : (
-          <div style={{ background: '#F8F6F2', border: '1px solid #EDE8E0', borderRadius: 14, padding: '12px 16px', marginBottom: 14 }}>
-            <p style={{ fontSize: 12, color: '#A09080' }}>📭 Kamu belum punya saham {codeUpper}</p>
-          </div>
-        )}
-
-        {/* Key metrics */}
-        {passedStock && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 14 }}>
-            {[
-              { label: 'P/E Ratio', value: passedStock.pe_ratio        },
-              { label: 'Volume',    value: passedStock.volume_label     },
-              { label: 'Mkt Cap',   value: passedStock.market_cap_label },
-            ].map(({ label, value }) => (
-              <div key={label} style={{ background: '#F8F6F2', borderRadius: 12, padding: '10px 8px', textAlign: 'center', border: '1px solid #EDE8E0' }}>
-                <p style={{ fontSize: 11, color: '#A09080', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>{label}</p>
-                <p style={{ fontSize: 13, fontWeight: 900, color: '#1A2030', fontFamily: "'Fredoka One',cursive" }}>{value || '—'}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* OJK disclaimer */}
-        <div style={{ marginBottom: 10 }}>
-          <OjkDisclaimer />
-        </div>
-
-        {/* Limit order explainer */}
-        <div style={{ background: '#F5FDF8', borderLeft: '3px solid #28A060', borderRadius: '0 12px 12px 0', padding: '10px 14px' }}>
-          <p style={{ fontSize: 12, fontWeight: 800, color: '#1A6040', marginBottom: 4 }}>💡 Cara kerja limit order</p>
-          <p style={{ fontSize: 11, color: '#2A4A3A', lineHeight: 1.65 }}>
-            <b>Beli:</b> order terisi jika harga turun ke limit-mu.<br />
-            <b>Jual:</b> order terisi jika harga naik ke limit-mu.<br />
-            Order yang belum terisi hangus di akhir hari.
-          </p>
+          ))}
         </div>
       </div>
 
-      {/* ── Sticky Buy / Sell footer ───────────────────────────────── */}
-      <div style={{
-        position: 'fixed', bottom: 64, left: '50%', transform: 'translateX(-50%)',
-        width: '100%', maxWidth: 448, padding: '10px 16px',
-        background: 'white', borderTop: '1px solid #EDE8E0',
-        display: 'flex', gap: 10,
-      }}>
+      {/* ── Chart type bar ───────────────────────────────────────────── */}
+      <div style={{ margin: '10px 14px 0', border: '0.5px solid #30363d', borderRadius: 8, overflow: 'hidden', display: 'flex', width: 'fit-content' }}>
+        {[['line', '⋯ Line'], ['bar', '▐ Bar']].map(([type, label], i, arr) => (
+          <button key={type} type="button" onClick={() => setChartType(type)}
+            style={{
+              padding: '5px 14px', fontSize: 12, cursor: 'pointer', border: 'none',
+              borderRight: i < arr.length - 1 ? '0.5px solid #30363d' : 'none',
+              background: chartType === type ? '#1f3a5f' : 'transparent',
+              color: chartType === type ? '#58a6ff' : '#8b949e',
+              transition: 'all .15s',
+            }}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Indicator tabs ───────────────────────────────────────────── */}
+      <div style={{ display: 'flex', gap: 6, padding: '8px 14px 4px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+        {/* EMA */}
+        <button type="button" onClick={() => setShowEma(v => !v)}
+          style={{
+            padding: '4px 10px', borderRadius: 20, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap',
+            border: `0.5px solid ${showEma ? '#58a6ff' : '#30363d'}`,
+            background: showEma ? '#1f3a5f' : 'transparent',
+            color: showEma ? '#58a6ff' : '#8b949e',
+          }}>
+          EMA 9/21/50
+        </button>
+        {/* Volume */}
+        <button type="button" onClick={() => setShowVol(v => !v)}
+          style={{
+            padding: '4px 10px', borderRadius: 20, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap',
+            border: `0.5px solid ${showVol ? '#3fb950' : '#30363d'}`,
+            background: showVol ? '#1f2d1f' : 'transparent',
+            color: showVol ? '#3fb950' : '#8b949e',
+          }}>
+          Volume
+        </button>
+        {/* Bandarmology */}
+        <button type="button" onClick={() => setShowBand(v => !v)}
+          style={{
+            padding: '4px 10px', borderRadius: 20, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap',
+            border: `0.5px solid ${showBand ? '#bc8cff' : '#30363d'}`,
+            background: showBand ? '#2d1f3a' : 'transparent',
+            color: showBand ? '#bc8cff' : '#8b949e',
+          }}>
+          Bandarmology
+        </button>
+        {/* RSI */}
+        <button type="button" onClick={() => setShowRsi(v => !v)}
+          style={{
+            padding: '4px 10px', borderRadius: 20, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap',
+            border: `0.5px solid ${showRsi ? '#e3b341' : '#30363d'}`,
+            background: showRsi ? '#2d2a1f' : 'transparent',
+            color: showRsi ? '#e3b341' : '#8b949e',
+          }}>
+          RSI 14
+        </button>
+        {/* Bollinger ↗ */}
+        <button type="button" onClick={() => navigate('/lesson?level=4')}
+          style={{ padding: '4px 10px', borderRadius: 20, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', border: '0.5px solid #30363d', background: 'transparent', color: '#8b949e' }}>
+          Bollinger ↗
+        </button>
+        {/* MACD ↗ */}
+        <button type="button" onClick={() => navigate('/lesson?level=4')}
+          style={{ padding: '4px 10px', borderRadius: 20, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', border: '0.5px solid #30363d', background: 'transparent', color: '#8b949e' }}>
+          MACD ↗
+        </button>
+      </div>
+
+      {/* ── Canvas chart ─────────────────────────────────────────────── */}
+      {displayBars.length >= 2 ? (
+        <CandleChart
+          bars={displayBars}
+          chartType={chartType}
+          showEma={showEma}
+          showVolume={showVol}
+        />
+      ) : (
+        <div style={{ height: 160, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0 14px' }}>
+          <p style={{ fontSize: 20 }}>{simMode === 'loading' ? '⌛' : '⏳'}</p>
+          <p style={{ fontSize: 12, color: '#8b949e' }}>
+            {simMode === 'loading' ? 'Mengambil data simulasi…' : 'Menunggu data intraday pasar…'}
+          </p>
+          {simMode === 'idle' && <p style={{ fontSize: 11, color: '#6e7681' }}>Data tersedia saat pasar buka (09:00 WIB)</p>}
+        </div>
+      )}
+
+      {/* ── Bandarmology panel ───────────────────────────────────────── */}
+      {showBand && <BandPanel code={codeUpper} simIdx={simIdx} />}
+
+      {/* ── RSI panel ────────────────────────────────────────────────── */}
+      {showRsi && <RsiPanel rsiValue={rsiValue} />}
+
+      {/* ── Playback / sim controls ──────────────────────────────────── */}
+      {simMode !== 'idle' ? (
+        <div style={{ padding: '6px 14px 8px' }}>
+          {/* Scrub row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
+            <span style={{ fontSize: 11, color: '#8b949e', flexShrink: 0 }}>{firstTime}</span>
+            <div
+              style={{ flex: 1, height: 4, background: '#21262d', borderRadius: 2, cursor: 'pointer', position: 'relative' }}
+              onClick={e => {
+                const rect = e.currentTarget.getBoundingClientRect()
+                const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
+                const idx  = Math.max(0, Math.min(allBars.length - 1, Math.round(pct * (allBars.length - 1))))
+                setSimIdx(idx)
+              }}
+            >
+              <div style={{ width: `${scrubPct}%`, height: 4, background: '#58a6ff', borderRadius: 2, pointerEvents: 'none' }} />
+              <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#58a6ff', position: 'absolute', top: -4, left: `${scrubPct}%`, transform: 'translateX(-50%)', cursor: 'pointer' }} />
+            </div>
+            <span style={{ fontSize: 11, color: '#58a6ff', flexShrink: 0 }}>{simTime}</span>
+          </div>
+          {/* Controls row */}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {simMode === 'playing' ? (
+              <button type="button" onClick={handlePause}
+                style={{ background: '#1f3a5f', border: '0.5px solid #58a6ff', color: '#58a6ff', borderRadius: 6, padding: '5px 12px', fontSize: 13, cursor: 'pointer' }}>
+                ⏸ Jeda
+              </button>
+            ) : simMode === 'paused' ? (
+              <button type="button" onClick={handleResume}
+                style={{ background: '#1f3a5f', border: '0.5px solid #58a6ff', color: '#58a6ff', borderRadius: 6, padding: '5px 12px', fontSize: 13, cursor: 'pointer' }}>
+                ▶ Lanjut
+              </button>
+            ) : (
+              <button type="button" onClick={handleStart}
+                style={{ background: '#161b22', border: '0.5px solid #30363d', color: '#e6edf3', borderRadius: 6, padding: '5px 12px', fontSize: 13, cursor: 'pointer' }}>
+                ↺ Ulangi
+              </button>
+            )}
+            <button type="button" onClick={handleStop}
+              style={{ background: '#161b22', border: '0.5px solid #30363d', color: '#e6edf3', borderRadius: 6, padding: '5px 12px', fontSize: 13, cursor: 'pointer' }}>
+              ■ Stop
+            </button>
+            <div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>
+              {SPEEDS.map((s, i) => (
+                <button key={s.label} type="button" onClick={() => handleSpeedChange(i)}
+                  style={{
+                    background: speedIdx === i ? '#1f2d1f' : '#161b22',
+                    border: `0.5px solid ${speedIdx === i ? '#3fb950' : '#30363d'}`,
+                    color: speedIdx === i ? '#3fb950' : '#8b949e',
+                    borderRadius: 4, padding: '3px 8px', fontSize: 11, cursor: 'pointer',
+                  }}>
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* ── Idle: date picker ── */
+        <div style={{ padding: '8px 14px 10px' }}>
+          <div style={{ background: '#161b22', borderRadius: 10, padding: '10px 12px', border: '0.5px solid #30363d' }}>
+            <p style={{ fontSize: 10, color: '#8b949e', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>
+              📅 Pilih Data Simulasi
+            </p>
+
+            <input
+              type="date"
+              value={simDate}
+              max={new Date(Date.now() - 86400000).toISOString().slice(0, 10)}
+              onChange={e => handleDatePick(e.target.value)}
+              style={{
+                width: '100%', padding: '7px 10px', borderRadius: 8, fontSize: 13,
+                background: 'rgba(255,255,255,0.05)', color: '#e6edf3',
+                border: '0.5px solid #30363d', marginBottom: 8,
+                colorScheme: 'dark', outline: 'none',
+              }}
+            />
+
+            {simDates.length > 0 && (
+              <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2, scrollbarWidth: 'none' }}>
+                {simDates.map(d => {
+                  const chipLabel = new Date(d + 'T00:00:00+07:00').toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })
+                  const selected  = d === simDate
+                  return (
+                    <button key={d} type="button" onClick={() => handleDatePick(d)}
+                      style={{
+                        flexShrink: 0, padding: '6px 12px', borderRadius: 20, cursor: 'pointer',
+                        border: `0.5px solid ${selected ? '#3fb950' : '#30363d'}`,
+                        background: selected ? 'rgba(63,185,80,0.15)' : 'transparent',
+                        color: selected ? '#3fb950' : '#8b949e',
+                        fontSize: 12, whiteSpace: 'nowrap',
+                      }}>
+                      {chipLabel}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
+            {simDate && dateStatus === 'ok' && (
+              <p style={{ fontSize: 11, color: '#3fb950', marginTop: 7 }}>
+                {new Date(simDate + 'T00:00:00+07:00').toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
+            )}
+            {dateStatus === 'weekend' && (
+              <p style={{ fontSize: 11, color: '#f85149', marginTop: 7 }}>🚫 Pasar tutup hari itu (libur weekend)</p>
+            )}
+            {dateStatus === 'error' && (
+              <p style={{ fontSize: 11, color: '#f85149', marginTop: 7 }}>⚠️ Data tidak tersedia. Coba tanggal lain.</p>
+            )}
+
+            {(dateStatus === 'fetching' || fetchPct > 0) && dateStatus !== 'weekend' && (
+              <div style={{ marginTop: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#8b949e', marginBottom: 4 }}>
+                  <span>{fetchStep}</span><span>{fetchPct}%</span>
+                </div>
+                <div style={{ height: 6, background: '#21262d', borderRadius: 3, overflow: 'hidden' }}>
+                  <div style={{ width: `${fetchPct}%`, height: '100%', background: fetchPct === 100 ? '#3fb950' : '#58a6ff', borderRadius: 3, transition: 'width 0.5s ease' }} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button type="button" onClick={handleStart}
+            disabled={!simDate || dateStatus !== 'ok'}
+            style={{
+              width: '100%', padding: '11px', borderRadius: 8, marginTop: 8,
+              background: simDate && dateStatus === 'ok' ? '#1f4d2a' : 'rgba(255,255,255,0.05)',
+              color: simDate && dateStatus === 'ok' ? '#3fb950' : '#6e7681',
+              border: `0.5px solid ${simDate && dateStatus === 'ok' ? '#3fb950' : '#30363d'}`,
+              fontSize: 14, cursor: simDate && dateStatus === 'ok' ? 'pointer' : 'not-allowed',
+            }}>
+            {dateStatus === 'fetching' ? '⏳ Mengambil data…' : '▶ Mulai Simulasi'}
+          </button>
+        </div>
+      )}
+
+      {/* ── Learn pill ───────────────────────────────────────────────── */}
+      <div
+        onClick={() => navigate('/lesson?level=4')}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#1f2d1f', border: '0.5px solid #3fb950', color: '#3fb950', borderRadius: 20, padding: '4px 10px', fontSize: 11, margin: '0 14px 8px', cursor: 'pointer' }}>
+        📚 Pelajari sinyal ini →
+      </div>
+
+      {/* ── Action row ───────────────────────────────────────────────── */}
+      <div style={{ display: 'flex', gap: 8, padding: '0 14px 10px' }}>
         <button type="button"
           onClick={() => setTradeSheet({ open: true, orderType: 'buy' })}
-          style={{
-            flex: 1, padding: '13px', borderRadius: 14,
-            fontFamily: "'Fredoka One',cursive", fontSize: 17, cursor: 'pointer',
-            background: 'linear-gradient(180deg,#48D870,#28B050)',
-            color: 'white', border: '2px solid #20A040', boxShadow: '0 4px 0 #189030',
-          }}>
-          ⬆ Beli
+          style={{ flex: 1, background: '#1f4d2a', border: '0.5px solid #3fb950', color: '#3fb950', borderRadius: 8, padding: 11, fontSize: 15, fontWeight: 500, cursor: 'pointer', textAlign: 'center' }}>
+          ↑ Beli
         </button>
         <button type="button"
           onClick={() => setTradeSheet({ open: true, orderType: 'sell' })}
-          disabled={!passedHolding}
-          style={{
-            flex: 1, padding: '13px', borderRadius: 14,
-            fontFamily: "'Fredoka One',cursive", fontSize: 17,
-            cursor: passedHolding ? 'pointer' : 'not-allowed',
-            background: passedHolding ? 'linear-gradient(180deg,#FF7070,#E03040)' : '#E8E4E0',
-            color: passedHolding ? 'white' : '#A09080',
-            border: passedHolding ? '2px solid #C02030' : '2px solid #D8D0C8',
-            boxShadow: passedHolding ? '0 4px 0 #A01020' : '0 2px 0 #C0B8B0',
-          }}>
-          {passedHolding ? '⬇ Jual' : 'Belum punya'}
+          style={{ flex: 1, background: '#3a1a1a', border: '0.5px solid #f85149', color: '#f85149', borderRadius: 8, padding: 11, fontSize: 15, fontWeight: 500, cursor: passedHolding ? 'pointer' : 'default', textAlign: 'center', opacity: passedHolding ? 1 : 0.5 }}>
+          ↓ Jual
         </button>
       </div>
 
+      {/* ── Portfolio strip ──────────────────────────────────────────── */}
+      <div style={{ background: '#161b22', borderTop: '0.5px solid #21262d', display: 'flex', justifyContent: 'space-around', padding: '10px 0' }}>
+        {[
+          { label: 'Modal',       value: 'Rp 10jt',                  color: '#e6edf3' },
+          { label: 'Lot dimiliki', value: `${passedHolding?.lots ?? 0} lot`, color: passedHolding ? '#3fb950' : '#e6edf3' },
+          {
+            label: 'P&L',
+            value: passedHolding
+              ? `${holdingPnl >= 0 ? '+' : ''}Rp ${Math.abs(holdingPnl).toLocaleString('id-ID')}`
+              : '—',
+            color: passedHolding ? (holdingPnl >= 0 ? '#3fb950' : '#f85149') : '#8b949e',
+          },
+          { label: 'Sisa kas',    value: sisaKas,                     color: '#e6edf3' },
+        ].map(({ label, value, color }) => (
+          <div key={label} style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 10, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{label}</div>
+            <div style={{ fontSize: 14, fontWeight: 500, marginTop: 2, color }}>{value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Sheets ───────────────────────────────────────────────────── */}
       <DebriefSheet
         open={simMode === 'done'}
         onClose={handleStop}
@@ -1392,7 +1347,8 @@ export function ArenaStock() {
         currentPrice={displayPrice}
       />
 
-      <BottomNav />
+      {/* blink keyframe injected inline */}
+      <style>{`@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}`}</style>
     </div>
   )
 }

@@ -5,9 +5,12 @@ REPO_ROOT := $(abspath .)
 BACKEND_DIR := $(REPO_ROOT)/backend
 FRONTEND_DIR := $(REPO_ROOT)/frontend
 
+# Match backend HTTP_PORT (or HTTP_ADDR) in backend/.env — used to free the port before dev-all
+BACKEND_HTTP_PORT ?= 9001
+
 .DEFAULT_GOAL := help
 
-.PHONY: help db db-down db-reset migrate migrate-file backend frontend dev dev-all install install-frontend install-backend
+.PHONY: help db db-down db-reset migrate migrate-file backend frontend dev dev-all kill-backend install install-frontend install-backend
 
 help:
 	@echo "Akademiweal — common targets"
@@ -23,6 +26,7 @@ help:
 	@echo "  make frontend    Run Vite dev server (proxies /api → backend)"
 	@echo "  make dev         Start DB, then API (one terminal)"
 	@echo "  make dev-all     Start DB, then API + Vite together (Ctrl+C stops both)"
+	@echo "  make kill-backend  Kill process(es) on API port $(BACKEND_HTTP_PORT) (dev-all runs this first)"
 	@echo ""
 	@echo "  make install     npm install + go mod download"
 	@echo ""
@@ -60,8 +64,12 @@ frontend:
 dev:
 	$(MAKE) -C $(BACKEND_DIR) dev
 
+# Free stale API listeners so a previous backend does not block :9001
+kill-backend:
+	@lsof -ti :$(BACKEND_HTTP_PORT) 2>/dev/null | xargs kill -9 2>/dev/null || true
+
 # Full stack: Postgres + Go (:9001) + Vite (default :5173)
-dev-all: db
+dev-all: db kill-backend
 	@set -e; \
 	cd $(BACKEND_DIR) && go run ./cmd & PID1=$$!; \
 	cd $(FRONTEND_DIR) && npm run dev & PID2=$$!; \
