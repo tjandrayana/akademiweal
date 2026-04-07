@@ -42,3 +42,5 @@ INSERT INTO stocks (code, name, sector, is_premium) VALUES
   ('JSMR', 'Jasa Marga',                 'Infrastruktur',  FALSE),
   ('WIKA', 'Wijaya Karya',               'Infrastruktur',  FALSE)
 ON CONFLICT (code) DO NOTHING;
+
+alter table public.stock_minute_bars enable row level security;

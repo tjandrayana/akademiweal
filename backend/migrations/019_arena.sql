@@ -44,3 +44,8 @@ CREATE TABLE arena_orders (
 
 CREATE INDEX idx_arena_orders_user_season  ON arena_orders(user_id, season_id);
 CREATE INDEX idx_arena_orders_pending      ON arena_orders(status, season_id) WHERE status = 'pending';
+
+alter table public.arena_seasons enable row level security;
+alter table public.arena_portfolios enable row level security;
+alter table public.arena_holdings enable row level security;
+alter table public.arena_orders enable row level security;

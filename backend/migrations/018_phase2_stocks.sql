@@ -79,3 +79,6 @@ VALUES
   'Wholesale dalam otomotif mengacu pada penjualan dari pabrikan (seperti Toyota/Honda) ke jaringan dealer — bukan ke konsumen akhir. Ini indikator awal permintaan sebelum retail sales tercatat.'
 )
 ON CONFLICT (stock_code, snapshot_date) DO NOTHING;
+
+alter table public.stocks enable row level security;
+alter table public.stock_daily_snapshots enable row level security;
