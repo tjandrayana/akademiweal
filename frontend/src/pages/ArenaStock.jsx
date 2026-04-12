@@ -334,65 +334,48 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
   }
 
   return (
-    <>
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 100 }} />
-      <div style={{
-        position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
-        width: '100%', maxWidth: 448, zIndex: 101,
-        background: 'white', borderRadius: '20px 20px 0 0',
-        maxHeight: '88vh', display: 'flex', flexDirection: 'column',
-        animation: 'slide-up 0.3s cubic-bezier(0.2, 0.85, 0.25, 1) forwards',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px', flexShrink: 0 }}>
-          <div style={{ width: 40, height: 4, borderRadius: 2, background: '#E0D8D0' }} />
+    <div style={{
+      background: 'white', borderTop: '2px solid #E0D8D0',
+      animation: 'slide-up 0.25s cubic-bezier(0.2, 0.85, 0.25, 1) forwards',
+    }}>
+        {/* compact drag handle + header */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 6px', flexShrink: 0 }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: '#E0D8D0' }} />
         </div>
-        <div style={{ padding: '6px 16px 12px', borderBottom: '1px solid #F0EDE8', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-          <div>
-            <p style={{ fontSize: 20, fontWeight: 900, color: '#1A2030', fontFamily: "'Fredoka One',cursive", lineHeight: 1 }}>{code}</p>
-            {stock?.name && <p style={{ fontSize: 11, color: '#8A8080', marginTop: 2 }}>{stock.name}</p>}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {currentPrice && (
-              <p style={{ fontSize: 17, fontWeight: 900, color: '#1A2030', fontFamily: "'Fredoka One',cursive" }}>
-                Rp {Number(currentPrice).toLocaleString('id-ID')}
-              </p>
-            )}
-            <button type="button" onClick={onClose}
-              style={{ width: 32, height: 32, borderRadius: 16, border: '1.5px solid #E0D8D0', background: '#F8F6F2', cursor: 'pointer', fontSize: 15, color: '#6A6060', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              ✕
-            </button>
-          </div>
+        <div style={{ padding: '0 14px 8px', borderBottom: '1px solid #F0EDE8', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+          <p style={{ fontSize: 18, fontWeight: 900, color: '#1A2030', fontFamily: "'Fredoka One',cursive", lineHeight: 1 }}>
+            {code}
+            {currentPrice && <span style={{ fontSize: 14, fontWeight: 700, color: '#4A4040', marginLeft: 8 }}>Rp {Number(currentPrice).toLocaleString('id-ID')}</span>}
+          </p>
+          <button type="button" onClick={onClose}
+            style={{ width: 28, height: 28, borderRadius: 14, border: '1.5px solid #E0D8D0', background: '#F8F6F2', cursor: 'pointer', fontSize: 13, color: '#6A6060', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            ✕
+          </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 32 }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 10, paddingBottom: 20 }}>
           {result ? (
             <>
               <div style={{
-                borderRadius: 18, padding: '28px 20px', textAlign: 'center',
+                borderRadius: 16, padding: '20px 16px', textAlign: 'center',
                 background: result.status === 'filled' ? '#E8FFF0' : '#FFFBF0',
                 border: `2px solid ${result.status === 'filled' ? '#40C860' : '#FFD060'}`,
               }}>
-                <span style={{ fontSize: 40 }}>{result.status === 'filled' ? '✅' : '⏳'}</span>
-                <p style={{ fontFamily: "'Fredoka One',cursive", fontSize: 20, color: result.status === 'filled' ? '#20A040' : '#CC8800', margin: '10px 0 6px' }}>
+                <span style={{ fontSize: 34 }}>{result.status === 'filled' ? '✅' : '⏳'}</span>
+                <p style={{ fontFamily: "'Fredoka One',cursive", fontSize: 18, color: result.status === 'filled' ? '#20A040' : '#CC8800', margin: '8px 0 4px' }}>
                   {result.status === 'filled' ? 'Order Terisi!' : 'Order Diterima'}
                 </p>
-                <p style={{ fontSize: 13, color: '#4A4040', lineHeight: 1.7 }}>
+                <p style={{ fontSize: 12, color: '#4A4040', lineHeight: 1.6 }}>
                   {result.order_type === 'buy' ? 'Beli' : 'Jual'}{' '}
                   <strong>{result.lots} lot</strong> {result.stock_code}{' '}
                   @ Rp {(result.filled_price ?? result.limit_price).toLocaleString('id-ID')}
                 </p>
-                {result.status !== 'filled' && (
-                  <p style={{ fontSize: 11, color: '#8A7060', marginTop: 8, lineHeight: 1.5 }}>
-                    Order akan dicek setiap menit.<br />
-                    Terisi otomatis jika harga memenuhi limit.
-                  </p>
-                )}
               </div>
               <button type="button" onClick={onClose}
                 style={{
-                  width: '100%', padding: '14px', borderRadius: 13, cursor: 'pointer',
+                  width: '100%', padding: '13px', borderRadius: 13, cursor: 'pointer',
                   background: 'linear-gradient(180deg,#48D870,#28B050)', color: 'white',
-                  border: '2px solid #20A040', boxShadow: '0 4px 0 #189030',
+                  border: '2px solid #20A040', boxShadow: '0 3px 0 #189030',
                   fontFamily: "'Fredoka One',cursive", fontSize: 16,
                 }}>
                 Kembali ke Chart
@@ -400,17 +383,18 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
             </>
           ) : (
             <>
-              <div style={{ display: 'flex', background: '#F0EDE8', borderRadius: 12, padding: 4, gap: 4 }}>
+              {/* buy / sell toggle */}
+              <div style={{ display: 'flex', background: '#F0EDE8', borderRadius: 10, padding: 3, gap: 3 }}>
                 {['buy', 'sell'].map(type => (
                   <button key={type} type="button" onClick={() => setOrderType(type)}
                     style={{
-                      flex: 1, padding: '11px', borderRadius: 10, border: 'none', cursor: 'pointer',
-                      fontFamily: "'Fredoka One',cursive", fontSize: 16,
+                      flex: 1, padding: '8px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                      fontFamily: "'Fredoka One',cursive", fontSize: 15,
                       background: orderType === type
                         ? (type === 'buy' ? 'linear-gradient(180deg,#48D870,#28B050)' : 'linear-gradient(180deg,#FF7070,#E03040)')
                         : 'transparent',
                       color: orderType === type ? 'white' : '#8A8080',
-                      boxShadow: orderType === type ? '0 2px 8px rgba(0,0,0,0.15)' : 'none',
+                      boxShadow: orderType === type ? '0 2px 6px rgba(0,0,0,0.12)' : 'none',
                       transition: 'all 0.15s',
                     }}>
                     {type === 'buy' ? '⬆ Beli' : '⬇ Jual'}
@@ -419,33 +403,27 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
               </div>
 
               {orderType === 'sell' && !holding && (
-                <div style={{ background: '#FFF8E8', border: '1.5px solid #FFD060', borderRadius: 12, padding: '10px 14px' }}>
-                  <p style={{ fontSize: 12, color: '#8A6000', fontWeight: 700 }}>
-                    ⚠ Kamu belum punya saham {code}. Order jual memerlukan saham yang dimiliki.
-                  </p>
-                </div>
+                <p style={{ fontSize: 11, color: '#8A6000', fontWeight: 700, background: '#FFF8E8', border: '1.5px solid #FFD060', borderRadius: 10, padding: '7px 11px' }}>
+                  ⚠ Belum punya {code} — order jual perlu saham yang dimiliki.
+                </p>
               )}
 
+              {/* lot selector */}
               <div>
-                <p style={{ fontSize: 11, fontWeight: 700, color: '#6A6060', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Jumlah Lot <span style={{ fontWeight: 400, color: '#A09080' }}>(1 lot = 100 lembar)</span>
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                   <button type="button" onClick={() => setLots(l => Math.max(1, l - 1))}
-                    style={{ width: 44, height: 44, borderRadius: 10, border: '2px solid #E0D8D0', background: 'white', fontSize: 20, cursor: 'pointer', fontWeight: 700, color: '#4A4040' }}>−</button>
+                    style={{ width: 38, height: 38, borderRadius: 9, border: '2px solid #E0D8D0', background: 'white', fontSize: 18, cursor: 'pointer', fontWeight: 700, color: '#4A4040', flexShrink: 0 }}>−</button>
                   <input
                     type="number" min={1} value={lots}
                     onChange={e => setLots(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                    style={{ flex: 1, height: 44, textAlign: 'center', border: '2px solid #E0D8D0', borderRadius: 10, fontSize: 20, fontWeight: 900, color: '#1A2030', fontFamily: "'Fredoka One',cursive", outline: 'none' }}
+                    style={{ flex: 1, height: 38, textAlign: 'center', border: '2px solid #E0D8D0', borderRadius: 9, fontSize: 18, fontWeight: 900, color: '#1A2030', fontFamily: "'Fredoka One',cursive", outline: 'none' }}
                   />
                   <button type="button" onClick={() => setLots(l => l + 1)}
-                    style={{ width: 44, height: 44, borderRadius: 10, border: '2px solid #E0D8D0', background: 'white', fontSize: 20, cursor: 'pointer', fontWeight: 700, color: '#4A4040' }}>+</button>
-                </div>
-                <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+                    style={{ width: 38, height: 38, borderRadius: 9, border: '2px solid #E0D8D0', background: 'white', fontSize: 18, cursor: 'pointer', fontWeight: 700, color: '#4A4040', flexShrink: 0 }}>+</button>
                   {[1, 5, 10, 50].map(v => (
                     <button key={v} type="button" onClick={() => setLots(v)}
                       style={{
-                        flex: 1, padding: '7px 0', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                        flex: 1, height: 38, borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer',
                         border: `1.5px solid ${lots === v ? '#28A060' : '#E0D8D0'}`,
                         background: lots === v ? '#E8FFF0' : 'white',
                         color: lots === v ? '#20A040' : '#6A6060',
@@ -454,69 +432,55 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
                     </button>
                   ))}
                 </div>
+                <p style={{ fontSize: 10, color: '#A09080', textAlign: 'right' }}>{lots} lot = {(lots * 100).toLocaleString('id-ID')} lembar</p>
               </div>
 
+              {/* limit price */}
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: '#6A6060', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    Harga Limit <span style={{ fontWeight: 400, color: '#A09080' }}>(Rp / lembar)</span>
-                  </p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: '#6A6060', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Harga Limit</p>
                   {currentPrice && (
                     <button type="button" onClick={() => setLimitPrice(String(Math.round(currentPrice)))}
-                      style={{ fontSize: 11, color: '#28A060', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, padding: 0 }}>
+                      style={{ fontSize: 10, color: '#28A060', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, padding: 0 }}>
                       Pakai harga kini
                     </button>
                   )}
                 </div>
                 <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 15, color: '#8A8080', fontWeight: 700 }}>Rp</span>
+                  <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: '#8A8080', fontWeight: 700 }}>Rp</span>
                   <input
                     type="number" min={1} value={limitPrice}
                     onChange={e => setLimitPrice(e.target.value)}
                     style={{
-                      width: '100%', height: 52, paddingLeft: 40, paddingRight: 14,
+                      width: '100%', height: 46, paddingLeft: 36, paddingRight: 12,
                       border: `2px solid ${fillHint?.ok ? '#40C860' : fillHint ? '#FFB830' : '#E0D8D0'}`,
-                      borderRadius: 12, fontSize: 18, fontWeight: 900, color: '#1A2030', outline: 'none', boxSizing: 'border-box',
+                      borderRadius: 10, fontSize: 17, fontWeight: 900, color: '#1A2030', outline: 'none', boxSizing: 'border-box',
                     }}
                   />
                 </div>
                 {fillHint && (
-                  <p style={{ fontSize: 11, fontWeight: 700, marginTop: 5, color: fillHint.ok ? '#20A040' : '#8A6000' }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, marginTop: 4, color: fillHint.ok ? '#20A040' : '#8A6000' }}>
                     {fillHint.ok ? '✅' : '⏳'} {fillHint.text}
                   </p>
                 )}
               </div>
 
+              {/* compact summary + submit */}
               {parsedLimitPrice > 0 && (
-                <div style={{ background: '#F8F6F2', borderRadius: 14, padding: '14px', border: '1px solid #EDE8E0' }}>
-                  <p style={{ fontSize: 10, fontWeight: 700, color: '#8A8080', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>
-                    Ringkasan Order
-                  </p>
-                  {[
-                    { label: 'Saham',    value: `${code} · ${lots} lot · ${(lots * 100).toLocaleString('id-ID')} lembar` },
-                    { label: 'Limit',    value: `Rp ${parsedLimitPrice.toLocaleString('id-ID')} / lembar` },
-                    { label: isBuy ? 'Total (maks)' : 'Est. Hasil', value: `Rp ${totalValue.toLocaleString('id-ID')}` },
-                  ].map(({ label, value }) => (
-                    <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #F0EDE8' }}>
-                      <span style={{ fontSize: 12, color: '#8A8080' }}>{label}</span>
-                      <span style={{ fontSize: 12, fontWeight: 800, color: '#1A2030' }}>{value}</span>
-                    </div>
-                  ))}
-                </div>
+                <p style={{ fontSize: 11, color: '#6A6060', textAlign: 'right' }}>
+                  {isBuy ? 'Total' : 'Est. Hasil'}: <strong style={{ color: '#1A2030' }}>Rp {totalValue.toLocaleString('id-ID')}</strong>
+                  <span style={{ color: '#A09080' }}> · {lots} lot @ Rp {parsedLimitPrice.toLocaleString('id-ID')}</span>
+                </p>
               )}
 
-              <OjkDisclaimer compact />
-
               {error && (
-                <div style={{ background: '#FFF0F0', border: '1.5px solid #FFB0B0', borderRadius: 12, padding: '10px 14px' }}>
-                  <p style={{ fontSize: 13, color: '#E03040', fontWeight: 700 }}>{error}</p>
-                </div>
+                <p style={{ fontSize: 12, color: '#E03040', fontWeight: 700, background: '#FFF0F0', border: '1.5px solid #FFB0B0', borderRadius: 10, padding: '7px 11px' }}>{error}</p>
               )}
 
               <button type="button" onClick={handleSubmit} disabled={!canSubmit}
                 style={{
-                  width: '100%', padding: '15px', borderRadius: 14,
-                  fontFamily: "'Fredoka One',cursive", fontSize: 18,
+                  width: '100%', padding: '13px', borderRadius: 13,
+                  fontFamily: "'Fredoka One',cursive", fontSize: 17,
                   cursor: canSubmit ? 'pointer' : 'not-allowed',
                   background: canSubmit
                     ? (isBuy ? 'linear-gradient(180deg,#48D870,#28B050)' : 'linear-gradient(180deg,#FF7070,#E03040)')
@@ -524,15 +488,14 @@ function TradeSheet({ open, orderType: initialOrderType, onClose, code, stock, h
                   color: canSubmit ? 'white' : '#A09080',
                   border: canSubmit ? (isBuy ? '2px solid #20A040' : '2px solid #C02030') : '2px solid #D8D0C8',
                   boxShadow: canSubmit ? (isBuy ? '0 4px 0 #189030' : '0 4px 0 #A01020') : '0 2px 0 #C0B8B0',
-                  transition: 'all 0.2s',
+                  transition: 'all 0.2s', flexShrink: 0,
                 }}>
                 {submitting ? 'Memproses…' : isBuy ? '⬆ Pasang Order Beli' : '⬇ Pasang Order Jual'}
               </button>
             </>
           )}
         </div>
-      </div>
-    </>
+    </div>
   )
 }
 
@@ -853,6 +816,7 @@ export function ArenaStock() {
   async function handleDatePick(dateStr) {
     if (!dateStr) return
     setSimDate(dateStr)
+    setFetchPct(0); setFetchStep('') // reset previous fetch bar
     const dow = new Date(dateStr + 'T12:00:00+07:00').getDay()
     if (dow === 0 || dow === 6) { setDateStatus('weekend'); return }
     if (simDates.includes(dateStr)) { setDateStatus('ok'); return }
@@ -875,12 +839,14 @@ export function ArenaStock() {
     }, 1400)
 
     try {
-      await fetchOrImportBars(codeUpper, dateStr)
+      const result = await fetchOrImportBars(codeUpper, dateStr)
       clearInterval(timer)
-      setFetchPct(100); setFetchStep('Selesai!')
+      const barCount = result?.bars?.length ?? 0
+      setFetchPct(100)
+      setFetchStep(`✅ ${barCount > 0 ? barCount + ' bar' : 'Data'} siap — klik Mulai Simulasi`)
       setSimDates(prev => [...new Set([dateStr, ...prev])].sort((a, b) => b.localeCompare(a)))
       setDateStatus('ok')
-      setTimeout(() => { setFetchPct(0); setFetchStep('') }, 1500)
+      // Keep the 100% bar visible — cleared when simulation starts or date changes
     } catch {
       clearInterval(timer)
       setFetchPct(0); setFetchStep('')
@@ -890,6 +856,7 @@ export function ArenaStock() {
 
   async function handleStart() {
     clearSimTimer()
+    setFetchPct(0); setFetchStep('') // clear fetch progress bar
     setSimMode('loading')
     setSimIdx(0)
     setSimStartTime('')
@@ -1034,8 +1001,8 @@ export function ArenaStock() {
           </div>
         </div>
 
-        {/* OHLCV strip */}
-        <div style={{ display: 'flex', marginTop: 10, border: '0.5px solid #21262d', borderRadius: 8, overflow: 'hidden' }}>
+        {/* OHLCV strip — hidden when trade form is open to save space */}
+        <div style={{ display: tradeSheet.open ? 'none' : 'flex', marginTop: 10, border: '0.5px solid #21262d', borderRadius: 8, overflow: 'hidden' }}>
           {[
             { label: 'Open',  value: openPrice,                        color: '#e6edf3' },
             { label: 'High',  value: dayHigh,                          color: '#3fb950' },
@@ -1053,8 +1020,8 @@ export function ArenaStock() {
         </div>
       </div>
 
-      {/* ── Chart type bar ───────────────────────────────────────────── */}
-      <div style={{ margin: '10px 14px 0', border: '0.5px solid #30363d', borderRadius: 8, overflow: 'hidden', display: 'flex', width: 'fit-content' }}>
+      {/* ── Chart type bar — hidden when trade form is open ─────────── */}
+      <div style={{ margin: '10px 14px 0', border: '0.5px solid #30363d', borderRadius: 8, overflow: 'hidden', display: tradeSheet.open ? 'none' : 'flex', width: 'fit-content' }}>
         {[['line', '⋯ Line'], ['bar', '▐ Bar']].map(([type, label], i, arr) => (
           <button key={type} type="button" onClick={() => setChartType(type)}
             style={{
@@ -1069,8 +1036,8 @@ export function ArenaStock() {
         ))}
       </div>
 
-      {/* ── Indicator tabs ───────────────────────────────────────────── */}
-      <div style={{ display: 'flex', gap: 6, padding: '8px 14px 4px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+      {/* ── Indicator tabs — hidden when trade form is open ──────────── */}
+      <div style={{ display: tradeSheet.open ? 'none' : 'flex', gap: 6, padding: '8px 14px 4px', overflowX: 'auto', scrollbarWidth: 'none' }}>
         {/* EMA */}
         <button type="button" onClick={() => setShowEma(v => !v)}
           style={{
@@ -1129,7 +1096,7 @@ export function ArenaStock() {
           bars={displayBars}
           chartType={chartType}
           showEma={showEma}
-          showVolume={showVol}
+          showVolume={showVol && !tradeSheet.open}
         />
       ) : (
         <div style={{ height: 160, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0 14px' }}>
@@ -1141,11 +1108,11 @@ export function ArenaStock() {
         </div>
       )}
 
-      {/* ── Bandarmology panel ───────────────────────────────────────── */}
-      {showBand && <BandPanel code={codeUpper} simIdx={simIdx} />}
+      {/* ── Bandarmology panel — hidden when trade form is open ──────── */}
+      {showBand && !tradeSheet.open && <BandPanel code={codeUpper} simIdx={simIdx} />}
 
-      {/* ── RSI panel ────────────────────────────────────────────────── */}
-      {showRsi && <RsiPanel rsiValue={rsiValue} />}
+      {/* ── RSI panel — hidden when trade form is open ───────────────── */}
+      {showRsi && !tradeSheet.open && <RsiPanel rsiValue={rsiValue} />}
 
       {/* ── Playback / sim controls ──────────────────────────────────── */}
       {simMode !== 'idle' ? (
@@ -1284,49 +1251,64 @@ export function ArenaStock() {
         </div>
       )}
 
-      {/* ── Learn pill ───────────────────────────────────────────────── */}
-      <div
-        onClick={() => navigate('/lesson?level=4')}
-        style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#1f2d1f', border: '0.5px solid #3fb950', color: '#3fb950', borderRadius: 20, padding: '4px 10px', fontSize: 11, margin: '0 14px 8px', cursor: 'pointer' }}>
-        📚 Pelajari sinyal ini →
-      </div>
-
-      {/* ── Action row ───────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', gap: 8, padding: '0 14px 10px' }}>
-        <button type="button"
-          onClick={() => setTradeSheet({ open: true, orderType: 'buy' })}
-          style={{ flex: 1, background: '#1f4d2a', border: '0.5px solid #3fb950', color: '#3fb950', borderRadius: 8, padding: 11, fontSize: 15, fontWeight: 500, cursor: 'pointer', textAlign: 'center' }}>
-          ↑ Beli
-        </button>
-        <button type="button"
-          onClick={() => setTradeSheet({ open: true, orderType: 'sell' })}
-          style={{ flex: 1, background: '#3a1a1a', border: '0.5px solid #f85149', color: '#f85149', borderRadius: 8, padding: 11, fontSize: 15, fontWeight: 500, cursor: passedHolding ? 'pointer' : 'default', textAlign: 'center', opacity: passedHolding ? 1 : 0.5 }}>
-          ↓ Jual
-        </button>
-      </div>
-
-      {/* ── Portfolio strip ──────────────────────────────────────────── */}
-      <div style={{ background: '#161b22', borderTop: '0.5px solid #21262d', display: 'flex', justifyContent: 'space-around', padding: '10px 0' }}>
-        {[
-          { label: 'Modal',       value: 'Rp 10jt',                  color: '#e6edf3' },
-          { label: 'Lot dimiliki', value: `${passedHolding?.lots ?? 0} lot`, color: passedHolding ? '#3fb950' : '#e6edf3' },
-          {
-            label: 'P&L',
-            value: passedHolding
-              ? `${holdingPnl >= 0 ? '+' : ''}Rp ${Math.abs(holdingPnl).toLocaleString('id-ID')}`
-              : '—',
-            color: passedHolding ? (holdingPnl >= 0 ? '#3fb950' : '#f85149') : '#8b949e',
-          },
-          { label: 'Sisa kas',    value: sisaKas,                     color: '#e6edf3' },
-        ].map(({ label, value, color }) => (
-          <div key={label} style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 10, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{label}</div>
-            <div style={{ fontSize: 14, fontWeight: 500, marginTop: 2, color }}>{value}</div>
+      {/* ── Inline trade form OR learn pill + action row + portfolio strip ── */}
+      {tradeSheet.open ? (
+        <TradeSheet
+          open={tradeSheet.open}
+          orderType={tradeSheet.orderType}
+          onClose={() => setTradeSheet(s => ({ ...s, open: false }))}
+          code={codeUpper}
+          stock={passedStock}
+          holding={passedHolding}
+          currentPrice={displayPrice}
+        />
+      ) : (
+        <>
+          {/* Learn pill */}
+          <div
+            onClick={() => navigate('/lesson?level=4')}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#1f2d1f', border: '0.5px solid #3fb950', color: '#3fb950', borderRadius: 20, padding: '4px 10px', fontSize: 11, margin: '0 14px 8px', cursor: 'pointer' }}>
+            📚 Pelajari sinyal ini →
           </div>
-        ))}
-      </div>
 
-      {/* ── Sheets ───────────────────────────────────────────────────── */}
+          {/* Action row */}
+          <div style={{ display: 'flex', gap: 8, padding: '0 14px 10px' }}>
+            <button type="button"
+              onClick={() => setTradeSheet({ open: true, orderType: 'buy' })}
+              style={{ flex: 1, background: '#1f4d2a', border: '0.5px solid #3fb950', color: '#3fb950', borderRadius: 8, padding: 11, fontSize: 15, fontWeight: 500, cursor: 'pointer', textAlign: 'center' }}>
+              ↑ Beli
+            </button>
+            <button type="button"
+              onClick={() => setTradeSheet({ open: true, orderType: 'sell' })}
+              style={{ flex: 1, background: '#3a1a1a', border: '0.5px solid #f85149', color: '#f85149', borderRadius: 8, padding: 11, fontSize: 15, fontWeight: 500, cursor: passedHolding ? 'pointer' : 'default', textAlign: 'center', opacity: passedHolding ? 1 : 0.5 }}>
+              ↓ Jual
+            </button>
+          </div>
+
+          {/* Portfolio strip */}
+          <div style={{ background: '#161b22', borderTop: '0.5px solid #21262d', display: 'flex', justifyContent: 'space-around', padding: '10px 0' }}>
+            {[
+              { label: 'Modal',       value: 'Rp 10jt',                  color: '#e6edf3' },
+              { label: 'Lot dimiliki', value: `${passedHolding?.lots ?? 0} lot`, color: passedHolding ? '#3fb950' : '#e6edf3' },
+              {
+                label: 'P&L',
+                value: passedHolding
+                  ? `${holdingPnl >= 0 ? '+' : ''}Rp ${Math.abs(holdingPnl).toLocaleString('id-ID')}`
+                  : '—',
+                color: passedHolding ? (holdingPnl >= 0 ? '#3fb950' : '#f85149') : '#8b949e',
+              },
+              { label: 'Sisa kas',    value: sisaKas,                     color: '#e6edf3' },
+            ].map(({ label, value, color }) => (
+              <div key={label} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 10, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{label}</div>
+                <div style={{ fontSize: 14, fontWeight: 500, marginTop: 2, color }}>{value}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* ── Debrief sheet ────────────────────────────────────────────── */}
       <DebriefSheet
         open={simMode === 'done'}
         onClose={handleStop}
@@ -1335,16 +1317,6 @@ export function ArenaStock() {
         allBars={allBars}
         simDate={simDate}
         navigate={navigate}
-      />
-
-      <TradeSheet
-        open={tradeSheet.open}
-        orderType={tradeSheet.orderType}
-        onClose={() => setTradeSheet(s => ({ ...s, open: false }))}
-        code={codeUpper}
-        stock={passedStock}
-        holding={passedHolding}
-        currentPrice={displayPrice}
       />
 
       {/* blink keyframe injected inline */}
